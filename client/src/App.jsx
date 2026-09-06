@@ -1862,11 +1862,31 @@ export default function App() {
                     >
                       ← Back to topics
                     </button>
-                    <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight" style={{ color: isDark ? '#FFFFFF' : '#0B1F3A' }}>
-                      {topics.find(t => t.topicId === selectedTopic)?.title || 'Medication Calculation Basics'}
-                    </h1>
-                    <p className="text-xs sm:text-sm font-medium mt-1" style={{ color: isDark ? '#94A3B8' : '#5B6470' }}>
-                      Lesson {lessons.findIndex(l => l.lessonId === activeLesson?.lessonId) + 1 || 1} of {lessons.length || 5}
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
+                      <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight" style={{ color: isDark ? '#FFFFFF' : '#0B1F3A' }}>
+                        {topics.find(t => t.topicId === selectedTopic)?.title || 'Medication Calculation Basics'}
+                      </h1>
+                      <div className="flex gap-1.5 overflow-x-auto pb-1">
+                        {lessons.map((l, idx) => {
+                          const isActive = activeLesson?.lessonId === l.lessonId;
+                          return (
+                            <button
+                              key={l.lessonId}
+                              onClick={() => setActiveLesson(l)}
+                              className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer border ${
+                                isActive
+                                  ? 'bg-[#12B3A8] text-white border-[#12B3A8] shadow-xs'
+                                  : (isDark ? 'bg-[#111827] border-[#1E293B] text-[#94A3B8] hover:text-white' : 'bg-[#F6F4EF] border-[#EDE9DF] text-[#5B6470] hover:bg-[#EDE9DF]')
+                              }`}
+                            >
+                              Lesson {idx + 1}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                    <p className="text-xs sm:text-sm font-medium" style={{ color: isDark ? '#94A3B8' : '#5B6470' }}>
+                      Lesson {lessons.findIndex(l => l.lessonId === activeLesson?.lessonId) + 1 || 1} of {lessons.length || 5}: <strong style={{ color: isDark ? '#F8FAFC' : '#0B1F3A' }}>{activeLesson?.title}</strong>
                     </p>
                   </div>
 

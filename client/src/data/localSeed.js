@@ -91,7 +91,7 @@ export const localLessons = {
       clinicalKey: 'Always lead with zero (0.5 mg, never .5 mg). Never end with zero (5 mg, never 5.0 mg).',
       workedExample: {
         scenario: 'A physician prescribes 0.5 mg of clonazepam. If written as .5 mg, a nurse could misread as 5 mg (10-fold overdose).',
-        formula: 'Decimal Safety Check',
+        formula: 'Decimal Safety Check: Lead with 0, drop trailing zeros.',
         calculation: 'Leading zero enforced: 0.5 mg. Trailing zero stripped: 5 mg.',
         result: '0.5 mg (Compliant)',
         ismpRationale: 'The Joint Commission and ISMP officially place naked decimals and trailing zeros on the "Do Not Use" list.'
@@ -118,7 +118,7 @@ export const localLessons = {
       content: [
         'Identify what unit is needed in the final answer (e.g., mL).',
         'Start the equation with the equivalent containing that unit in the numerator.',
-        'Multiply across the numerators and divide across the denominators.'
+        'Multiply across numerators and divide across denominators.'
       ]
     },
     {
@@ -138,6 +138,42 @@ export const localLessons = {
         'Amounts less than 1 mL must be calculated and rounded to the hundredths place.',
         'Amounts greater than 1 mL are typically rounded to the tenths place unless high-potency.',
         'IV gravity drops (gtt/min) can never be divided; round to the nearest whole integer.'
+      ]
+    },
+    {
+      lessonId: 'les_mmb_4',
+      topicId: 'med_math_basics',
+      title: 'Fractions to Decimals & Clinical Percentages',
+      summary: 'Converting mathematical fraction ratios to metric clinical decimals for pump programming.',
+      clinicalKey: 'Divide numerator by denominator. Example: 1/4 tablet = 0.25; 1/2 tablet = 0.5.',
+      workedExample: {
+        scenario: 'An order calls for 3/4 of a scored tablet.',
+        formula: 'Fraction = 3 ÷ 4 = 0.75',
+        calculation: '3 ÷ 4 = 0.75 tablet',
+        result: '0.75 tablet',
+        ismpRationale: 'Expressing fractional oral doses as decimals clarifies documentation in the Electronic Health Record.'
+      },
+      content: [
+        'Electronic MAR systems require decimal input (0.5 tab, not 1/2 tab).',
+        'Always verify if tablet is scored before dispensing partial doses.'
+      ]
+    },
+    {
+      lessonId: 'les_mmb_5',
+      topicId: 'med_math_basics',
+      title: 'Clinical Calculation Double-Check Protocol',
+      summary: 'The independent dual-nurse verification methodology for high-alert medications.',
+      clinicalKey: 'Both nurses must perform the math independently from scratch without viewing each other’s answers first.',
+      workedExample: {
+        scenario: 'High-risk IV heparin infusion calculation requires independent nurse double-check.',
+        formula: 'Nurse 1 calc: 18 units/kg/hr × 80 kg = 1,440 units/hr. Bag: 25,000 units/250 mL (100 u/mL) -> 14.4 mL/hr.',
+        calculation: 'Nurse 2 performs identical math separately: 14.4 mL/hr confirmed.',
+        result: '14.4 mL/hr (Double Verified)',
+        ismpRationale: 'Independent double checks catch up to 95% of math and programming slips before drug reaches the patient.'
+      },
+      content: [
+        'Never tell the second nurse your answer before they calculate.',
+        'Check patient weight, concentration on the bag, and final pump programming.'
       ]
     }
   ],
@@ -198,6 +234,42 @@ export const localLessons = {
         'Review whether the unit ordered was grams instead of milligrams.',
         'Call the hospital pharmacy when in doubt.'
       ]
+    },
+    {
+      lessonId: 'les_tab_4',
+      topicId: 'tablet_calculations',
+      title: 'Extended Release & Enteric-Coated Guardrails',
+      summary: 'Identifying non-crushable solid oral dosage forms and DO NOT CRUSH list standard.',
+      clinicalKey: 'Never split, chew, or crush medications with suffixes XL, XR, SR, CR, LA, or EC.',
+      workedExample: {
+        scenario: 'Patient has a nasogastric tube. Order: Morphine Sulfate ER (MS Contin) 30 mg PO.',
+        formula: 'Crushing ER causes immediate dose dumping of 12-hour narcotic into systemic circulation.',
+        calculation: 'Contact prescriber to switch to immediate-release oral liquid solution.',
+        result: 'Hold and clarify formulation',
+        ismpRationale: 'Dose dumping from crushed sustained release formulations can cause fatal respiratory depression.'
+      },
+      content: [
+        'Enteric coatings protect stomach mucosa or protect drug from gastric acid.',
+        'Extended-release beads release drug over 12 to 24 hours.'
+      ]
+    },
+    {
+      lessonId: 'les_tab_5',
+      topicId: 'tablet_calculations',
+      title: 'Multi-Strength Oral Tablet Combinations',
+      summary: 'Formulating exact prescribed doses using available stock strengths safely.',
+      clinicalKey: 'Use the minimal number of tablets to achieve the exact required therapeutic dose.',
+      workedExample: {
+        scenario: 'Order: Levothyroxine 175 mcg PO. Available: 100 mcg and 75 mcg tablets.',
+        formula: '175 mcg = 1 × 100 mcg tablet + 1 × 75 mcg tablet',
+        calculation: '100 + 75 = 175 mcg total',
+        result: '2 tablets (1 of each strength)',
+        ismpRationale: 'Clearly label both tablet strengths to ensure clarity for the patient and MAR.'
+      },
+      content: [
+        'Double-check each blister pack label carefully when combining different strengths.',
+        'Ensure both packages contain the same active chemical entity.'
+      ]
     }
   ],
   liquid_calculations: [
@@ -237,6 +309,60 @@ export const localLessons = {
         'Inspect syringe markings carefully: lines on 3 mL syringes represent 0.1 mL.',
         'Lines on 1 mL syringes represent 0.01 mL.',
         'Never use an insulin syringe (U-100) for non-insulin medications.'
+      ]
+    },
+    {
+      lessonId: 'les_liq_3',
+      topicId: 'liquid_calculations',
+      title: 'Oral Liquid Solutions & Suspensions',
+      summary: 'Accurately measuring oral liquid medications using calibrated oral syringes.',
+      clinicalKey: 'Never use household spoons (teaspoon/tablespoon). Always measure oral liquids in metric milliliters (mL).',
+      workedExample: {
+        scenario: 'Order: Amoxicillin oral suspension 250 mg PO. Stock: 125 mg / 5 mL.',
+        formula: 'mL = (250 mg ÷ 125 mg) × 5 mL',
+        calculation: '2 × 5 mL = 10 mL',
+        result: '10 mL',
+        ismpRationale: 'Oral syringes prevent accidental attachment to IV ports, protecting against fatal enteral route misconnections.'
+      },
+      content: [
+        'Shake suspensions thoroughly before measuring.',
+        'Read liquid meniscus at eye level on a flat surface.'
+      ]
+    },
+    {
+      lessonId: 'les_liq_4',
+      topicId: 'liquid_calculations',
+      title: 'Insulin Syringe Calibration (U-100 Units)',
+      summary: 'Specialized unit measurement for regular and intermediate insulins.',
+      clinicalKey: 'Insulin is measured strictly in USP Units using calibrated U-100 insulin syringes (100 units = 1 mL).',
+      workedExample: {
+        scenario: 'Order: Regular Insulin 14 Units SubQ before meals.',
+        formula: 'Use U-100 insulin syringe; align stopper directly with 14 unit marking.',
+        calculation: '14 Units = 0.14 mL of U-100 solution.',
+        result: '14 Units',
+        ismpRationale: 'Never calculate insulin doses in milliliters with standard syringes; 10x dosing errors with insulin can be lethal.'
+      },
+      content: [
+        'Clear before cloudy: draw Regular (clear) before NPH (cloudy) when combining in one syringe.',
+        'Have a second nurse independently verify insulin dose in the syringe.'
+      ]
+    },
+    {
+      lessonId: 'les_liq_5',
+      topicId: 'liquid_calculations',
+      title: 'Heparin Subcutaneous Dosing Protocols',
+      summary: 'Calculating concentrated heparin injection units without decimal errors.',
+      clinicalKey: 'Check vial strength: Heparin vials range from 100 units/mL (flushes) to 10,000 units/mL (therapeutic).',
+      workedExample: {
+        scenario: 'Order: Heparin 5,000 units SubQ Q12H. Available: Heparin 10,000 units/mL vial.',
+        formula: 'mL = (5,000 units ÷ 10,000 units) × 1 mL',
+        calculation: '5,000 ÷ 10,000 = 0.5 mL',
+        result: '0.5 mL',
+        ismpRationale: 'Administering 10,000 u/mL instead of 100 u/mL flush has caused multiple catastrophic pediatric fatalities.'
+      },
+      content: [
+        'Confirm concentration in bold lettering on vial label.',
+        'Use a 1 mL tuberculin syringe to draw exact subcutaneous volume.'
       ]
     }
   ],
@@ -278,6 +404,59 @@ export const localLessons = {
         'Never estimate patient weight for weight-based chemotherapy or vasoactive drips.',
         'Double check scale calibration before recording in the electronic health record.'
       ]
+    },
+    {
+      lessonId: 'les_uc_3',
+      topicId: 'unit_conversions',
+      title: 'Liquid Volume Conversions (Liters to Milliliters)',
+      summary: 'Converting IV infusion bags and daily intake totals from Liters to mL.',
+      clinicalKey: '1 Liter (L) = 1,000 Milliliters (mL).',
+      workedExample: {
+        scenario: 'Prescription: Infuse 1.5 L of 0.9% Normal Saline over 12 hours.',
+        formula: 'mL = 1.5 L × 1,000',
+        calculation: '1.5 × 1,000 = 1,500 mL',
+        result: '1,500 mL',
+        ismpRationale: 'IV infusion pumps are programmed in mL/hr; convert liters to milliliters before calculating rate.'
+      },
+      content: [
+        'Multiply liters by 1,000 to get milliliters.',
+        'Divide milliliters by 1,000 to get liters.'
+      ]
+    },
+    {
+      lessonId: 'les_uc_4',
+      topicId: 'unit_conversions',
+      title: 'Household to Metric Fluid Equivalencies',
+      summary: 'Calculating fluid intake and output (I&O) from cups, ounces, and teaspoons.',
+      clinicalKey: '1 oz = 30 mL | 1 cup (8 oz) = 240 mL | 1 tsp = 5 mL | 1 tbsp = 15 mL.',
+      workedExample: {
+        scenario: 'Patient drinks 6 oz of apple juice and 1 cup of coffee. Record total fluid intake in mL.',
+        formula: 'Total mL = (6 oz × 30 mL) + (240 mL)',
+        calculation: '180 mL + 240 mL = 420 mL',
+        result: '420 mL',
+        ismpRationale: 'Accurate intake calculation is essential for managing congestive heart failure and renal failure patients.'
+      },
+      content: [
+        'Ice chips melt to half their volume in liquid (100 mL ice = 50 mL water).',
+        'Record all hospital fluid balance sheets in metric milliliters.'
+      ]
+    },
+    {
+      lessonId: 'les_uc_5',
+      topicId: 'unit_conversions',
+      title: 'Temperature Conversions (Celsius ↔ Fahrenheit)',
+      summary: 'Clinical temperature conversions for vital sign recording.',
+      clinicalKey: '°C = (°F - 32) ÷ 1.8 | °F = (°C × 1.8) + 32.',
+      workedExample: {
+        scenario: 'Patient temperature reads 101.4 °F on thermometer.',
+        formula: '°C = (101.4 - 32) ÷ 1.8',
+        calculation: '69.4 ÷ 1.8 = 38.55 °C -> 38.6 °C',
+        result: '38.6 °C (Febrile)',
+        ismpRationale: 'Recognizing 38.0 °C (100.4 °F) as the clinical sepsis threshold triggers rapid blood culture protocols.'
+      },
+      content: [
+        'Normal adult core temperature is 36.5 °C to 37.5 °C (97.7 °F to 99.5 °F).'
+      ]
     }
   ],
   ratios_proportions: [
@@ -298,6 +477,77 @@ export const localLessons = {
         'Place identical unit positions on both sides of the proportion equation.',
         'Multiply outer numbers (extremes) and inner numbers (means).',
         'Solve for unknown X and check answer against clinical reality.'
+      ]
+    },
+    {
+      lessonId: 'les_rp_2',
+      topicId: 'ratios_proportions',
+      title: 'Ratio Strengths in Emergency Meds (1:1,000 vs 1:10,000)',
+      summary: 'Solving ratio concentrations expressed as 1:X parts.',
+      clinicalKey: '1:1,000 means 1 gram in 1,000 mL (1 mg/mL). 1:10,000 means 1 gram in 10,000 mL (0.1 mg/mL).',
+      workedExample: {
+        scenario: 'Order: Epinephrine 0.3 mg IM for severe anaphylaxis. Stock: 1:1,000 ampule (1 mg/mL).',
+        formula: 'mL = 0.3 mg ÷ 1 mg/mL',
+        calculation: '0.3 ÷ 1 = 0.3 mL',
+        result: '0.3 mL IM',
+        ismpRationale: 'Always use 1:1,000 for IM injection and 1:10,000 for IV cardiac resuscitation.'
+      },
+      content: [
+        '1:1,000 = 1 mg in 1 mL',
+        '1:10,000 = 1 mg in 10 mL (0.1 mg/mL)',
+        '1:100,000 = 1 mg in 100 mL'
+      ]
+    },
+    {
+      lessonId: 'les_rp_3',
+      topicId: 'ratios_proportions',
+      title: 'Fractional Dosage Proportions',
+      summary: 'Solving fractional medication doses using proportional ratios.',
+      clinicalKey: 'Keep units constant on both sides of the colon: mg : mL = mg : mL.',
+      workedExample: {
+        scenario: 'Order: 0.125 mg Digoxin. Stock: 0.25 mg per 2 mL ampule.',
+        formula: '0.25 mg : 2 mL = 0.125 mg : X mL',
+        calculation: '0.25X = 2 × 0.125 = 0.25 -> X = 1 mL',
+        result: '1.0 mL',
+        ismpRationale: 'Using cross multiplication prevents numerator/denominator inversion errors.'
+      },
+      content: [
+        'Cross-multiply diagonal values to isolate X.',
+        'Perform sanity check: half the dose requires half the volume.'
+      ]
+    },
+    {
+      lessonId: 'les_rp_4',
+      topicId: 'ratios_proportions',
+      title: 'Scaling Pediatric Suspension Volumes',
+      summary: 'Calculating proportional multi-dose bottles for home discharge.',
+      clinicalKey: 'Daily Volume = (Single Dose Volume) × (Doses Per Day).',
+      workedExample: {
+        scenario: 'Single dose is 7.5 mL TID (3 times daily) for a 10-day course. Calculate total bottle size in mL.',
+        formula: 'Total = 7.5 mL × 3 doses/day × 10 days',
+        calculation: '22.5 mL/day × 10 days = 225 mL',
+        result: '225 mL bottle',
+        ismpRationale: 'Dispensing accurate course volumes prevents under-treatment and antibiotic resistance.'
+      },
+      content: [
+        'Calculate single dose first, then multiply by daily frequency, then by duration.'
+      ]
+    },
+    {
+      lessonId: 'les_rp_5',
+      topicId: 'ratios_proportions',
+      title: 'Direct vs Inverse Proportional Logic in Nursing',
+      summary: 'Understanding relationship between concentration and required volume.',
+      clinicalKey: 'As drug concentration increases (doubles), the required injection volume decreases (halves).',
+      workedExample: {
+        scenario: 'Order: 50 mg Demerol. Case A stock: 50 mg/mL (1 mL). Case B stock: 100 mg/mL (0.5 mL).',
+        formula: 'Volume is inversely proportional to stock concentration.',
+        calculation: 'Case A = 1 mL; Case B = 0.5 mL.',
+        result: '0.5 mL vs 1 mL',
+        ismpRationale: 'Recognizing inverse relationships prevents giving double volume when high concentration stock is supplied.'
+      },
+      content: [
+        'Always check the concentration on the vial label, not just the drug name.'
       ]
     }
   ],
@@ -320,6 +570,78 @@ export const localLessons = {
         'Epinephrine 1:10,000 (0.1 mg/mL) is for IV cardiac arrest resuscitation.',
         'Always read the full concentration label and route warning.'
       ]
+    },
+    {
+      lessonId: 'les_cm_2',
+      topicId: 'concentration_math',
+      title: 'Weight-in-Volume (w/v) Percentage Rules',
+      summary: 'Calculating milligrams per milliliter from percentage solutions.',
+      clinicalKey: 'To find mg/mL from percentage: Multiply percent number by 10 (e.g., 2% Lidocaine = 20 mg/mL; 0.9% NaCl = 9 mg/mL).',
+      workedExample: {
+        scenario: 'Order: Lidocaine 100 mg IV Bolus. Stock: 2% Lidocaine solution.',
+        formula: 'Concentration = 2% × 10 = 20 mg/mL. Volume = 100 mg ÷ 20 mg/mL',
+        calculation: '100 ÷ 20 = 5 mL',
+        result: '5 mL',
+        ismpRationale: 'Rapid percent-to-mg conversion prevents severe antiarrhythmic under-dosing and local anesthetic toxicity.'
+      },
+      content: [
+        '1% = 10 mg/mL',
+        '2% = 20 mg/mL',
+        '50% Dextrose = 500 mg/mL (0.5 g/mL)'
+      ]
+    },
+    {
+      lessonId: 'les_cm_3',
+      topicId: 'concentration_math',
+      title: 'Dextrose & Electrolyte Solution Math',
+      summary: 'Calculating grams of solute delivered in IV maintenance bags.',
+      clinicalKey: 'D5W = 5% Dextrose in Water = 5 g Dextrose per 100 mL (50 g per Liter).',
+      workedExample: {
+        scenario: 'Patient receives 1,000 mL of D5W over 8 hours. How many grams of dextrose are delivered?',
+        formula: 'Grams = 5 g / 100 mL × 1,000 mL = 50 g Dextrose',
+        calculation: '50 grams total',
+        result: '50 grams',
+        ismpRationale: 'Tracking IV carbohydrate and electrolyte calories is vital for diabetic and NPO patients.'
+      },
+      content: [
+        'D10W = 10 g per 100 mL (100 g/L)',
+        '0.45% NaCl = 4.5 g NaCl per Liter (Half Normal Saline)'
+      ]
+    },
+    {
+      lessonId: 'les_cm_4',
+      topicId: 'concentration_math',
+      title: 'Potassium Chloride (KCl) Additive Limits',
+      summary: 'High-alert electrolyte concentration limits in peripheral and central IV lines.',
+      clinicalKey: 'Peripheral IV max concentration: 40 mEq/L. Max infusion rate: 10 mEq/hr (never give IV Push).',
+      workedExample: {
+        scenario: 'Order: 20 mEq KCl in 100 mL IV piggyback over 2 hours.',
+        formula: 'Infusion rate = 20 mEq ÷ 2 hr = 10 mEq/hr (Within safe peripheral limit)',
+        calculation: '10 mEq/hr',
+        result: '10 mEq/hr (Safe limit)',
+        ismpRationale: 'KCl IV Push causes immediate fatal cardiac arrest. Never administer undiluted KCl.'
+      },
+      content: [
+        'Always use an electronic infusion pump for potassium infusions.',
+        'Check renal function (creatinine/urine output) before administering potassium.'
+      ]
+    },
+    {
+      lessonId: 'les_cm_5',
+      topicId: 'concentration_math',
+      title: 'Parts-Per-Million and Topical Ratios',
+      summary: 'Calculating antiseptic wound wash and soak dilutions.',
+      clinicalKey: 'Dilution Volume Formula: C1 × V1 = C2 × V2.',
+      workedExample: {
+        scenario: 'Prepare 500 mL of 0.25% Dakin solution using 5% stock bleach solution.',
+        formula: 'V1 = (C2 × V2) ÷ C1 = (0.25% × 500 mL) ÷ 5%',
+        calculation: '125 ÷ 5 = 25 mL of 5% stock bleach diluted to 500 mL',
+        result: '25 mL stock + 475 mL water',
+        ismpRationale: 'Accurate antiseptic dilution prevents severe tissue chemical burns on open surgical wounds.'
+      },
+      content: [
+        'Always label compounded topical washes with date, time, and nurse initials.'
+      ]
     }
   ],
   reconstitution: [
@@ -340,6 +662,74 @@ export const localLessons = {
         'Read vial label instructions for exact diluent type (Sterile Water, 0.9% NaCl, Bacteriostatic Water).',
         'Note date, time, and resulting concentration on reconstituted vial label.',
         'Store in refrigerator or room temperature as indicated by manufacturer.'
+      ]
+    },
+    {
+      lessonId: 'les_rc_2',
+      topicId: 'reconstitution',
+      title: 'Multiple Concentration Reconstitution Tables',
+      summary: 'Selecting the appropriate diluent volume from manufacturer reconstitution charts.',
+      clinicalKey: 'Select diluent volume that produces the highest concentration for IM to minimize tissue pain.',
+      workedExample: {
+        scenario: 'Order: Ampicillin 500 mg IM. Reconstitution chart: Add 1.8 mL diluent -> 250 mg/mL; Add 0.9 mL diluent -> 500 mg/mL.',
+        formula: 'For IM injection, choose 500 mg/mL to administer only 1.0 mL volume.',
+        calculation: '500 mg ÷ 500 mg/mL = 1.0 mL IM',
+        result: '1.0 mL IM',
+        ismpRationale: 'Minimizing IM volume reduces muscular trauma and patient discomfort.'
+      },
+      content: [
+        'Check whether order is IM or IV before choosing diluent amount on chart.'
+      ]
+    },
+    {
+      lessonId: 'les_rc_3',
+      topicId: 'reconstitution',
+      title: 'Determining Powder Displacement Volume',
+      summary: 'Calculating the exact volume occupied by solid dry medication powder.',
+      clinicalKey: 'Powder Displacement Volume = (Total Reconstituted Volume) - (Diluent Volume Added).',
+      workedExample: {
+        scenario: 'Adding 8.2 mL diluent yields 10 mL final solution. What is powder displacement?',
+        formula: 'Displacement = 10 mL - 8.2 mL',
+        calculation: '10 - 8.2 = 1.8 mL',
+        result: '1.8 mL',
+        ismpRationale: 'Displacement calculations ensure students understand why concentration is based on final volume, not diluent added.'
+      },
+      content: [
+        'Dry powder always expands the liquid volume.'
+      ]
+    },
+    {
+      lessonId: 'les_rc_4',
+      topicId: 'reconstitution',
+      title: 'Reconstituted Stability & Multi-Dose Labeling',
+      summary: 'Labeling reconstituted vials per JCAHO and hospital pharmacy guidelines.',
+      clinicalKey: 'Every reconstituted vial must be labeled with: Date, Time, Concentration, Expiration, and Nurse Initials.',
+      workedExample: {
+        scenario: 'A nurse reconstitutes a 2 g vial of Cefazolin at 0800 on Sept 6. Label states stable for 24 hours at room temp.',
+        formula: 'Expiration = Sept 7 at 0800.',
+        calculation: 'Document: 100 mg/mL | Exp: 09/07 08:00 | Initials: RN',
+        result: 'Fully labeled vial',
+        ismpRationale: 'Unlabeled medication vials in clinical refrigerators are a primary cause of accidental expired drug administration.'
+      },
+      content: [
+        'Discard unlabelled reconstituted vials immediately.'
+      ]
+    },
+    {
+      lessonId: 'les_rc_5',
+      topicId: 'reconstitution',
+      title: 'Pediatric Reconstitution Dosage Precision',
+      summary: 'Measuring micro-volume reconstituted antibiotic doses with tuberculin syringes.',
+      clinicalKey: 'For pediatric reconstituted doses < 1 mL, always calculate to hundredths and use 1 mL syringe.',
+      workedExample: {
+        scenario: 'Infant order: Vancomycin 65 mg IV. Reconstituted stock concentration: 50 mg/mL.',
+        formula: 'mL = 65 mg ÷ 50 mg/mL',
+        calculation: '65 ÷ 50 = 1.30 mL',
+        result: '1.30 mL',
+        ismpRationale: 'High-potency antibiotics in neonates require exact volume measurement to prevent nephrotoxicity and ototoxicity.'
+      },
+      content: [
+        'Always verify with pediatric dosing guides before administration.'
       ]
     }
   ],
@@ -381,6 +771,57 @@ export const localLessons = {
         'Standard volumetric infusion pumps have a maximum ceiling of 999 mL/hr.',
         'Check secondary line backcheck valve alignment for piggyback infusions.'
       ]
+    },
+    {
+      lessonId: 'les_ivm_3',
+      topicId: 'iv_mathematics',
+      title: 'IV Piggyback (IVPB) Intermittent Dosing',
+      summary: 'Setting up intermittent secondary bags over 30 to 60 minute intervals.',
+      clinicalKey: 'When infusing over 30 minutes, pump mL/hr is double the bag volume (Volume ÷ 0.5 hr = Volume × 2).',
+      workedExample: {
+        scenario: 'Order: Cefepime 1 g in 100 mL D5W IVPB over 30 minutes.',
+        formula: 'Rate = 100 mL ÷ 0.5 hr',
+        calculation: '100 ÷ 0.5 = 200 mL/hr',
+        result: '200 mL/hr',
+        ismpRationale: 'Programming 100 mL/hr instead of 200 mL/hr causes the antibiotic to infuse over 60 min instead of 30 min.'
+      },
+      content: [
+        'Hang secondary bag higher than primary fluid bag to establish hydrostatic gravity feed.'
+      ]
+    },
+    {
+      lessonId: 'les_ivm_4',
+      topicId: 'iv_mathematics',
+      title: 'Infusion Completion Time Calculation',
+      summary: 'Predicting exact bag change times and remaining infusion duration.',
+      clinicalKey: 'Remaining Time (Hours) = (Remaining Volume in mL) ÷ (Infusion Rate in mL/hr).',
+      workedExample: {
+        scenario: 'An IV bag has 350 mL remaining, infusing at 125 mL/hr. Infusion started at 12:00.',
+        formula: 'Time = 350 ÷ 125 = 2.8 hours (2 hours + 0.8 × 60 min = 2 hr 48 min).',
+        calculation: '12:00 + 2 hr 48 min = 14:48 (2:48 PM)',
+        result: '14:48 (2:48 PM)',
+        ismpRationale: 'Timely IV bag changes prevent vein lumen clotting and air embolism.'
+      },
+      content: [
+        'Multiply decimal hour by 60 to obtain exact minutes.'
+      ]
+    },
+    {
+      lessonId: 'les_ivm_5',
+      topicId: 'iv_mathematics',
+      title: 'Microdrip Rule of 60 Equivalency',
+      summary: 'The mathematical relationship between mL/hr and microdrip gtt/min.',
+      clinicalKey: 'With a 60 gtt/mL microdrip set, the rate in mL/hr is always identical to the rate in gtt/min (Rate in mL/hr = gtt/min).',
+      workedExample: {
+        scenario: 'Order: 45 mL/hr via microdrip tubing (60 gtt/mL).',
+        formula: 'gtt/min = (45 mL × 60 gtt/mL) ÷ 60 min = 45 gtt/min',
+        calculation: '45 gtt/min',
+        result: '45 gtt/min (1:1 Ratio)',
+        ismpRationale: 'The 60 gtt/min rule eliminates intermediate math during emergency pediatric transport.'
+      },
+      content: [
+        'Microdrip tubing contains a small metal stylus inside the drip chamber.'
+      ]
     }
   ],
   weight_based: [
@@ -402,6 +843,74 @@ export const localLessons = {
         'Divide total 24-hour milligrams by dosing frequency (e.g., BID = 2, TID = 3, QID = 4).',
         'Verify calculated dose against safe recommended manufacturer ranges.'
       ]
+    },
+    {
+      lessonId: 'les_wb_2',
+      topicId: 'weight_based',
+      title: 'Pediatric Safe Dose Range Verification (Min/Max Checks)',
+      summary: 'Verifying physician orders against recommended therapeutic ranges before administration.',
+      clinicalKey: 'Always calculate both Minimum Safe Dose and Maximum Safe Dose before verifying order.',
+      workedExample: {
+        scenario: 'Order: Cefdinir 280 mg PO BID for 20 kg child. Safe range: 14 mg/kg/day divided BID.',
+        formula: 'Recommended = 14 × 20 = 280 mg/day (140 mg BID). Order was 280 mg BID (560 mg/day = 2x overdose).',
+        calculation: 'Order exceeds recommended range. Hold and clarify with prescriber.',
+        result: 'Hold and clarify with physician',
+        ismpRationale: 'Independent safe dose range verification prevents fatal pediatric toxicity from prescribing slips.'
+      },
+      content: [
+        'Never administer an unverified pediatric dose that exceeds manufacturer ceiling.'
+      ]
+    },
+    {
+      lessonId: 'les_wb_3',
+      topicId: 'weight_based',
+      title: 'Weight Conversion Errors (Pounds to Kilograms)',
+      summary: 'Avoiding the dangerous 2.2x over-dosing and under-dosing multipliers.',
+      clinicalKey: 'Always convert lbs to kg (lb ÷ 2.2) before entering weight into dosing calculations.',
+      workedExample: {
+        scenario: 'Patient weighs 44 lbs. Order: 10 mg/kg.',
+        formula: 'Weight in kg = 44 ÷ 2.2 = 20 kg. Correct dose = 20 × 10 = 200 mg. (Using 44 directly would give 440 mg = 220% overdose).',
+        calculation: '200 mg',
+        result: '200 mg',
+        ismpRationale: 'Dosing in pounds instead of kilograms is one of the top reported root causes of fatal medication events in children.'
+      },
+      content: [
+        'Weigh all patients directly in kilograms.'
+      ]
+    },
+    {
+      lessonId: 'les_wb_4',
+      topicId: 'weight_based',
+      title: 'Weight-Based Loading Dose Calculations',
+      summary: 'Calculating initial bolus doses (mg/kg) to reach therapeutic plasma levels rapidly.',
+      clinicalKey: 'Loading Dose (mg) = Prescribed Bolus (mg/kg) × Patient Weight (kg).',
+      workedExample: {
+        scenario: 'Order: Phenytoin loading dose 15 mg/kg IV for a 60 kg status epilepticus patient.',
+        formula: 'Dose = 15 mg/kg × 60 kg = 900 mg IV.',
+        calculation: '900 mg IV',
+        result: '900 mg IV',
+        ismpRationale: 'Phenytoin IV must not exceed 50 mg/min infusion rate to prevent severe hypotension and cardiac arrhythmias.'
+      },
+      content: [
+        'Infuse loading doses strictly at approved manufacturer rate limits.'
+      ]
+    },
+    {
+      lessonId: 'les_wb_5',
+      topicId: 'weight_based',
+      title: 'Body Surface Area (BSA) Mosteller Formula',
+      summary: 'Calculating exact BSA for oncology chemotherapy dosing protocols.',
+      clinicalKey: 'BSA (m²) = √ [ (Height in cm × Weight in kg) ÷ 3,600 ].',
+      workedExample: {
+        scenario: 'Patient height: 170 cm; weight: 70 kg. Calculate BSA in m².',
+        formula: 'BSA = √ [ (170 × 70) ÷ 3,600 ] = √ [ 11,900 ÷ 3,600 ] = √ 3.305 = 1.818 m².',
+        calculation: '1.82 m²',
+        result: '1.82 m²',
+        ismpRationale: 'Chemotherapy medications require BSA calculation rounded to two decimal places.'
+      },
+      content: [
+        'Ensure height is in centimeters and weight is in kilograms before applying formula.'
+      ]
     }
   ],
   advanced_calc: [
@@ -422,6 +931,74 @@ export const localLessons = {
         'Calculate bag concentration in mcg/mL first.',
         'Calculate hourly microgram requirements (dose × weight in kg × 60).',
         'Divide hourly micrograms by bag concentration to yield pump mL/hr.'
+      ]
+    },
+    {
+      lessonId: 'les_ac_2',
+      topicId: 'advanced_calc',
+      title: 'Weight-Based IV Heparin Nomograms & Boluses',
+      summary: 'Calculating initial heparin boluses and aPTT titration rate adjustments.',
+      clinicalKey: 'Initial Bolus: 80 units/kg IV Push. Initial Infusion: 18 units/kg/hr.',
+      workedExample: {
+        scenario: 'Patient weighs 75 kg. Calculate initial bolus and infusion rate for 25,000 units / 250 mL bag (100 u/mL).',
+        formula: 'Bolus = 80 × 75 = 6,000 units (6 mL). Infusion = 18 × 75 = 1,350 u/hr -> 1,350 ÷ 100 = 13.5 mL/hr.',
+        calculation: 'Bolus: 6,000 units (6 mL); Rate: 13.5 mL/hr',
+        result: 'Bolus 6 mL | Rate 13.5 mL/hr',
+        ismpRationale: 'Standardized weight-based heparin protocols reduce time to reach therapeutic anticoagulation without bleeding.'
+      },
+      content: [
+        'Recheck aPTT / Anti-Xa every 6 hours after rate changes.'
+      ]
+    },
+    {
+      lessonId: 'les_ac_3',
+      topicId: 'advanced_calc',
+      title: 'Insulin Continuous Infusion Titration Protocols',
+      summary: 'Calculating IV regular insulin infusion rates for Diabetic Ketoacidosis (DKA).',
+      clinicalKey: 'DKA Infusion Protocol: 0.1 units/kg/hr continuous regular insulin infusion.',
+      workedExample: {
+        scenario: 'Order: Regular Insulin 0.1 units/kg/hr for an 80 kg DKA patient. Bag: 100 units in 100 mL Normal Saline (1 u/mL).',
+        formula: 'Desired = 0.1 × 80 = 8 units/hr. Pump Rate = 8 units ÷ 1 u/mL = 8 mL/hr.',
+        calculation: '8 mL/hr',
+        result: '8 mL/hr',
+        ismpRationale: 'Check blood glucose hourly on IV insulin infusions to prevent hypoglycemic coma.'
+      },
+      content: [
+        'Prime infusion tubing with 20 mL of insulin solution before starting (insulin adheres to plastic tubing).'
+      ]
+    },
+    {
+      lessonId: 'les_ac_4',
+      topicId: 'advanced_calc',
+      title: 'Emergency Resuscitation Epinephrine Infusions (mcg/min)',
+      summary: 'Calculating non-weight-based emergency vasoactive infusions.',
+      clinicalKey: 'mL/hr = (Dose in mcg/min × 60 min/hr) ÷ Bag Concentration in mcg/mL.',
+      workedExample: {
+        scenario: 'Order: Epinephrine 4 mcg/min IV infusion for septic shock. Bag: 4 mg in 250 mL NS (16 mcg/mL).',
+        formula: 'Hourly mcg = 4 × 60 = 240 mcg/hr. Rate = 240 ÷ 16 mcg/mL',
+        calculation: '240 ÷ 16 = 15 mL/hr',
+        result: '15 mL/hr',
+        ismpRationale: 'Non-weight based infusions are titrated to target Mean Arterial Pressure (MAP >= 65 mmHg).'
+      },
+      content: [
+        'Central venous access is preferred to prevent peripheral extravasation necrosis.'
+      ]
+    },
+    {
+      lessonId: 'les_ac_5',
+      topicId: 'advanced_calc',
+      title: 'Opioid Conversion & Patient-Controlled Analgesia (PCA)',
+      summary: 'Calculating equianalgesic opioid rotations and PCA lockout safety.',
+      clinicalKey: 'Morphine 10 mg IV = Hydromorphone (Dilaudid) 1.5 mg IV = Fentanyl 100 mcg IV.',
+      workedExample: {
+        scenario: 'Patient is switched from Morphine 20 mg IV daily to Hydromorphone IV.',
+        formula: 'Hydromorphone = 20 mg Morphine × (1.5 mg Hydromorphone ÷ 10 mg Morphine)',
+        calculation: '20 × 0.15 = 3 mg Hydromorphone IV daily',
+        result: '3.0 mg daily',
+        ismpRationale: 'Hydromorphone is ~7x more potent than Morphine. Failing to convert potency leads to fatal overdoses.'
+      },
+      content: [
+        'PCA lockout time prevents rapid consecutive patient doses before peak effect is reached.'
       ]
     }
   ]
