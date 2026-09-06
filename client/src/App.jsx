@@ -1848,224 +1848,231 @@ export default function App() {
           {/* EDUCATION / LEARN TAB                                                     */}
           {/* ========================================================================= */}
           {currentTab === 'learn' && (
-            <section className="space-y-6">
+            <section className="space-y-6 max-w-4xl mx-auto">
               <div className="space-y-1">
-                <h2 className="text-2xl font-bold tracking-tight" style={{ color: isDark ? '#FFFFFF' : '#0F172A' }}>
-                  Curriculum Topics
+                <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight" style={{ color: isDark ? '#FFFFFF' : '#0F172A' }}>
+                  Learn
                 </h2>
-                <p className="text-sm" style={{ color: isDark ? '#94A3B8' : '#475569' }}>
-                  Accredited clinical calculation standards and worked step-by-step examples.
+                <p className="text-sm font-normal" style={{ color: isDark ? '#94A3B8' : '#475569' }}>
+                  Structured lessons, one topic at a time.
                 </p>
               </div>
 
-              {/* Topic Selector Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              {/* Minimal Clean Card Stack matching user screenshot */}
+              <div className="space-y-3.5 pt-1">
                 {topics.map(t => {
                   const isSelected = selectedTopic === t.topicId;
+                  const lessonsList = localLessons[t.topicId] || [];
+
                   return (
-                    <button
+                    <div
                       key={t.topicId}
-                      onClick={() => {
-                        setSelectedTopic(t.topicId);
-                        const list = localLessons[t.topicId] || [];
-                        setLessons(list);
-                        setActiveLesson(list[0] || null);
-                      }}
-                      className={`p-4 rounded-xl border text-left transition-all cursor-pointer shadow-2xs ${
-                        isSelected
-                          ? 'bg-[#2563EB] border-[#2563EB] text-white shadow-xs'
-                          : (isDark ? 'bg-[#111827] border-[#263247] hover:border-[#3B82F6]' : 'bg-white border-[#E2E8F0] hover:border-[#93C5FD] hover:bg-slate-50')
+                      className={`rounded-2xl border transition-all duration-200 overflow-hidden ${
+                        isDark 
+                          ? (isSelected ? 'bg-[#111827] border-[#3B82F6]/60 shadow-lg shadow-blue-500/5' : 'bg-[#111827] border-[#1E293B] hover:border-[#334155]') 
+                          : (isSelected ? 'bg-white border-[#2563EB]/40 shadow-sm' : 'bg-white border-[#E2E8F0] hover:border-[#CBD5E1]')
                       }`}
                     >
-                      <h3 
-                        className="font-bold text-sm mb-1"
-                        style={{ color: isSelected ? '#FFFFFF' : (isDark ? '#F8FAFC' : '#0F172A') }}
+                      {/* Topic Header Card */}
+                      <button
+                        onClick={() => {
+                          if (isSelected) {
+                            // toggle close if clicked again
+                            setSelectedTopic(null);
+                            setActiveLesson(null);
+                          } else {
+                            setSelectedTopic(t.topicId);
+                            setLessons(lessonsList);
+                            setActiveLesson(lessonsList[0] || null);
+                          }
+                        }}
+                        className="w-full text-left p-5 sm:px-6 sm:py-5 flex items-center justify-between cursor-pointer group"
                       >
-                        {t.title}
-                      </h3>
-                      <p 
-                        className="text-xs line-clamp-2 leading-relaxed"
-                        style={{ color: isSelected ? '#DBEAFE' : (isDark ? '#94A3B8' : '#64748B') }}
-                      >
-                        {t.description}
-                      </p>
-                    </button>
+                        <div className="space-y-1">
+                          <h3 
+                            className="font-bold text-base sm:text-[17px] tracking-tight group-hover:text-[#2563EB] transition-colors"
+                            style={{ color: isDark ? '#F8FAFC' : '#0F172A' }}
+                          >
+                            {t.title}
+                          </h3>
+                          <p 
+                            className="text-xs sm:text-sm font-medium"
+                            style={{ color: isDark ? '#94A3B8' : '#64748B' }}
+                          >
+                            {t.lessonCount || 5} lessons · {t.questionCount || 8} questions
+                          </p>
+                        </div>
+
+                        <div className="flex items-center gap-3">
+                          <span 
+                            className={`p-1.5 rounded-full transition-transform duration-200 ${
+                              isSelected ? 'rotate-90 text-[#2563EB]' : 'text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300'
+                            }`}
+                          >
+                            <ChevronRight className="w-5 h-5" />
+                          </span>
+                        </div>
+                      </button>
+
+                      {/* Expanded In-Depth Lesson View */}
+                      {isSelected && (
+                        <div 
+                          className="border-t p-5 sm:p-6 space-y-6"
+                          style={{
+                            borderColor: isDark ? '#1E293B' : '#F1F5F9',
+                            backgroundColor: isDark ? '#0B0F17' : '#F8FAFC'
+                          }}
+                        >
+                          {/* Lesson Sub-Tabs */}
+                          {lessonsList.length > 0 && (
+                            <div className="space-y-2">
+                              <span className="text-xs font-bold uppercase tracking-wider block" style={{ color: isDark ? '#94A3B8' : '#64748B' }}>
+                                Lessons in this topic:
+                              </span>
+                              <div className="flex flex-wrap gap-2">
+                                {lessonsList.map((l, idx) => {
+                                  const isActive = activeLesson?.lessonId === l.lessonId;
+                                  return (
+                                    <button
+                                      key={l.lessonId}
+                                      onClick={() => setActiveLesson(l)}
+                                      className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer border ${
+                                        isActive
+                                          ? 'bg-[#2563EB] text-white border-[#2563EB] shadow-xs'
+                                          : (isDark ? 'bg-[#111827] border-[#1E293B] text-[#94A3B8] hover:text-white' : 'bg-white border-[#E2E8F0] text-[#475569] hover:bg-slate-50')
+                                      }`}
+                                    >
+                                      Lesson {idx + 1}: {l.title.split(' ')[0]}...
+                                    </button>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Selected Lesson Details */}
+                          {activeLesson && (
+                            <div className={`p-5 sm:p-6 rounded-xl border space-y-5 shadow-xs ${isDark ? 'bg-[#111827] border-[#1E293B]' : 'bg-white border-[#E2E8F0]'}`}>
+                              <div className="flex items-center justify-between flex-wrap gap-2">
+                                <div className="space-y-0.5">
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-[11px] font-bold text-[#2563EB] bg-[#EFF6FF] dark:bg-[#172554] dark:text-[#60A5FA] px-2 py-0.5 rounded-md">
+                                      Clinical Lesson
+                                    </span>
+                                    <span className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold flex items-center gap-1">
+                                      <CheckCircle className="w-3.5 h-3.5" /> ISMP / NCLEX Standard
+                                    </span>
+                                  </div>
+                                  <h4 className="text-lg font-bold pt-1" style={{ color: isDark ? '#FFFFFF' : '#0F172A' }}>
+                                    {activeLesson.title}
+                                  </h4>
+                                </div>
+
+                                <button
+                                  onClick={() => {
+                                    setFilteredTopic(t.topicId);
+                                    setCurrentTab('practice');
+                                  }}
+                                  className="px-3.5 py-2 bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-xs font-semibold rounded-lg transition-colors cursor-pointer flex items-center gap-1.5 shadow-xs"
+                                >
+                                  <GraduationCap className="w-4 h-4" />
+                                  <span>Practice {t.title.split(' ')[0]} Qs</span>
+                                </button>
+                              </div>
+
+                              <p className="text-xs sm:text-sm leading-relaxed" style={{ color: isDark ? '#94A3B8' : '#475569' }}>
+                                {activeLesson.summary}
+                              </p>
+
+                              {/* Golden Rule */}
+                              {activeLesson.clinicalKey && (
+                                <div 
+                                  className="p-4 rounded-xl border flex items-start gap-3"
+                                  style={{
+                                    backgroundColor: isDark ? '#172554' : '#EFF6FF',
+                                    borderColor: isDark ? '#1E40AF' : '#BFDBFE'
+                                  }}
+                                >
+                                  <Info className="w-5 h-5 text-[#2563EB] shrink-0 mt-0.5" />
+                                  <div className="text-xs sm:text-sm leading-relaxed">
+                                    <strong className="font-bold block mb-0.5" style={{ color: isDark ? '#93C5FD' : '#1E40AF' }}>
+                                      Golden Clinical Rule:
+                                    </strong>
+                                    <span className="font-semibold" style={{ color: isDark ? '#F8FAFC' : '#0F172A' }}>
+                                      {activeLesson.clinicalKey}
+                                    </span>
+                                  </div>
+                                </div>
+                              )}
+
+                              {/* Content Steps */}
+                              {activeLesson.content && (
+                                <div className="space-y-2.5 pt-1">
+                                  <span className="text-xs font-bold uppercase tracking-wider block" style={{ color: isDark ? '#94A3B8' : '#475569' }}>
+                                    Key Steps & Principles:
+                                  </span>
+                                  <div className="space-y-2">
+                                    {activeLesson.content.map((pt, i) => (
+                                      <div key={i} className="flex items-start gap-2.5 text-xs sm:text-sm">
+                                        <span 
+                                          className="w-5 h-5 rounded-full font-bold flex items-center justify-center shrink-0 text-xs mt-0.5"
+                                          style={{
+                                            backgroundColor: isDark ? '#1E3A8A' : '#EFF6FF',
+                                            color: isDark ? '#93C5FD' : '#2563EB'
+                                          }}
+                                        >
+                                          {i + 1}
+                                        </span>
+                                        <p className="leading-relaxed font-medium" style={{ color: isDark ? '#F1F5F9' : '#0F172A' }}>
+                                          {pt}
+                                        </p>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+
+                              {/* Step by Step Worked Example */}
+                              {activeLesson.workedExample && (
+                                <div className={`p-4 sm:p-5 rounded-xl border space-y-3.5 ${isDark ? 'bg-[#0F172A] border-[#1E293B]' : 'bg-[#F8FAFC] border-[#E2E8F0]'}`}>
+                                  <div className="flex items-center justify-between">
+                                    <span className="font-bold text-xs sm:text-sm" style={{ color: isDark ? '#FFFFFF' : '#0F172A' }}>
+                                      Worked Example:
+                                    </span>
+                                    <span className="text-xs font-mono text-emerald-600 dark:text-emerald-400 font-bold bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded-md border border-emerald-200 dark:border-emerald-800">
+                                      {activeLesson.workedExample.result || 'Solved'}
+                                    </span>
+                                  </div>
+
+                                  <p className="text-xs sm:text-sm leading-relaxed" style={{ color: isDark ? '#CBD5E1' : '#334155' }}>
+                                    {activeLesson.workedExample.scenario}
+                                  </p>
+
+                                  {activeLesson.workedExample.calculation && (
+                                    <div className={`p-3 rounded-lg font-mono text-xs sm:text-sm border font-semibold ${isDark ? 'bg-[#111827] border-[#1E293B] text-emerald-300' : 'bg-white border-emerald-200 text-emerald-900'}`}>
+                                      {activeLesson.workedExample.calculation}
+                                    </div>
+                                  )}
+
+                                  {activeLesson.workedExample.ismpRationale && (
+                                    <div className="text-xs text-amber-950 dark:text-amber-100 bg-amber-50 dark:bg-amber-950/50 border border-amber-300 dark:border-amber-800 p-3 rounded-lg flex items-start gap-2">
+                                      <ShieldCheck className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+                                      <span className="leading-relaxed">
+                                        <strong>ISMP Safety Rationale: </strong>
+                                        {activeLesson.workedExample.ismpRationale}
+                                      </span>
+                                    </div>
+                                  )}
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
                   );
                 })}
               </div>
-
-              {/* Lesson Tabs for Selected Topic */}
-              {lessons.length > 1 && (
-                <div className="flex gap-2 overflow-x-auto pb-1">
-                  {lessons.map((l, index) => (
-                    <button
-                      key={l.lessonId}
-                      onClick={() => setActiveLesson(l)}
-                      className={`px-3.5 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition-all cursor-pointer border ${
-                        activeLesson?.lessonId === l.lessonId
-                          ? 'bg-[#2563EB] text-white border-[#2563EB] shadow-xs'
-                          : (isDark ? 'bg-[#111827] border-[#263247] text-[#94A3B8] hover:text-white' : 'bg-white border-[#E2E8F0] text-[#64748B] hover:text-[#0F172A]')
-                      }`}
-                    >
-                      Lesson {index + 1}: {l.title.split(' ')[0]}...
-                    </button>
-                  ))}
-                </div>
-              )}
-
-              {/* Active Lesson Educational Suite */}
-              {activeLesson && (
-                <div className={`p-6 rounded-2xl border space-y-5 shadow-2xs ${isDark ? 'bg-[#111827] border-[#263247]' : 'bg-white border-[#E2E8F0]'}`}>
-                  <div className="flex items-center justify-between flex-wrap gap-2">
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs font-bold text-[#2563EB] bg-[#EFF6FF] dark:bg-[#172554] dark:text-[#60A5FA] px-2.5 py-1 rounded-md">
-                        Lesson Module
-                      </span>
-                      <span className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold flex items-center gap-1">
-                        <CheckCircle className="w-3.5 h-3.5" /> NCLEX-RN Clinical Standard
-                      </span>
-                    </div>
-
-                    <button
-                      onClick={() => {
-                        setFilteredTopic(selectedTopic);
-                        setCurrentTab('practice');
-                      }}
-                      className="px-3.5 py-1.5 bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-xs font-semibold rounded-lg transition-colors cursor-pointer flex items-center gap-1.5"
-                    >
-                      <GraduationCap className="w-3.5 h-3.5" />
-                      <span>Practice {activeLesson.title.split(' ')[0]} Qs</span>
-                    </button>
-                  </div>
-                  
-                  <div>
-                    <h3 
-                      className="text-xl font-bold tracking-tight"
-                      style={{ color: isDark ? '#FFFFFF' : '#0F172A' }}
-                    >
-                      {activeLesson.title}
-                    </h3>
-                    <p 
-                      className="text-sm mt-1 leading-relaxed"
-                      style={{ color: isDark ? '#94A3B8' : '#475569' }}
-                    >
-                      {activeLesson.summary}
-                    </p>
-                  </div>
-
-                  {/* Core Clinical Takeaway / Safety Rule */}
-                  {activeLesson.clinicalKey && (
-                    <div 
-                      className={`p-4 rounded-xl border flex items-start gap-3`}
-                      style={{
-                        backgroundColor: isDark ? '#172554' : '#EFF6FF',
-                        borderColor: isDark ? '#1E40AF' : '#BFDBFE'
-                      }}
-                    >
-                      <Info className="w-5 h-5 text-[#2563EB] shrink-0 mt-0.5" />
-                      <div className="text-xs sm:text-sm leading-relaxed">
-                        <strong 
-                          className="font-bold block mb-1"
-                          style={{ color: isDark ? '#93C5FD' : '#1E40AF' }}
-                        >
-                          Golden Clinical Rule:
-                        </strong>
-                        <span 
-                          className="font-semibold"
-                          style={{ color: isDark ? '#F8FAFC' : '#0F172A' }}
-                        >
-                          {activeLesson.clinicalKey}
-                        </span>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Educational Content Bullet Points */}
-                  {activeLesson.content && activeLesson.content.length > 0 && (
-                    <div className="space-y-3 pt-1">
-                      <span 
-                        className="text-xs font-bold uppercase tracking-wider block"
-                        style={{ color: isDark ? '#94A3B8' : '#475569' }}
-                      >
-                        Essential Knowledge & Steps:
-                      </span>
-                      <div className="space-y-2.5 pl-1">
-                        {activeLesson.content.map((point, idx) => (
-                          <div key={idx} className="flex items-start gap-3 text-xs sm:text-sm">
-                            <span 
-                              className="w-5 h-5 rounded-full font-bold flex items-center justify-center shrink-0 text-xs mt-0.5 shadow-2xs"
-                              style={{
-                                backgroundColor: isDark ? '#1E3A8A' : '#EFF6FF',
-                                color: isDark ? '#93C5FD' : '#2563EB'
-                              }}
-                            >
-                              {idx + 1}
-                            </span>
-                            <p 
-                              className="leading-relaxed font-medium"
-                              style={{ color: isDark ? '#F1F5F9' : '#0F172A' }}
-                            >
-                              {point}
-                            </p>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Worked Clinical Example */}
-                  {activeLesson.workedExample && (
-                    <div className={`p-5 rounded-xl border space-y-4 text-xs sm:text-sm ${isDark ? 'bg-[#0F172A] border-[#263247]' : 'bg-[#F8FAFC] border-[#E2E8F0]'}`}>
-                      <div className="flex items-center justify-between">
-                        <strong 
-                          className="block text-sm sm:text-base font-bold"
-                          style={{ color: isDark ? '#FFFFFF' : '#0F172A' }}
-                        >
-                          Step-by-Step Worked Example:
-                        </strong>
-                        <span className="text-xs font-mono text-emerald-600 dark:text-emerald-400 font-bold bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded-md border border-emerald-200 dark:border-emerald-800">
-                          Target: {activeLesson.workedExample.result || 'Solved'}
-                        </span>
-                      </div>
-                      
-                      <p 
-                        className="leading-relaxed text-xs sm:text-sm font-medium"
-                        style={{ color: isDark ? '#E2E8F0' : '#1E293B' }}
-                      >
-                        {activeLesson.workedExample.scenario}
-                      </p>
-
-                      {activeLesson.workedExample.formula && (
-                        <div>
-                          <span className="text-xs font-bold text-[#475569] dark:text-[#94A3B8] block mb-1">Mathematical Formula:</span>
-                          <div className={`p-3 rounded-lg font-mono text-xs sm:text-sm border font-semibold ${isDark ? 'bg-[#111827] border-[#263247] text-blue-300' : 'bg-white border-blue-200 text-[#1D4ED8]'}`}>
-                            {activeLesson.workedExample.formula}
-                          </div>
-                        </div>
-                      )}
-
-                      {activeLesson.workedExample.calculation && (
-                        <div>
-                          <span className="text-xs font-bold text-[#475569] dark:text-[#94A3B8] block mb-1">Step Calculation:</span>
-                          <div className={`p-3 rounded-lg font-mono text-xs sm:text-sm border font-semibold ${isDark ? 'bg-[#111827] border-[#263247] text-emerald-300' : 'bg-white border-emerald-200 text-emerald-900'}`}>
-                            {activeLesson.workedExample.calculation}
-                          </div>
-                        </div>
-                      )}
-
-                      {activeLesson.workedExample.ismpRationale && (
-                        <div className="text-xs sm:text-sm text-amber-950 dark:text-amber-100 bg-amber-50 dark:bg-amber-950/50 border border-amber-300 dark:border-amber-800 p-3.5 rounded-xl flex items-start gap-2.5">
-                          <ShieldCheck className="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
-                          <span className="leading-relaxed">
-                            <strong className="font-bold text-amber-900 dark:text-amber-200">ISMP Safety Rationale: </strong>
-                            {activeLesson.workedExample.ismpRationale}
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-              )}
             </section>
           )}
 

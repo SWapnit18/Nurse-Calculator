@@ -1,38 +1,83 @@
 export const localTopics = [
   {
     topicId: 'med_math_basics',
-    title: '1. Medication Math Basics',
+    title: 'Medication Calculation Basics',
     description: 'Foundations of clinical numeracy, ratio-proportion, dimensional analysis, and ISMP decimal rules.',
     order: 1,
-    lessonCount: 3
-  },
-  {
-    topicId: 'unit_conversions',
-    title: '2. Clinical Unit Conversions',
-    description: 'Metric-to-metric conversions (mcg, mg, g, kg, mL, L) and exact imperial pound conversions.',
-    order: 2,
-    lessonCount: 3
+    lessonCount: 5,
+    questionCount: 8
   },
   {
     topicId: 'tablet_calculations',
-    title: '3. Oral & Tablet Calculations',
+    title: 'Tablet Calculations',
     description: 'Desired over Have formula (D/H × V), scored tablet split safety, and 4-tablet ceiling rules.',
-    order: 3,
-    lessonCount: 3
+    order: 2,
+    lessonCount: 5,
+    questionCount: 8
   },
   {
     topicId: 'liquid_calculations',
-    title: '4. Liquid Injections & Syringes',
+    title: 'Liquid Calculations',
     description: 'Parenteral liquid injection volumes, reconstitution concentration, and visual syringe barrel calibrations.',
-    order: 4,
-    lessonCount: 3
+    order: 3,
+    lessonCount: 5,
+    questionCount: 8
   },
   {
-    topicId: 'iv_flow_mathematics',
-    title: '5. IV Flow & Infusion Mathematics',
-    description: 'Gravity drip rates (gtt/min), volumetric electronic infusion pumps (mL/hr), and ICU titrations.',
+    topicId: 'unit_conversions',
+    title: 'Unit Conversions',
+    description: 'Metric-to-metric conversions (mcg, mg, g, kg, mL, L) and exact imperial pound conversions.',
+    order: 4,
+    lessonCount: 5,
+    questionCount: 8
+  },
+  {
+    topicId: 'ratios_proportions',
+    title: 'Ratios and Proportions',
+    description: 'Setting up clinical proportions, fraction equivalencies, and rapid proportional dosage solving.',
     order: 5,
-    lessonCount: 3
+    lessonCount: 5,
+    questionCount: 8
+  },
+  {
+    topicId: 'concentration_math',
+    title: 'Concentration Mathematics',
+    description: 'Percentage concentrations (w/v, v/v), ratio solutions (1:1000, 1:10000), and parts per thousand.',
+    order: 6,
+    lessonCount: 5,
+    questionCount: 8
+  },
+  {
+    topicId: 'reconstitution',
+    title: 'Reconstitution Exercises',
+    description: 'Powdered medication reconstitution, diluent selection, displacement factor, and final concentration.',
+    order: 7,
+    lessonCount: 5,
+    questionCount: 8
+  },
+  {
+    topicId: 'iv_mathematics',
+    title: 'IV Mathematics',
+    description: 'Gravity drip rates (gtt/min), volumetric electronic infusion pumps (mL/hr), and secondary piggybacks.',
+    order: 8,
+    lessonCount: 5,
+    questionCount: 8
+  },
+  {
+    topicId: 'weight_based',
+    title: 'Weight-Based Practice',
+    description: 'Pediatric and adult weight-based dosing (mg/kg/day, mcg/kg/min) and division of divided doses.',
+    order: 9,
+    lessonCount: 5,
+    questionCount: 8
+  },
+  {
+    topicId: 'advanced_calc',
+    title: 'Advanced Calculation Practice',
+    description: 'Multi-step titrations, insulin sliding scales, body surface area (BSA), and emergency push drugs.',
+    order: 10,
+    lessonCount: 5,
+    questionCount: 8
   }
 ];
 
@@ -73,85 +118,26 @@ export const localLessons = {
       content: [
         'Identify what unit is needed in the final answer (e.g., mL).',
         'Start the equation with the equivalent containing that unit in the numerator.',
-        'Multiply by successive conversion factors until only the desired unit remains.'
+        'Multiply across the numerators and divide across the denominators.'
       ]
     },
     {
       lessonId: 'les_mmb_3',
       topicId: 'med_math_basics',
-      title: 'Independent Double-Check Protocols',
-      summary: 'The critical role of two independent licensed clinicians in verifying high-alert calculations.',
-      clinicalKey: 'High-alert meds (Insulin, Heparin, Chemotherapy, Opioids) require independent recalculation without seeing the first result.',
+      title: 'Clinical Decimal Rounding Standards',
+      summary: 'Standard clinical rules for rounding numbers greater than or less than 1.0.',
+      clinicalKey: 'For doses < 1, round to hundredths (0.01). For doses > 1, round to tenths (0.1). Drops (gtt) always whole numbers.',
       workedExample: {
-        scenario: 'Nurse A prepares an IV Heparin infusion. Nurse B recalculates from scratch using raw orders and bag concentration.',
-        formula: 'Independent Recalculation',
-        calculation: 'Nurse A gets 18 mL/hr. Nurse B independently verifies: (1000 units/hr ÷ 50 units/mL) = 20 mL/hr. Discrepancy caught prior to connection.',
-        result: 'Discrepancy caught prior to administration',
-        ismpRationale: 'Confirmation bias occurs when a nurse looks at a pre-filled calculation rather than starting from raw clinical data.'
+        scenario: 'A calculation yields 0.746 mL of a pediatric cardiac drug.',
+        formula: 'Values < 1 round to nearest 100th (two decimal places)',
+        calculation: '0.746 rounds up to 0.75 mL',
+        result: '0.75 mL',
+        ismpRationale: 'High-risk pediatric liquid doses require 100th precision using tuberculin syringes.'
       },
       content: [
-        'Independent double checks catch up to 95% of math errors.',
-        'Never show your math or pump screen to the verifying nurse prior to their calculation.',
-        'Verify patient identity, drug vial, concentration, and pump programming simultaneously.'
-      ]
-    }
-  ],
-  unit_conversions: [
-    {
-      lessonId: 'les_uc_1',
-      topicId: 'unit_conversions',
-      title: 'Metric Mass Conversions: Micrograms to Grams',
-      summary: 'Seamless shifting across orders of magnitude: 1 g = 1,000 mg = 1,000,000 mcg.',
-      clinicalKey: 'To convert mcg to mg, divide by 1,000 (shift decimal 3 places left).',
-      workedExample: {
-        scenario: 'Physician prescribes Levothyroxine 125 mcg. Stock available is 0.05 mg tablets.',
-        formula: '125 mcg ÷ 1,000 = 0.125 mg. Tablets = 0.125 mg ÷ 0.05 mg',
-        calculation: '0.125 ÷ 0.05 = 2.5 tablets',
-        result: '2.5 tablets',
-        ismpRationale: 'Always convert both values to the same unit of measure before attempting division.'
-      },
-      content: [
-        'Always align units: convert the physician order to match the stock label.',
-        'Never divide milligrams by micrograms without converting.',
-        'Ensure standard abbreviations (mcg for microgram, not the outdated Greek letter µg).'
-      ]
-    },
-    {
-      lessonId: 'les_uc_2',
-      topicId: 'unit_conversions',
-      title: 'Exact Imperial Weight Normalization (lbs to kg)',
-      summary: 'Weight-based pharmacology requires accurate metric patient weights.',
-      clinicalKey: 'Divide lbs by 2.2 or multiply by 0.45359237. Round to nearest tenth or hundredth depending on protocol.',
-      workedExample: {
-        scenario: 'Pediatric patient weighs 44 lbs. Order requires dosing in mg/kg.',
-        formula: '44 lbs × 0.45359237 = 19.958 kg (≈ 20 kg)',
-        calculation: '44 ÷ 2.2 = 20 kg',
-        result: '20 kg',
-        ismpRationale: 'In neonatal and pediatric care, weight errors directly scale toxicity or subtherapeutic underdosing.'
-      },
-      content: [
-        'In emergency triage, 2.2 is acceptable; in clinical trials or high-potency chemotherapy, exact conversion constants apply.',
-        'Always verify whether the scale is set to pounds or kilograms before recording baseline intake.',
-        'Watch for physiological boundary outliers (<0.3 kg or >400 kg).'
-      ]
-    },
-    {
-      lessonId: 'les_uc_3',
-      topicId: 'unit_conversions',
-      title: 'Liquid Volume Conversions: Household to Metric',
-      summary: 'Translating teaspoons, tablespoons, ounces, and milliliters for patient discharge instructions.',
-      clinicalKey: '1 tsp = 5 mL | 1 tbsp = 15 mL | 1 fl oz = 30 mL | 1 cup = 240 mL.',
-      workedExample: {
-        scenario: 'Patient is discharged with instructions to take 10 mL of cough syrup at home. How many teaspoons should they take?',
-        formula: '10 mL ÷ (5 mL / 1 tsp)',
-        calculation: '10 ÷ 5 = 2 tsp',
-        result: '2 teaspoons',
-        ismpRationale: 'Always provide calibrated oral syringes rather than household kitchen spoons, which vary by up to 100% in volume.'
-      },
-      content: [
-        'Never recommend household kitchen spoons for pediatric liquid dosing.',
-        'Clearly demarcate measuring syringes in metric milliliters.',
-        'Teach parents the danger of confusing teaspoons (5 mL) with tablespoons (15 mL).'
+        'Amounts less than 1 mL must be calculated and rounded to the hundredths place.',
+        'Amounts greater than 1 mL are typically rounded to the tenths place unless high-potency.',
+        'IV gravity drops (gtt/min) can never be divided; round to the nearest whole integer.'
       ]
     }
   ],
@@ -248,73 +234,180 @@ export const localLessons = {
         ismpRationale: 'Using a 3 mL syringe for doses under 1 mL forces visual estimation and introduces dangerous dosing variance.'
       },
       content: [
-        'The front edge of the black rubber plunger head determines the volume, not the cone or middle.',
-        'Insulin must only be measured in dedicated U-100 insulin syringes (units, never mL).',
-        'Discard air bubbles which artificially distort drawn medication volume.'
-      ]
-    },
-    {
-      lessonId: 'les_liq_3',
-      topicId: 'liquid_calculations',
-      title: 'Powder Reconstitution Mathematics',
-      summary: 'Reconstituting lyophilized powder vials with diluent to achieve exact target concentration.',
-      clinicalKey: 'Resulting concentration = Total Drug (mg) ÷ Final Volume with powder displacement (mL).',
-      workedExample: {
-        scenario: 'Vial of Ceftriaxone 1 g powder. Add 3.6 mL sterile water for injection to produce a final concentration of 250 mg/mL.',
-        formula: 'Dose Volume = Order ÷ Final Concentration',
-        calculation: 'Order is 500 mg. Vol = 500 mg ÷ 250 mg/mL = 2.0 mL',
-        result: '2.0 mL',
-        ismpRationale: 'Powder displacement volume expands the liquid beyond the added diluent volume; always consult the manufacturer vial insert.'
-      },
-      content: [
-        'Read vial label carefully for specific diluent: Sterile Water vs. Normal Saline vs. 1% Lidocaine.',
-        'Clearly label the reconstituted vial with Date, Time, Concentration, and Nurse Initials.',
-        'Store in refrigerator if required by stability guidelines.'
+        'Inspect syringe markings carefully: lines on 3 mL syringes represent 0.1 mL.',
+        'Lines on 1 mL syringes represent 0.01 mL.',
+        'Never use an insulin syringe (U-100) for non-insulin medications.'
       ]
     }
   ],
-  iv_flow_mathematics: [
+  unit_conversions: [
     {
-      lessonId: 'les_iv_1',
-      topicId: 'iv_flow_mathematics',
-      title: 'IV Gravity Drip Rate Calculations (gtt/min)',
-      summary: 'Calculating manual gravity infusion drip rates using drop factors (10, 15, 20, or 60 gtt/mL).',
-      clinicalKey: 'Drip Rate (gtt/min) = (Total Volume in mL × Drop Factor in gtt/mL) ÷ Total Minutes.',
+      lessonId: 'les_uc_1',
+      topicId: 'unit_conversions',
+      title: 'Metric Mass Conversions (mcg ↔ mg ↔ g ↔ kg)',
+      summary: 'Step-by-step thousand-factor scaling between clinical metric mass units.',
+      clinicalKey: '1 kg = 1,000 g | 1 g = 1,000 mg | 1 mg = 1,000 mcg.',
       workedExample: {
-        scenario: 'Order: 1,000 mL Lactated Ringer over 8 hours. Tubing drop factor: 15 gtt/mL.',
-        formula: 'gtt/min = (1,000 mL × 15 gtt/mL) ÷ (8 hr × 60 min)',
-        calculation: '15,000 ÷ 480 min = 31.25 gtt/min',
-        result: '31 gtt/min (Whole drops)',
-        ismpRationale: 'Gravity drips cannot administer fractional drops. Round mathematically to the nearest whole integer.'
+        scenario: 'Physician orders Levothyroxine 0.125 mg. Pharmacy dispenses 125 mcg tablets.',
+        formula: 'mcg = mg × 1,000',
+        calculation: '0.125 mg × 1,000 = 125 mcg',
+        result: '125 mcg (Exact Match = 1 Tablet)',
+        ismpRationale: 'Confirming microgram and milligram conversions prevents severe 1,000-fold thyroid and cardiac dosing crises.'
       },
       content: [
-        'Convert all infusion times to minutes (hours × 60).',
-        'Microdrip tubing always has a drop factor of 60 gtt/mL (where mL/hr = gtt/min).',
-        'Count drops with a watch for a full 60 seconds when establishing or adjusting rate.'
+        'To convert from larger to smaller unit (e.g., mg to mcg), multiply by 1,000 (move decimal 3 places right).',
+        'To convert from smaller to larger unit (e.g., mcg to mg), divide by 1,000 (move decimal 3 places left).',
+        'Always double-check unit abbreviations on the drug label.'
       ]
     },
     {
-      lessonId: 'les_iv_2',
-      topicId: 'iv_flow_mathematics',
-      title: 'Electronic Infusion Pump Flow Rate (mL/hr)',
-      summary: 'Programming volumetric smart pumps for continuous and intermittent infusions.',
+      lessonId: 'les_uc_2',
+      topicId: 'unit_conversions',
+      title: 'Imperial to Metric Weight Conversion (lb to kg)',
+      summary: 'Accurate clinical conversion of patient weights using standard 2.2 factor.',
+      clinicalKey: 'Patient Weight in kg = Weight in lb ÷ 2.2 (Round to tenths).',
+      workedExample: {
+        scenario: 'Patient weighs 154 lbs. Medication is dosed in mg/kg.',
+        formula: 'kg = lb ÷ 2.2',
+        calculation: '154 ÷ 2.2 = 70 kg',
+        result: '70 kg',
+        ismpRationale: 'Always use weight in kg for medication dosing calculations; using pounds directly causes a 220% massive overdose.'
+      },
+      content: [
+        'Weigh pediatric patients directly in kilograms whenever possible.',
+        'Never estimate patient weight for weight-based chemotherapy or vasoactive drips.',
+        'Double check scale calibration before recording in the electronic health record.'
+      ]
+    }
+  ],
+  ratios_proportions: [
+    {
+      lessonId: 'les_rp_1',
+      topicId: 'ratios_proportions',
+      title: 'Proportional Dosage Solving',
+      summary: 'Setting up Means and Extremes to solve clinical dose fractions.',
+      clinicalKey: 'Known Ratio (Have) :: Desired Ratio (Need) -> Product of Means = Product of Extremes.',
+      workedExample: {
+        scenario: 'Ordered: 250 mg. Stock: 125 mg in 5 mL liquid suspension.',
+        formula: '125 mg : 5 mL = 250 mg : X mL',
+        calculation: '125X = 5 × 250 = 1,250 -> X = 1,250 ÷ 125 = 10 mL',
+        result: '10 mL',
+        ismpRationale: 'Proportions verify sanity of calculated dosage volume against bottle stock.'
+      },
+      content: [
+        'Place identical unit positions on both sides of the proportion equation.',
+        'Multiply outer numbers (extremes) and inner numbers (means).',
+        'Solve for unknown X and check answer against clinical reality.'
+      ]
+    }
+  ],
+  concentration_math: [
+    {
+      lessonId: 'les_cm_1',
+      topicId: 'concentration_math',
+      title: 'Percentage and Ratio Concentrations',
+      summary: 'Understanding 1:1,000 and 1:10,000 epinephrine solutions and % w/v formulations.',
+      clinicalKey: '1% solution = 1 g per 100 mL (10 mg/mL). 1:1,000 = 1 mg/mL; 1:10,000 = 0.1 mg/mL.',
+      workedExample: {
+        scenario: 'Order: 1 mg Epinephrine IV Push in cardiac arrest. Stock vials: 1:1,000 (1 mg/mL) and 1:10,000 (0.1 mg/mL).',
+        formula: 'IV cardiac arrest requires 1:10,000 dilution (1 mg / 10 mL)',
+        calculation: 'Administer 10 mL of 1:10,000 epinephrine syringe.',
+        result: '10 mL of 1:10,000',
+        ismpRationale: 'Administering 1:1,000 IV Push instead of IM causes severe tachycardia, hypertension, and fatal arrhythmias.'
+      },
+      content: [
+        'Epinephrine 1:1,000 (1 mg/mL) is for IM anaphylaxis injection.',
+        'Epinephrine 1:10,000 (0.1 mg/mL) is for IV cardiac arrest resuscitation.',
+        'Always read the full concentration label and route warning.'
+      ]
+    }
+  ],
+  reconstitution: [
+    {
+      lessonId: 'les_rc_1',
+      topicId: 'reconstitution',
+      title: 'Powder Reconstitution and Displacement',
+      summary: 'Adding sterile diluents to powdered vials to create accurate solution concentrations.',
+      clinicalKey: 'Final Concentration (mg/mL) = Total Solute (mg) ÷ Total Reconstituted Volume (mL).',
+      workedExample: {
+        scenario: 'Vial contains 1 g Ceftriaxone powder. Label: Add 9.6 mL sterile water to yield 10 mL of 100 mg/mL.',
+        formula: 'Conc = 1,000 mg ÷ 10 mL = 100 mg/mL. Displacement volume of powder = 0.4 mL.',
+        calculation: 'If order is 500 mg: Vol = 500 mg ÷ 100 mg/mL = 5 mL',
+        result: '5 mL',
+        ismpRationale: 'Powder adds volume (displacement). Adding diluent does not equal final volume.'
+      },
+      content: [
+        'Read vial label instructions for exact diluent type (Sterile Water, 0.9% NaCl, Bacteriostatic Water).',
+        'Note date, time, and resulting concentration on reconstituted vial label.',
+        'Store in refrigerator or room temperature as indicated by manufacturer.'
+      ]
+    }
+  ],
+  iv_mathematics: [
+    {
+      lessonId: 'les_ivm_1',
+      topicId: 'iv_mathematics',
+      title: 'Gravity Drip Rates & Drop Factors',
+      summary: 'Calculating manual IV infusion gravity drip rates in drops per minute (gtt/min).',
+      clinicalKey: 'Drip Rate (gtt/min) = (Total Volume in mL × Drop Factor in gtt/mL) ÷ Time in Minutes.',
+      workedExample: {
+        scenario: 'Order: 1,000 mL 0.9% Normal Saline over 8 hours. Tubing drop factor: 15 gtt/mL.',
+        formula: 'Time in minutes = 8 × 60 = 480 min. Rate = (1,000 × 15) ÷ 480',
+        calculation: '15,000 ÷ 480 = 31.25 -> Round to 31 gtt/min',
+        result: '31 gtt/min',
+        ismpRationale: 'Gravity drip rates must always be rounded to the nearest whole integer drop count.'
+      },
+      content: [
+        'Macro-drip sets typically deliver 10, 15, or 20 gtt/mL.',
+        'Micro-drip sets deliver 60 gtt/mL (useful for pediatric or critical titration).',
+        'Count drops against a watch second hand for one full minute to calibrate roller clamp.'
+      ]
+    },
+    {
+      lessonId: 'les_ivm_2',
+      topicId: 'iv_mathematics',
+      title: 'Volumetric IV Infusion Pump Rates',
+      summary: 'Programming volumetric smart pumps for continuous and intermittent infusions in mL/hr.',
       clinicalKey: 'Rate (mL/hr) = Total Volume to Infuse in mL ÷ Infusion Time in Hours.',
       workedExample: {
         scenario: 'Order: Vancomycin 1,000 mg in 200 mL D5W over 90 minutes. Set pump rate.',
         formula: 'Time in hours = 90 min ÷ 60 = 1.5 hr. Rate = 200 mL ÷ 1.5 hr',
         calculation: '200 ÷ 1.5 = 133.33 mL/hr',
-        result: '133.3 mL/hr (or 133 mL/hr depending on pump capability)',
-        ismpRationale: 'Smart pumps with dose error reduction systems (DERS) provide hard and soft dosing safety stops.'
+        result: '133.3 mL/hr',
+        ismpRationale: 'Smart pumps with dose error reduction systems (DERS) provide hard and soft safety stops.'
       },
       content: [
         'Always convert partial hours into decimals (e.g., 30 min = 0.5 hr; 45 min = 0.75 hr).',
         'Standard volumetric infusion pumps have a maximum ceiling of 999 mL/hr.',
         'Check secondary line backcheck valve alignment for piggyback infusions.'
       ]
-    },
+    }
+  ],
+  weight_based: [
     {
-      lessonId: 'les_iv_3',
-      topicId: 'iv_flow_mathematics',
+      lessonId: 'les_wb_1',
+      topicId: 'weight_based',
+      title: 'Weight-Based Daily Dosing (mg/kg/day in Divided Doses)',
+      summary: 'Pediatric dosing protocols split into Q8H or Q12H administrations.',
+      clinicalKey: 'Single Dose = (Dose in mg/kg/day × Weight in kg) ÷ Number of Doses per Day.',
+      workedExample: {
+        scenario: 'Child weighs 20 kg. Order: Amoxicillin 45 mg/kg/day PO divided every 8 hours (3 doses/day).',
+        formula: 'Daily Total = 45 × 20 = 900 mg/day. Per Dose = 900 ÷ 3 doses',
+        calculation: '900 ÷ 3 = 300 mg per dose',
+        result: '300 mg every 8 hours',
+        ismpRationale: 'Confusing single-dose orders with total daily dose is a leading cause of pediatric 3x/4x overdoses.'
+      },
+      content: [
+        'Verify whether the ordered number represents the 24-hour total or a single administration.',
+        'Divide total 24-hour milligrams by dosing frequency (e.g., BID = 2, TID = 3, QID = 4).',
+        'Verify calculated dose against safe recommended manufacturer ranges.'
+      ]
+    }
+  ],
+  advanced_calc: [
+    {
+      lessonId: 'les_ac_1',
+      topicId: 'advanced_calc',
       title: 'High-Alert ICU Vasoactive Titrations (mcg/kg/min)',
       summary: 'Calculating high-risk inotropic and vasopressor infusions (Dopamine, Dobutamine, Norepinephrine).',
       clinicalKey: 'mL/hr = (Prescribed mcg/kg/min × Patient kg × 60 min/hr) ÷ Bag Concentration (mcg/mL).',
