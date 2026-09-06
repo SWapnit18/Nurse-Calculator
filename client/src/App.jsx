@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { supabase } from './lib/supabaseClient';
 import { localTopics, localLessons } from './data/localSeed';
 import { whoPatientSafetyStandards } from './data/whoSafetyStandards';
 import SubscriptionModal from './components/SubscriptionModal';
@@ -389,8 +390,48 @@ export default function App() {
     computeCalculation();
   }, [calcType, flowVol, flowHr, dripVol, dripHr, dropFactor, wtRate, wtVal, wtUnit, reqAmount, availAmount, availVol, oralD, oralH, gcsE, gcsV, gcsM, titMcg, titWt, titBagMg, titBagMl]);
 
-  // Fetch backend data
-  const refreshUserData = () => {
+  // Fetch backend / Supabase data
+  const refreshUserData = async () => {
+    // 1. Fetch Topics from Supabase if configured, otherwise fallback to local/express
+    try {
+      if (supabase) {
+        const { data: sbTopics, error } = await supabase.from('topics').select('*').order('order_index', { ascending: true });
+        if (!error && sbTopics && sbTopics.length > 0) {
+          setTopics(sbTopics.map(t => ({
+            topicId: t.id,
+            title: t.title,
+            description: t.description,
+            lessonCount: t.lesson_count,
+            questionCount: t.question_count,
+            order: t.order_index
+          })));
+        }
+      }
+    } catch (e) {}
+
+    // 2. Fetch Questions
+    try {
+      if (supabase) {
+        const { data: sbQuestions, error } = await supabase.from('questions').select('*');
+        if (!error && sbQuestions && sbQuestions.length > 0) {
+          setQuestions(sbQuestions.map(q => ({
+            questionId: q.id,
+            topicId: q.topic_id,
+            title: q.title,
+            prompt: q.prompt,
+            correctAnswer: q.correct_answer,
+            unit: q.unit,
+            difficulty: q.difficulty,
+            tolerance: q.tolerance,
+            formula: q.formula,
+            explanation: q.explanation,
+            commonMistake: q.common_mistake
+          })));
+        }
+      }
+    } catch (e) {}
+
+    // Fallback Express Server checks
     fetch('http://localhost:5000/api/topics')
       .then(r => r.json())
       .then(res => { if (res.data && res.data.length > 0) setTopics(res.data); })
