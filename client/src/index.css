@@ -31,7 +31,7 @@
     -webkit-tap-highlight-color: transparent;
   }
 
-  html, body {
+  html {
     background-color: #FFFFFF;
     color: #111111;
     font-family: var(--font-sans);
@@ -40,8 +40,22 @@
     min-height: 100%;
     width: 100%;
     overflow-x: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    background-color: #FFFFFF;
+    color: #111111;
+    font-family: var(--font-sans);
+    margin: 0;
+    padding: 0;
+    min-height: 100%;
+    width: 100%;
+    overflow-x: hidden;
+    overflow-y: visible;
   }
 
   /* Dark mode overrides (Clean dark slate/monochrome) */
@@ -50,6 +64,7 @@
     color: #F7F7F7;
   }
 }
+
 
 /* Custom Component Classes */
 .nc-card {
