@@ -1,5 +1,5 @@
 import React from 'react';
-import { BookOpen, ChevronRight, CheckCircle2 } from 'lucide-react';
+import { BookOpen, ChevronRight, CheckCircle2, ShieldCheck, ExternalLink, Globe, Award } from 'lucide-react';
 
 const TOPICS = [
   {
@@ -70,12 +70,53 @@ const TOPICS = [
 
 export default function LearnView({ onSelectTopic }) {
   return (
-    <div className="space-y-4 pb-8 animate-fade-in">
+    <div className="space-y-5 pb-8 animate-fade-in">
       <div>
         <h1 className="text-2xl font-bold tracking-tight text-[#111111]">Learn</h1>
         <p className="text-sm text-[#666666] mt-0.5">Master key concepts step by step.</p>
       </div>
 
+      {/* WHO & NCLEX Standards Banner */}
+      <div className="nc-card p-4 bg-[#F8FAFC] border border-[#E2E8F0] space-y-3">
+        <div className="flex items-center gap-2">
+          <ShieldCheck className="w-5 h-5 text-[#0284C7]" />
+          <span className="text-xs font-bold uppercase tracking-wider text-[#0F172A]">
+            Accredited Clinical Guidelines
+          </span>
+        </div>
+        <p className="text-xs text-[#475569] leading-relaxed">
+          NurseCalc curriculum follows World Health Organization (WHO) Patient Safety standards and NCLEX Next-Gen clinical judgment measurement models.
+        </p>
+        <div className="grid grid-cols-2 gap-2 pt-1">
+          <a
+            href="https://www.who.int/initiatives/medication-without-harm"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center justify-between p-2.5 bg-white border border-[#CBD5E1] rounded-xl text-xs font-medium text-[#1E293B] hover:border-[#0284C7] transition-all"
+          >
+            <div className="flex items-center gap-2 min-w-0">
+              <Globe className="w-4 h-4 text-[#0284C7] flex-shrink-0" />
+              <span className="truncate">WHO Med Safety</span>
+            </div>
+            <ExternalLink className="w-3.5 h-3.5 text-[#94A3B8] flex-shrink-0" />
+          </a>
+
+          <a
+            href="https://www.ncsbn.org/nclex.page"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center justify-between p-2.5 bg-white border border-[#CBD5E1] rounded-xl text-xs font-medium text-[#1E293B] hover:border-[#0284C7] transition-all"
+          >
+            <div className="flex items-center gap-2 min-w-0">
+              <Award className="w-4 h-4 text-[#0284C7] flex-shrink-0" />
+              <span className="truncate">NCLEX NCSBN</span>
+            </div>
+            <ExternalLink className="w-3.5 h-3.5 text-[#94A3B8] flex-shrink-0" />
+          </a>
+        </div>
+      </div>
+
+      {/* Curriculum Topic List */}
       <div className="space-y-3">
         {TOPICS.map((topic) => (
           <div

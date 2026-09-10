@@ -31,6 +31,7 @@ export default function PracticeView({
   }
 
   const progressPercent = Math.round(((questionIndex + 1) / totalQuestions) * 100);
+  const questionScenario = currentQuestion.scenario || currentQuestion.prompt || currentQuestion.questionText || currentQuestion.text || '';
 
   const handleKeyDown = (e) => {
     if (e.key === 'Enter' && !isSubmitted && !isChecking && userAnswer.trim()) {
@@ -68,12 +69,19 @@ export default function PracticeView({
       </div>
 
       {/* Scenario / Question Card */}
-      <div className="nc-card p-4 sm:p-5 space-y-3">
-        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-[#F7F7F7] border border-[#E5E5E5] rounded-md text-[11px] font-semibold uppercase tracking-wider text-[#666666]">
-          Scenario
+      <div className="nc-card p-4 sm:p-5 space-y-2 bg-white border border-[#E5E5E5] rounded-2xl shadow-sm">
+        <div className="flex items-center justify-between">
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-[#F7F7F7] border border-[#E5E5E5] rounded text-[10px] font-bold uppercase tracking-wider text-[#666666]">
+            {currentQuestion.title || 'Clinical Scenario'}
+          </span>
+          {currentQuestion.topicId && (
+            <span className="text-[11px] font-medium text-[#888888]">
+              {currentQuestion.topicId.replace(/_/g, ' ')}
+            </span>
+          )}
         </div>
-        <p className="text-base text-[#111111] font-medium leading-relaxed">
-          {currentQuestion.scenario || currentQuestion.questionText}
+        <p className="text-base text-[#111111] font-medium leading-relaxed pt-1">
+          {questionScenario}
         </p>
       </div>
 
@@ -208,7 +216,7 @@ export default function PracticeView({
               <Lightbulb className="w-4 h-4 text-[#111111] flex-shrink-0 mt-0.5" />
               <div className="text-xs text-[#444444]">
                 <strong className="text-[#111111] block mb-0.5">Key Takeaway:</strong>
-                {currentQuestion.keyPoint || 'Always use consistent units and double-check concentration before calculating.'}
+                {currentQuestion.keyPoint || currentQuestion.clinicalPearls || 'Always use consistent units and double-check concentration before calculating.'}
               </div>
             </div>
           </div>
