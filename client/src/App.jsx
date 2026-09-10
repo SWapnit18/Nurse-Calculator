@@ -16,6 +16,7 @@ import ProfileView from './components/ProfileView';
 import SettingsView from './components/SettingsView';
 import AiTutorView from './components/AiTutorView';
 import QuestionPortfolioView from './components/QuestionPortfolioView';
+import { INITIAL_QUESTION_BANK } from './data/fallbackQuestions';
 
 import CalculationEngine from './calculator/engine';
 
@@ -68,7 +69,7 @@ export default function App() {
   const [practiceTopicFilter, setPracticeTopicFilter] = useState(null);
 
   // Practice State
-  const [allQuestions, setAllQuestions] = useState([]);
+  const [allQuestions, setAllQuestions] = useState(INITIAL_QUESTION_BANK);
   const [customQuestions, setCustomQuestions] = useState(() => {
     try {
       const saved = localStorage.getItem('nursecalc_custom_questions');
@@ -113,49 +114,8 @@ export default function App() {
         }
       })
       .catch(() => {
-        // Fallback robust questions if offline
-        setAllQuestions([
-          {
-            questionId: 'q_1',
-            topicId: 'liquid_calculations',
-            scenario: 'Order: Gentamicin 80 mg intramuscular injection. Available: 200 mg/mL in a 1.0 mL single-dose vial. How many mL should the nurse draw up in the syringe?',
-            correctAnswer: 0.4,
-            unit: 'mL',
-            steps: [
-              'Identify what is ordered and available: Order: 80 mg, Available: 200 mg/mL',
-              'Use the formula: Volume = Desired ÷ Available = 80 mg ÷ 200 mg/mL',
-              'Calculate: Volume = 0.4 mL',
-              'Check: 0.4 mL is a safe, measurable volume for IM injection.'
-            ],
-            keyPoint: 'Always use consistent units and double-check concentration.'
-          },
-          {
-            questionId: 'q_2',
-            topicId: 'iv_flow_mathematics',
-            scenario: 'Order: 1,000 mL 0.9% Normal Saline over 16 hours via electronic infusion pump. Calculate the pump rate in mL/hr.',
-            correctAnswer: 62.5,
-            unit: 'mL/hr',
-            steps: [
-              'Formula: Rate (mL/hr) = Total Volume (mL) ÷ Time (hr)',
-              'Calculation: 1,000 mL ÷ 16 hr = 62.5 mL/hr',
-              'Safety: Maintain 62.5 mL/hr decimal on electronic infusion pump. Do not round to integer.'
-            ],
-            keyPoint: 'Electronic pumps support decimal rates (62.5 mL/hr), unlike gravity drips.'
-          },
-          {
-            questionId: 'q_3',
-            topicId: 'tablet_calculations',
-            scenario: 'Order: Metoprolol Tartrate 25 mg PO twice daily. Available: 50 mg scored tablets. How many tablets should be administered per dose?',
-            correctAnswer: 0.5,
-            unit: 'tablets',
-            steps: [
-              'Formula: Tabs = Desired ÷ Have = 25 mg ÷ 50 mg',
-              'Calculation: 25 ÷ 50 = 0.5 tablets',
-              'Safety: Confirm tablet is scored before splitting.'
-            ],
-            keyPoint: 'Only tablets with an engineered score line can be split in half.'
-          }
-        ]);
+        // Fallback to local high-yield clinical question bank
+        setAllQuestions(INITIAL_QUESTION_BANK);
       });
 
     // Fetch dynamic progress
