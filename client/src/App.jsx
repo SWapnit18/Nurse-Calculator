@@ -413,6 +413,8 @@ export default function App() {
 
         {activeTab === 'settings' && (
           <SettingsView
+            user={user}
+            onNavigate={handleNavigate}
             onLogout={() => {
               localStorage.removeItem('nursecalc_token');
               handleNavigate('home');
