@@ -14,12 +14,14 @@ import MistakesView from './components/MistakesView';
 import ProgressView from './components/ProgressView';
 import ProfileView from './components/ProfileView';
 import SettingsView from './components/SettingsView';
+import AiTutorView from './components/AiTutorView';
 
 import CalculationEngine from './calculator/engine';
 
 export default function App() {
-  // Navigation: 'home' | 'learn' | 'lesson' | 'practice' | 'calculator' | 'mistakes' | 'progress' | 'profile' | 'settings'
+  // Navigation: 'home' | 'learn' | 'lesson' | 'practice' | 'calculator' | 'mistakes' | 'progress' | 'profile' | 'settings' | 'ai-tutor'
   const [activeTab, setActiveTab] = useState('home');
+
   const [previousTab, setPreviousTab] = useState('home');
   
   // Modals
@@ -223,25 +225,34 @@ export default function App() {
 
   const handleOpenAiTutor = () => {
     setIsAiTutorOpen(true);
-    if (!aiExplanationText && currentQuestion) {
+    if (currentQuestion) {
       setIsAiLoading(true);
       fetch('http://localhost:5000/api/ai/explain-mistake', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           questionId: currentQuestion.questionId,
+          prompt: currentQuestion.scenario || currentQuestion.questionText,
           studentAnswer: userAnswer,
+          correctAnswer: currentQuestion.correctAnswer,
+          unit: currentQuestion.unit,
+          mistakeType: practiceResult?.mistakeType || 'FORMULA_ERROR',
+          steps: currentQuestion.steps,
           userId: 'demo_student'
         })
       })
         .then(r => r.json())
         .then(res => {
           setIsAiLoading(false);
-          setAiExplanationText(res.explanation || res.aiExplanation || 'Always align the ordered dose with available stock concentration.');
+          const text = res.data?.pedagogicalExplanation || res.explanation || res.aiExplanation || currentQuestion.explanation;
+          setAiExplanationText(text);
         })
         .catch(() => {
           setIsAiLoading(false);
-          setAiExplanationText('Notice the ratio between ordered dose and stock concentration. Always check that units cancel out correctly before calculating final volume.');
+          setAiExplanationText(
+            currentQuestion.explanation || 
+            `Review the clinical formula: (${currentQuestion.steps?.[1] || 'Desired ÷ Have × Volume'}). Ensure that units cancel out before dividing.`
+          );
         });
     }
   };
@@ -259,9 +270,10 @@ export default function App() {
           activeTab === 'mistakes' ? 'Mistakes' :
           activeTab === 'progress' ? 'Progress' :
           activeTab === 'profile' ? 'Profile' :
-          activeTab === 'settings' ? 'Settings' : ''
+          activeTab === 'settings' ? 'Settings' :
+          activeTab === 'ai-tutor' ? 'AI Tutor' : ''
         }
-        showBack={['lesson', 'practice', 'mistakes', 'progress', 'settings'].includes(activeTab)}
+        showBack={['lesson', 'practice', 'mistakes', 'progress', 'settings', 'ai-tutor'].includes(activeTab)}
         onBack={handleBack}
         onOpenMenu={() => setIsMenuOpen(true)}
         onOpenProfile={() => handleNavigate('profile')}
@@ -359,7 +371,14 @@ export default function App() {
             onOpenSubscriptionModal={() => setIsSubscriptionOpen(true)}
           />
         )}
+
+        {activeTab === 'ai-tutor' && (
+          <AiTutorView
+            onStartPractice={() => handleNavigate('practice')}
+          />
+        )}
       </main>
+
 
       {/* Persistent Bottom Mobile Navigation */}
       <BottomNav
