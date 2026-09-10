@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import MobileHeader from './components/MobileHeader';
 import BottomNav from './components/BottomNav';
 import SideMenuModal from './components/SideMenuModal';
@@ -17,6 +17,18 @@ import SettingsView from './components/SettingsView';
 import AiTutorView from './components/AiTutorView';
 
 import CalculationEngine from './calculator/engine';
+
+// Maps frontend lesson IDs to question topicIds
+const LESSON_TO_TOPIC_MAP = {
+  'medication-math-basics': ['med_math_basics'],
+  'unit-conversions': ['unit_conversions'],
+  'tablet-calculations': ['tablet_calculations'],
+  'liquid-calculations': ['liquid_calculations'],
+  'iv-flow-mathematics': ['iv_flow_mathematics'],
+  'weight-based-practice': ['med_math_basics', 'weight_based'],
+  'reconstitution-exercises': ['liquid_calculations', 'reconstitution'],
+  'advanced-calculations': ['unit_conversions', 'iv_flow_mathematics', 'advanced_calc']
+};
 
 export default function App() {
   // Navigation tabs:
@@ -45,11 +57,12 @@ export default function App() {
     weakTopic: { title: 'IV Flow Mathematics', accuracy: 51 }
   });
 
-  // Learn State
+  // Learn State & Practice Filter
   const [selectedTopic, setSelectedTopic] = useState(null);
+  const [practiceTopicFilter, setPracticeTopicFilter] = useState(null);
 
   // Practice State
-  const [questions, setQuestions] = useState([]);
+  const [allQuestions, setAllQuestions] = useState([]);
   const [currentQIndex, setCurrentQIndex] = useState(0);
   const [userAnswer, setUserAnswer] = useState('');
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -65,12 +78,12 @@ export default function App() {
       .then(r => r.json())
       .then(res => {
         if (res.data && res.data.length > 0) {
-          setQuestions(res.data);
+          setAllQuestions(res.data);
         }
       })
       .catch(() => {
         // Fallback robust questions if offline
-        setQuestions([
+        setAllQuestions([
           {
             questionId: 'q_1',
             topicId: 'liquid_calculations',
@@ -131,7 +144,15 @@ export default function App() {
       .catch(() => {});
   }, []);
 
-  const currentQuestion = questions[currentQIndex] || null;
+  // Filter questions dynamically based on selected lesson or general practice
+  const activeQuestions = useMemo(() => {
+    if (!practiceTopicFilter) return allQuestions;
+    const allowedTopicIds = LESSON_TO_TOPIC_MAP[practiceTopicFilter] || [practiceTopicFilter];
+    const filtered = allQuestions.filter(q => allowedTopicIds.includes(q.topicId));
+    return filtered.length > 0 ? filtered : allQuestions;
+  }, [allQuestions, practiceTopicFilter]);
+
+  const currentQuestion = activeQuestions[currentQIndex] || null;
   const isCurrentBookmarked = currentQuestion ? bookmarks.has(currentQuestion.questionId) : false;
 
   const handleToggleBookmark = () => {
@@ -151,6 +172,17 @@ export default function App() {
     setPreviousTab(activeTab);
     setActiveTab(tabId);
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleStartTopicPractice = (topicKey) => {
+    const key = typeof topicKey === 'string' ? topicKey : topicKey?.id;
+    setPracticeTopicFilter(key || null);
+    setCurrentQIndex(0);
+    setUserAnswer('');
+    setIsSubmitted(false);
+    setPracticeResult(null);
+    setAiExplanationText(null);
+    handleNavigate('practice');
   };
 
   const handleBack = () => {
@@ -217,7 +249,7 @@ export default function App() {
     setIsSubmitted(false);
     setPracticeResult(null);
     setAiExplanationText(null);
-    if (currentQIndex + 1 < questions.length) {
+    if (currentQIndex + 1 < activeQuestions.length) {
       setCurrentQIndex(prev => prev + 1);
     } else {
       setCurrentQIndex(0);
@@ -267,7 +299,7 @@ export default function App() {
           activeTab === 'home' ? '' :
           activeTab === 'learn' ? 'Learn' :
           activeTab === 'lesson' ? 'Lesson' :
-          activeTab === 'practice' ? 'Practice' :
+          activeTab === 'practice' ? (practiceTopicFilter ? `${practiceTopicFilter.replace(/-/g, ' ')}` : 'Practice') :
           activeTab === 'calculator' ? 'Calculator' :
           activeTab === 'mistakes' ? 'Mistakes' :
           activeTab === 'progress' ? 'Progress' :
@@ -295,7 +327,11 @@ export default function App() {
           <HomeView
             user={user}
             stats={stats}
-            onStartPractice={() => handleNavigate('practice')}
+            onStartPractice={() => {
+              setPracticeTopicFilter(null);
+              setCurrentQIndex(0);
+              handleNavigate('practice');
+            }}
             onContinueTopic={(topicId) => {
               setSelectedTopic(topicId);
               handleNavigate('lesson');
@@ -318,7 +354,7 @@ export default function App() {
             lesson={selectedTopic}
             onBack={() => handleNavigate('learn')}
             onSelectLesson={(newTopicId) => setSelectedTopic(newTopicId)}
-            onStartPractice={() => handleNavigate('practice')}
+            onStartPractice={() => handleStartTopicPractice(selectedTopic)}
           />
         )}
 
@@ -326,7 +362,7 @@ export default function App() {
           <PracticeView
             currentQuestion={currentQuestion}
             questionIndex={currentQIndex}
-            totalQuestions={questions.length || 10}
+            totalQuestions={activeQuestions.length || 10}
             userAnswer={userAnswer}
             setUserAnswer={setUserAnswer}
             unit={currentQuestion?.unit}
@@ -349,7 +385,7 @@ export default function App() {
         {activeTab === 'mistakes' && (
           <MistakesView
             onPracticeCategory={(catId) => {
-              handleNavigate('practice');
+              handleStartTopicPractice(catId);
             }}
           />
         )}
@@ -381,7 +417,10 @@ export default function App() {
 
         {activeTab === 'ai-tutor' && (
           <AiTutorView
-            onStartPractice={() => handleNavigate('practice')}
+            onStartPractice={() => {
+              setPracticeTopicFilter(null);
+              handleNavigate('practice');
+            }}
           />
         )}
 
@@ -419,7 +458,7 @@ export default function App() {
               </div>
             ) : (
               <div className="space-y-2">
-                {questions
+                {allQuestions
                   .filter(q => bookmarks.has(q.questionId))
                   .map((q, idx) => (
                     <div key={idx} className="nc-card p-4 space-y-2">
