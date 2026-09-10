@@ -220,13 +220,22 @@ export default function PracticeView({
                 <span className={`text-base font-bold ${
                   result?.isCorrect ? 'text-emerald-700' : 'text-red-600'
                 }`}>
-                  {userAnswer} {unit || currentQuestion.unit}
+                  {String(userAnswer).endsWith(unit || currentQuestion?.unit || '')
+                    ? userAnswer 
+                    : `${userAnswer} ${unit || currentQuestion?.unit || ''}`.trim()}
                 </span>
               </div>
               <div className="p-2.5 bg-white rounded-xl border border-[#E5E5E5]">
                 <span className="text-[11px] font-medium text-[#666666] block">Correct Answer</span>
                 <span className="text-base font-bold text-[#111111]">
-                  {result?.correctAnswer || currentQuestion.correctAnswer} {unit || currentQuestion.unit}
+                  {(() => {
+                    const ans = result?.correctAnswer !== undefined ? result.correctAnswer : currentQuestion?.correctAnswer;
+                    const u = unit || currentQuestion?.unit || '';
+                    if (typeof ans === 'string' && u && ans.includes(u)) {
+                      return ans;
+                    }
+                    return `${ans} ${u}`.trim();
+                  })()}
                 </span>
               </div>
             </div>
