@@ -1,135 +1,214 @@
 @import "tailwindcss";
 
 @theme {
-  --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
+
+  /* Strict Monochrome Medical Design Tokens */
+  --color-nc-black: #111111;
+  --color-nc-white: #FFFFFF;
+  --color-nc-bg-sec: #F7F7F7;
+  --color-nc-border: #E5E5E5;
+  --color-nc-text-sec: #666666;
   
-  --color-medical-bg: #F8FAFC;
-  --color-medical-surface: #FFFFFF;
-  --color-medical-primary: #2563EB;
-  --color-medical-primary-hover: #1D4ED8;
-  --color-medical-secondary: #06B6D4;
-  --color-medical-success: #10B981;
-  --color-medical-warning: #F59E0B;
-  --color-medical-error: #EF4444;
-  --color-medical-text: #0F172A;
-  --color-medical-muted: #64748B;
-  --color-medical-border: #E2E8F0;
-  --color-medical-result-bg: #EFF6FF;
+  /* Status Accent Tokens (Strict minimal use) */
+  --color-nc-success: #16A34A;
+  --color-nc-success-bg: #F0FDF4;
+  --color-nc-success-border: #BBF7D0;
+  
+  --color-nc-error: #DC2626;
+  --color-nc-error-bg: #FEF2F2;
+  --color-nc-error-border: #FECACA;
+  
+  --color-nc-amber: #D97706;
+  --color-nc-amber-bg: #FFFBEB;
+  --color-nc-amber-border: #FDE68A;
 }
 
 @layer base {
-  * {
+  *, *::before, *::after {
+    box-sizing: border-box;
     -webkit-tap-highlight-color: transparent;
   }
 
-  /* Force correct color inheritance everywhere */
-  h1, h2, h3, h4, h5, h6 {
-    color: inherit;
+  html, body {
+    background-color: #FFFFFF;
+    color: #111111;
+    font-family: var(--font-sans);
+    margin: 0;
+    padding: 0;
+    min-height: 100%;
+    width: 100%;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Dark mode overrides (Clean dark slate/monochrome) */
+  html.dark, body.dark {
+    background-color: #0A0A0A;
+    color: #F7F7F7;
   }
 }
 
-/* Base Light / Dark Tokens */
-:root {
-  --bg-main: #F8FAFC;
-  --surface-card: #FFFFFF;
-  --border-card: #E2E8F0;
-  --text-primary: #0F172A;
-  --text-secondary: #64748B;
-  --text-muted: #94A3B8;
-  --result-bg: #EFF6FF;
-  --result-border: #BFDBFE;
-  --result-num: #1D4ED8;
-  --formula-bg: #F8FAFC;
-  --btn-primary: #2563EB;
-  --btn-primary-hover: #1D4ED8;
-}
-
-.dark {
-  --bg-main: #0B1220;
-  --surface-card: #111827;
-  --border-card: #263247;
-  --text-primary: #F8FAFC;
-  --text-secondary: #94A3B8;
-  --text-muted: #64748B;
-  --result-bg: #172554;
-  --result-border: #1E40AF;
-  --result-num: #60A5FA;
-  --formula-bg: #172033;
-  --btn-primary: #2563EB;
-  --btn-primary-hover: #1D4ED8;
-}
-
-html {
-  background-color: var(--bg-main);
-  color: var(--text-primary);
-  font-family: var(--font-sans);
-  min-height: 100%;
-}
-
-body {
-  background-color: var(--bg-main);
-  color: var(--text-primary);
-  font-family: var(--font-sans);
-  min-height: 100%;
-}
-
-/* Explicit text color classes for guaranteed contrast */
-.text-primary-forced {
-  color: #0F172A !important;
-}
-.dark .text-primary-forced {
-  color: #F8FAFC !important;
-}
-
-/* Subtle clean focus ring */
-.input-medical {
-  height: 48px;
-  border-radius: 12px;
-  border: 1px solid #E2E8F0;
+/* Custom Component Classes */
+.nc-card {
   background-color: #FFFFFF;
-  color: #0F172A;
-  font-size: 16px;
-  transition: all 0.2s ease;
-}
-
-.dark .input-medical {
-  border-color: #263247;
-  background-color: #0F172A;
-  color: #F8FAFC;
-}
-
-.input-medical:focus {
-  outline: none;
-  border-color: #2563EB;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
-}
-
-.dark .input-medical:focus {
-  border-color: #60A5FA;
-  box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.2);
-}
-
-/* Card Styling */
-.card-medical {
-  background-color: var(--surface-card);
-  border: 1px solid var(--border-card);
+  border: 1px solid #E5E5E5;
   border-radius: 14px;
-  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
-/* Clean Custom Scrollbar */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+.dark .nc-card {
+  background-color: #141414;
+  border-color: #262626;
 }
-::-webkit-scrollbar-track {
-  background: transparent;
+
+.nc-input {
+  width: 100%;
+  height: 48px;
+  padding: 0 16px;
+  background-color: #FFFFFF;
+  border: 1px solid #E5E5E5;
+  border-radius: 12px;
+  color: #111111;
+  font-size: 16px;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
-::-webkit-scrollbar-thumb {
-  background: #CBD5E1;
-  border-radius: 9999px;
+
+.dark .nc-input {
+  background-color: #141414;
+  border-color: #262626;
+  color: #F7F7F7;
 }
-.dark ::-webkit-scrollbar-thumb {
-  background: #334155;
+
+.nc-input:focus {
+  outline: none;
+  border-color: #111111;
+  box-shadow: 0 0 0 2px rgba(17, 17, 17, 0.08);
+}
+
+.dark .nc-input:focus {
+  border-color: #F7F7F7;
+  box-shadow: 0 0 0 2px rgba(247, 247, 247, 0.15);
+}
+
+/* Button System: Primary, Secondary, Ghost, Disabled */
+.nc-btn-primary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 48px;
+  padding: 12px 20px;
+  background-color: #111111;
+  color: #FFFFFF;
+  font-weight: 600;
+  font-size: 15px;
+  border-radius: 12px;
+  border: 1px solid #111111;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.nc-btn-primary:hover:not(:disabled) {
+  background-color: #222222;
+}
+
+.nc-btn-primary:active:not(:disabled) {
+  transform: scale(0.99);
+}
+
+.nc-btn-primary:disabled {
+  background-color: #F0F0F0;
+  color: #999999;
+  border-color: #E5E5E5;
+  cursor: not-allowed;
+}
+
+.dark .nc-btn-primary {
+  background-color: #F7F7F7;
+  color: #111111;
+  border-color: #F7F7F7;
+}
+
+.dark .nc-btn-primary:hover:not(:disabled) {
+  background-color: #E5E5E5;
+}
+
+.dark .nc-btn-primary:disabled {
+  background-color: #262626;
+  color: #666666;
+  border-color: #333333;
+}
+
+.nc-btn-secondary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 48px;
+  padding: 12px 18px;
+  background-color: #FFFFFF;
+  color: #111111;
+  font-weight: 500;
+  font-size: 14px;
+  border-radius: 12px;
+  border: 1px solid #E5E5E5;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.nc-btn-secondary:hover:not(:disabled) {
+  background-color: #F7F7F7;
+  border-color: #111111;
+}
+
+.dark .nc-btn-secondary {
+  background-color: #141414;
+  color: #F7F7F7;
+  border-color: #262626;
+}
+
+.dark .nc-btn-secondary:hover:not(:disabled) {
+  background-color: #1F1F1F;
+  border-color: #F7F7F7;
+}
+
+/* Category Pill */
+.nc-pill {
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+  border: 1px solid #E5E5E5;
+  background-color: #FFFFFF;
+  color: #666666;
+}
+
+.nc-pill.active {
+  background-color: #111111;
+  color: #FFFFFF;
+  border-color: #111111;
+}
+
+.dark .nc-pill {
+  background-color: #141414;
+  border-color: #262626;
+  color: #888888;
+}
+
+.dark .nc-pill.active {
+  background-color: #F7F7F7;
+  color: #111111;
+  border-color: #F7F7F7;
+}
+
+/* Safe Bottom Padding for fixed navigation */
+.safe-bottom-pad {
+  padding-bottom: 90px;
 }
