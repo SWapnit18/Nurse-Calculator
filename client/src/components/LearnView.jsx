@@ -119,10 +119,11 @@ export default function LearnView({ onSelectTopic }) {
       {/* Curriculum Topic List */}
       <div className="space-y-3">
         {TOPICS.map((topic) => (
-          <div
+          <button
             key={topic.id}
+            type="button"
             onClick={() => onSelectTopic(topic)}
-            className="nc-card p-4 hover:border-[#111111] cursor-pointer transition-all active:scale-[0.99] flex items-center justify-between gap-3"
+            className="w-full nc-card p-4 text-left hover:border-[#111111] hover:bg-[#FAFAFA] cursor-pointer transition-all active:scale-[0.99] flex items-center justify-between gap-3"
           >
             <div className="min-w-0 flex-1">
               <div className="flex items-center justify-between gap-2">
@@ -147,7 +148,7 @@ export default function LearnView({ onSelectTopic }) {
             </div>
 
             <ChevronRight className="w-5 h-5 text-[#888888] flex-shrink-0 ml-1" />
-          </div>
+          </button>
         ))}
       </div>
     </div>
