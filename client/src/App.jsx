@@ -19,15 +19,20 @@ import QuestionPortfolioView from './components/QuestionPortfolioView';
 
 import CalculationEngine from './calculator/engine';
 
-// Maps frontend lesson IDs to question topicIds
+// Maps frontend lesson IDs and mistake category IDs to question topicIds
 const LESSON_TO_TOPIC_MAP = {
   'medication-math-basics': ['med_math_basics'],
   'unit-conversions': ['unit_conversions'],
+  'unit-conversion': ['unit_conversions'],
   'tablet-calculations': ['tablet_calculations'],
+  'tablet-calculation': ['tablet_calculations'],
   'liquid-calculations': ['liquid_calculations'],
   'iv-flow-mathematics': ['iv_flow_mathematics'],
+  'flow-rate': ['iv_flow_mathematics'],
+  'decimals-rounding': ['med_math_basics'],
   'weight-based-practice': ['med_math_basics', 'weight_based'],
   'reconstitution-exercises': ['liquid_calculations', 'reconstitution'],
+  'reconstitution': ['liquid_calculations', 'reconstitution'],
   'advanced-calculations': ['unit_conversions', 'iv_flow_mathematics', 'advanced_calc']
 };
 
