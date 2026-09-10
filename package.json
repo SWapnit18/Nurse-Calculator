@@ -12,5 +12,8 @@
     "sync:mobile": "npm --prefix client run build && cd client && npx cap sync",
     "open:android": "npx --prefix client cap open android",
     "open:ios": "npx --prefix client cap open ios"
+  },
+  "dependencies": {
+    "@supabase/server": "^1.6.0"
   }
 }
