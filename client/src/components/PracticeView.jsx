@@ -1,7 +1,7 @@
 import React from 'react';
 import { 
-  CheckCircle2, XCircle, ArrowRight, Bookmark, 
-  Sparkles, ShieldCheck, AlertCircle, RefreshCw, Lightbulb 
+  CheckCircle2, XCircle, ArrowRight, ArrowLeft, Bookmark, 
+  Sparkles, ShieldCheck, AlertCircle, RefreshCw, Lightbulb, ChevronLeft, ChevronRight 
 } from 'lucide-react';
 
 export default function PracticeView({
@@ -41,10 +41,33 @@ export default function PracticeView({
 
   return (
     <div className="space-y-4 pb-12 animate-fade-in w-full max-w-full overflow-hidden">
-      {/* Header Info */}
+      {/* Header Info & Quick Navigation */}
       <div className="space-y-2">
         <div className="flex items-center justify-between text-xs font-medium text-[#666666]">
-          <span>Question {questionIndex + 1} of {totalQuestions}</span>
+          <div className="flex items-center gap-1.5">
+            <button
+              onClick={onPreviousQuestion}
+              disabled={questionIndex === 0}
+              className="p-1 rounded-md text-[#666666] hover:bg-[#F0F0F0] disabled:opacity-30 disabled:hover:bg-transparent transition-all"
+              aria-label="Previous question"
+              title="Previous question"
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </button>
+            <span className="font-semibold text-[#111111]">
+              Question {questionIndex + 1} of {totalQuestions}
+            </span>
+            <button
+              onClick={onNextQuestion}
+              disabled={questionIndex + 1 >= totalQuestions}
+              className="p-1 rounded-md text-[#666666] hover:bg-[#F0F0F0] disabled:opacity-30 disabled:hover:bg-transparent transition-all"
+              aria-label="Next question"
+              title="Next question"
+            >
+              <ChevronRight className="w-4 h-4" />
+            </button>
+          </div>
+
           <div className="flex items-center gap-2">
             <span>{progressPercent}%</span>
             <button
@@ -136,6 +159,28 @@ export default function PracticeView({
               )}
             </button>
           </div>
+
+          {/* Previous / Next Question Buttons */}
+          <div className="flex items-center justify-between gap-3 pt-2">
+            <button
+              type="button"
+              onClick={onPreviousQuestion}
+              disabled={questionIndex === 0}
+              className="nc-btn-secondary flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-semibold disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              <ArrowLeft className="w-3.5 h-3.5" />
+              <span>Previous</span>
+            </button>
+            <button
+              type="button"
+              onClick={onNextQuestion}
+              disabled={questionIndex + 1 >= totalQuestions}
+              className="nc-btn-secondary flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-semibold disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              <span>Skip / Next</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
         </div>
       ) : (
         /* Result & Educational Breakdown */
@@ -221,7 +266,7 @@ export default function PracticeView({
             </div>
           </div>
 
-          {/* Action Buttons: Next & Explain My Mistake */}
+          {/* Action Buttons: Next & Explain My Mistake & Previous */}
           <div className="space-y-2 pt-1">
             <button
               id="btn-next-question"
@@ -242,6 +287,16 @@ export default function PracticeView({
                 <span>Explain My Mistake with AI</span>
               </button>
             )}
+
+            <button
+              type="button"
+              onClick={onPreviousQuestion}
+              disabled={questionIndex === 0}
+              className="nc-btn-secondary w-full flex items-center justify-center gap-2 text-xs py-2.5 disabled:opacity-40"
+            >
+              <ArrowLeft className="w-3.5 h-3.5" />
+              <span>Back to Previous Question</span>
+            </button>
           </div>
         </div>
       )}
