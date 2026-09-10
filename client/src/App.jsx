@@ -15,6 +15,7 @@ import ProgressView from './components/ProgressView';
 import ProfileView from './components/ProfileView';
 import SettingsView from './components/SettingsView';
 import AiTutorView from './components/AiTutorView';
+import QuestionPortfolioView from './components/QuestionPortfolioView';
 
 import CalculationEngine from './calculator/engine';
 
@@ -63,6 +64,14 @@ export default function App() {
 
   // Practice State
   const [allQuestions, setAllQuestions] = useState([]);
+  const [customQuestions, setCustomQuestions] = useState(() => {
+    try {
+      const saved = localStorage.getItem('nursecalc_custom_questions');
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
   const [currentQIndex, setCurrentQIndex] = useState(0);
   const [userAnswer, setUserAnswer] = useState('');
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -71,6 +80,23 @@ export default function App() {
   const [bookmarks, setBookmarks] = useState(new Set());
   const [aiExplanationText, setAiExplanationText] = useState(null);
   const [isAiLoading, setIsAiLoading] = useState(false);
+
+  // Custom question handlers
+  const handleAddCustomQuestion = (newQuestion) => {
+    setCustomQuestions(prev => {
+      const updated = [newQuestion, ...prev];
+      localStorage.setItem('nursecalc_custom_questions', JSON.stringify(updated));
+      return updated;
+    });
+  };
+
+  const handleDeleteCustomQuestion = (qId) => {
+    setCustomQuestions(prev => {
+      const updated = prev.filter(q => q.questionId !== qId);
+      localStorage.setItem('nursecalc_custom_questions', JSON.stringify(updated));
+      return updated;
+    });
+  };
 
   // Load questions from backend on mount
   useEffect(() => {
@@ -146,11 +172,15 @@ export default function App() {
 
   // Filter questions dynamically based on selected lesson or general practice
   const activeQuestions = useMemo(() => {
-    if (!practiceTopicFilter) return allQuestions;
+    const combined = [...customQuestions, ...allQuestions];
+    if (!practiceTopicFilter) return combined;
+    if (practiceTopicFilter === 'custom') {
+      return customQuestions.length > 0 ? customQuestions : combined;
+    }
     const allowedTopicIds = LESSON_TO_TOPIC_MAP[practiceTopicFilter] || [practiceTopicFilter];
-    const filtered = allQuestions.filter(q => allowedTopicIds.includes(q.topicId));
-    return filtered.length > 0 ? filtered : allQuestions;
-  }, [allQuestions, practiceTopicFilter]);
+    const filtered = combined.filter(q => allowedTopicIds.includes(q.topicId));
+    return filtered.length > 0 ? filtered : combined;
+  }, [allQuestions, customQuestions, practiceTopicFilter]);
 
   const currentQuestion = activeQuestions[currentQIndex] || null;
   const isCurrentBookmarked = currentQuestion ? bookmarks.has(currentQuestion.questionId) : false;
@@ -188,7 +218,7 @@ export default function App() {
   const handleBack = () => {
     if (activeTab === 'lesson') {
       setActiveTab('learn');
-    } else if (['learning-goals', 'bookmarks', 'safety', 'help', 'settings'].includes(activeTab)) {
+    } else if (['portfolio', 'learning-goals', 'bookmarks', 'safety', 'help', 'settings'].includes(activeTab)) {
       setActiveTab('profile');
     } else if (activeTab === 'practice' && previousTab) {
       setActiveTab(previousTab);
@@ -299,7 +329,8 @@ export default function App() {
           activeTab === 'home' ? '' :
           activeTab === 'learn' ? 'Learn' :
           activeTab === 'lesson' ? 'Lesson' :
-          activeTab === 'practice' ? (practiceTopicFilter ? `${practiceTopicFilter.replace(/-/g, ' ')}` : 'Practice') :
+          activeTab === 'practice' ? (practiceTopicFilter === 'custom' ? 'Portfolio Practice' : practiceTopicFilter ? `${practiceTopicFilter.replace(/-/g, ' ')}` : 'Practice') :
+          activeTab === 'portfolio' ? 'Question Portfolio' :
           activeTab === 'calculator' ? 'Calculator' :
           activeTab === 'mistakes' ? 'Mistakes' :
           activeTab === 'progress' ? 'Progress' :
@@ -311,7 +342,7 @@ export default function App() {
           activeTab === 'help' ? 'Help & Support' :
           activeTab === 'ai-tutor' ? 'AI Tutor' : ''
         }
-        showBack={['lesson', 'practice', 'mistakes', 'progress', 'settings', 'ai-tutor', 'learning-goals', 'bookmarks', 'safety', 'help'].includes(activeTab)}
+        showBack={['lesson', 'practice', 'portfolio', 'mistakes', 'progress', 'settings', 'ai-tutor', 'learning-goals', 'bookmarks', 'safety', 'help'].includes(activeTab)}
         onBack={handleBack}
         onOpenMenu={() => setIsMenuOpen(true)}
         onOpenProfile={() => handleNavigate('profile')}
@@ -397,11 +428,21 @@ export default function App() {
         {activeTab === 'profile' && (
           <ProfileView
             user={user}
+            customQuestionsCount={customQuestions.length}
             onNavigate={handleNavigate}
             onLogout={() => {
               localStorage.removeItem('nursecalc_token');
               handleNavigate('home');
             }}
+          />
+        )}
+
+        {activeTab === 'portfolio' && (
+          <QuestionPortfolioView
+            customQuestions={customQuestions}
+            onAddQuestion={handleAddCustomQuestion}
+            onDeleteQuestion={handleDeleteCustomQuestion}
+            onPracticeCustom={() => handleStartTopicPractice('custom')}
           />
         )}
 

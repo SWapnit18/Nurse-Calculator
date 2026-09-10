@@ -1,20 +1,22 @@
 import React from 'react';
 import { 
   User, ChevronRight, Settings, Shield, HelpCircle, 
-  BookOpen, AlertCircle, TrendingUp, Bookmark, LogOut 
+  BookOpen, AlertCircle, TrendingUp, Bookmark, LogOut, PlusCircle, FolderHeart
 } from 'lucide-react';
 
 export default function ProfileView({ 
   user, 
+  customQuestionsCount = 0,
   onNavigate, 
   onLogout 
 }) {
   const profileRows = [
+    { id: 'portfolio', label: 'My Question Portfolio', icon: FolderHeart, badge: `${customQuestionsCount} custom` },
     { id: 'learning-goals', label: 'Learning Goals', icon: BookOpen },
     { id: 'practice', label: 'Practice History', icon: User },
     { id: 'bookmarks', label: 'Bookmarks', icon: Bookmark },
-    { id: 'mistakes', label: 'Mistakes', icon: AlertCircle },
-    { id: 'progress', label: 'Progress', icon: TrendingUp },
+    { id: 'mistakes', label: 'Mistakes Review', icon: AlertCircle },
+    { id: 'progress', label: 'Progress & Mastery', icon: TrendingUp },
     { id: 'settings', label: 'Settings', icon: Settings },
     { id: 'safety', label: 'Safety & Educational Use', icon: Shield },
     { id: 'help', label: 'Help & Support', icon: HelpCircle },
@@ -51,7 +53,14 @@ export default function ProfileView({
                 <Icon className="w-4 h-4 text-[#666666]" />
                 <span className="text-sm font-medium text-[#111111]">{row.label}</span>
               </div>
-              <ChevronRight className="w-4 h-4 text-[#888888]" />
+              <div className="flex items-center gap-2">
+                {row.badge && (
+                  <span className="text-[10px] font-bold px-2 py-0.5 bg-[#F0F0F0] text-[#444444] rounded-full">
+                    {row.badge}
+                  </span>
+                )}
+                <ChevronRight className="w-4 h-4 text-[#888888]" />
+              </div>
             </button>
           );
         })}
