@@ -14,6 +14,8 @@
     "open:ios": "npx --prefix client cap open ios"
   },
   "dependencies": {
-    "@supabase/server": "^1.6.0"
+    "@supabase/server": "^1.6.0",
+    "@supabase/ssr": "^0.12.7",
+    "@supabase/supabase-js": "^2.116.0"
   }
 }
