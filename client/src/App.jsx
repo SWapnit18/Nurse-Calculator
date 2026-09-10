@@ -19,9 +19,9 @@ import AiTutorView from './components/AiTutorView';
 import CalculationEngine from './calculator/engine';
 
 export default function App() {
-  // Navigation: 'home' | 'learn' | 'lesson' | 'practice' | 'calculator' | 'mistakes' | 'progress' | 'profile' | 'settings' | 'ai-tutor'
+  // Navigation tabs:
+  // 'home' | 'learn' | 'lesson' | 'practice' | 'calculator' | 'mistakes' | 'progress' | 'profile' | 'settings' | 'ai-tutor' | 'learning-goals' | 'bookmarks' | 'safety' | 'help'
   const [activeTab, setActiveTab] = useState('home');
-
   const [previousTab, setPreviousTab] = useState('home');
   
   // Modals
@@ -156,6 +156,8 @@ export default function App() {
   const handleBack = () => {
     if (activeTab === 'lesson') {
       setActiveTab('learn');
+    } else if (['learning-goals', 'bookmarks', 'safety', 'help', 'settings'].includes(activeTab)) {
+      setActiveTab('profile');
     } else if (activeTab === 'practice' && previousTab) {
       setActiveTab(previousTab);
     } else {
@@ -232,7 +234,7 @@ export default function App() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           questionId: currentQuestion.questionId,
-          prompt: currentQuestion.scenario || currentQuestion.questionText,
+          prompt: currentQuestion.scenario || currentQuestion.prompt || currentQuestion.questionText,
           studentAnswer: userAnswer,
           correctAnswer: currentQuestion.correctAnswer,
           unit: currentQuestion.unit,
@@ -271,9 +273,13 @@ export default function App() {
           activeTab === 'progress' ? 'Progress' :
           activeTab === 'profile' ? 'Profile' :
           activeTab === 'settings' ? 'Settings' :
+          activeTab === 'learning-goals' ? 'Learning Goals' :
+          activeTab === 'bookmarks' ? 'Bookmarks' :
+          activeTab === 'safety' ? 'Safety Standards' :
+          activeTab === 'help' ? 'Help & Support' :
           activeTab === 'ai-tutor' ? 'AI Tutor' : ''
         }
-        showBack={['lesson', 'practice', 'mistakes', 'progress', 'settings', 'ai-tutor'].includes(activeTab)}
+        showBack={['lesson', 'practice', 'mistakes', 'progress', 'settings', 'ai-tutor', 'learning-goals', 'bookmarks', 'safety', 'help'].includes(activeTab)}
         onBack={handleBack}
         onOpenMenu={() => setIsMenuOpen(true)}
         onOpenProfile={() => handleNavigate('profile')}
@@ -377,12 +383,98 @@ export default function App() {
             onStartPractice={() => handleNavigate('practice')}
           />
         )}
-      </main>
 
+        {/* Learning Goals View */}
+        {activeTab === 'learning-goals' && (
+          <div className="space-y-4 pb-8 animate-fade-in">
+            <h1 className="text-2xl font-bold tracking-tight text-[#111111]">Learning Goals</h1>
+            <div className="nc-card p-4 space-y-3">
+              <h2 className="font-semibold text-sm text-[#111111]">NCLEX Calculation Target</h2>
+              <p className="text-xs text-[#666666] leading-relaxed">
+                Achieve 90%+ calculation accuracy across all 7 clinical areas with zero 10-fold decimal errors.
+              </p>
+              <div className="w-full h-2 bg-[#EAEAEA] rounded-full overflow-hidden">
+                <div className="h-full bg-[#111111] rounded-full" style={{ width: '82%' }} />
+              </div>
+              <span className="text-xs font-bold text-[#111111]">82% Completed (103/126 solved)</span>
+            </div>
+          </div>
+        )}
+
+        {/* Bookmarks View */}
+        {activeTab === 'bookmarks' && (
+          <div className="space-y-4 pb-8 animate-fade-in">
+            <h1 className="text-2xl font-bold tracking-tight text-[#111111]">Bookmarked Questions</h1>
+            {bookmarks.size === 0 ? (
+              <div className="nc-card p-8 text-center space-y-2">
+                <p className="text-sm font-semibold text-[#111111]">No Bookmarks Yet</p>
+                <p className="text-xs text-[#666666]">Bookmark questions during practice to review them here anytime.</p>
+                <button
+                  onClick={() => handleNavigate('practice')}
+                  className="nc-btn-primary px-4 py-2 text-xs mx-auto mt-2"
+                >
+                  Go to Practice
+                </button>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {questions
+                  .filter(q => bookmarks.has(q.questionId))
+                  .map((q, idx) => (
+                    <div key={idx} className="nc-card p-4 space-y-2">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-[#888888] bg-[#F7F7F7] px-2 py-0.5 rounded border border-[#E5E5E5]">
+                        {q.topicId}
+                      </span>
+                      <p className="text-sm font-medium text-[#111111]">{q.scenario || q.prompt}</p>
+                      <p className="text-xs text-emerald-700 font-semibold">Answer: {q.correctAnswer} {q.unit}</p>
+                    </div>
+                  ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Safety Standards View */}
+        {activeTab === 'safety' && (
+          <div className="space-y-4 pb-8 animate-fade-in">
+            <h1 className="text-2xl font-bold tracking-tight text-[#111111]">Safety & Educational Standards</h1>
+            <div className="nc-card p-4 space-y-3 bg-[#F8FAFC] border border-[#E2E8F0]">
+              <h2 className="font-bold text-sm text-[#0F172A]">WHO & ISMP Guidelines</h2>
+              <ul className="text-xs text-[#475569] space-y-2 list-disc pl-4 leading-relaxed">
+                <li><strong>Leading zero enforced:</strong> Always write 0.5 mL, never .5 mL.</li>
+                <li><strong>Trailing zero prohibited:</strong> Always write 5 mg, never 5.0 mg.</li>
+                <li><strong>Gravity Drips:</strong> Rounded to nearest integer drop (gtt/min).</li>
+                <li><strong>Electronic Infusion Pumps:</strong> Decimals supported (mL/hr).</li>
+              </ul>
+            </div>
+          </div>
+        )}
+
+        {/* Help & Support View */}
+        {activeTab === 'help' && (
+          <div className="space-y-4 pb-8 animate-fade-in">
+            <h1 className="text-2xl font-bold tracking-tight text-[#111111]">Help & Support</h1>
+            <div className="nc-card p-4 space-y-3">
+              <h2 className="font-bold text-sm text-[#111111]">NurseCalc Education Support</h2>
+              <p className="text-xs text-[#666666] leading-relaxed">
+                Need help with formulas or clinical calculation questions? Reach our team or review our accredited NCLEX guides.
+              </p>
+              <div className="pt-2">
+                <a
+                  href="mailto:support@nursecalc.app"
+                  className="nc-btn-primary w-full flex items-center justify-center gap-2 text-xs"
+                >
+                  Contact Support
+                </a>
+              </div>
+            </div>
+          </div>
+        )}
+      </main>
 
       {/* Persistent Bottom Mobile Navigation */}
       <BottomNav
-        activeTab={['lesson', 'mistakes', 'progress', 'settings'].includes(activeTab) ? '' : activeTab}
+        activeTab={['lesson', 'mistakes', 'progress', 'settings', 'learning-goals', 'bookmarks', 'safety', 'help'].includes(activeTab) ? '' : activeTab}
         setActiveTab={handleNavigate}
       />
 
