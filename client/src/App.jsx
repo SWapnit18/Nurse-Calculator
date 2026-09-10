@@ -317,6 +317,7 @@ export default function App() {
           <LessonView
             lesson={selectedTopic}
             onBack={() => handleNavigate('learn')}
+            onSelectLesson={(newTopicId) => setSelectedTopic(newTopicId)}
             onStartPractice={() => handleNavigate('practice')}
           />
         )}

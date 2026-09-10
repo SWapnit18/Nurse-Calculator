@@ -1,8 +1,20 @@
 import React from 'react';
-import { ArrowLeft, BookOpen, CheckCircle2, AlertTriangle, Lightbulb, ArrowRight, ShieldCheck } from 'lucide-react';
+import { ArrowLeft, BookOpen, CheckCircle2, AlertTriangle, Lightbulb, ArrowRight, ChevronRight, ChevronLeft } from 'lucide-react';
+
+const TOPIC_KEYS = [
+  'medication-math-basics',
+  'unit-conversions',
+  'tablet-calculations',
+  'liquid-calculations',
+  'iv-flow-mathematics',
+  'weight-based-practice',
+  'reconstitution-exercises',
+  'advanced-calculations'
+];
 
 const TOPIC_LESSONS = {
   'medication-math-basics': {
+    id: 'medication-math-basics',
     title: 'Medication Math Basics',
     objective: 'Master clinical ratios, dimensional analysis, and ISMP decimal safety rules.',
     concept: 'Clinical calculations require strict adherence to standard units, factor cancellation, and zero-slip decimal formatting. A misplaced decimal can cause a 10-fold or 100-fold overdose.',
@@ -16,6 +28,7 @@ const TOPIC_LESSONS = {
     keyPoint: 'Always enforce leading zeros (0.5 mg) and prohibit trailing zeros (5 mg, never 5.0 mg).'
   },
   'unit-conversions': {
+    id: 'unit-conversions',
     title: 'Clinical Unit Conversions',
     objective: 'Convert metric doses accurately using the factor-label method.',
     concept: 'In healthcare, medication orders are frequently written in milligrams (mg) while stock packages may be labelled in grams (g) or micrograms (mcg). 1 gram (g) is equal to 1,000 milligrams (mg).',
@@ -29,6 +42,7 @@ const TOPIC_LESSONS = {
     keyPoint: 'Remember: 1 g = 1,000 mg = 1,000,000 mcg. Large unit to small unit = multiply.'
   },
   'tablet-calculations': {
+    id: 'tablet-calculations',
     title: 'Oral & Tablet Calculations',
     objective: 'Calculate whole and partial tablet administration using the Desired over Have formula.',
     concept: 'Oral solid calculations determine the exact number of tablets or capsules to deliver prescribed therapeutic doses safely.',
@@ -42,6 +56,7 @@ const TOPIC_LESSONS = {
     keyPoint: 'Only tablets with an engineered manufacturer score line may be divided in half.'
   },
   'liquid-calculations': {
+    id: 'liquid-calculations',
     title: 'Liquid Injections & Syringes',
     objective: 'Calculate parenteral injection volumes and calibrate visual syringe barrel readings.',
     concept: 'Liquid calculations calculate volume in milliliters (mL) based on concentration per mL (D ÷ H × V).',
@@ -55,6 +70,7 @@ const TOPIC_LESSONS = {
     keyPoint: 'Never administer more than 3 mL in a single adult IM site; deltoid maximum is 1 mL.'
   },
   'iv-flow-mathematics': {
+    id: 'iv-flow-mathematics',
     title: 'IV Flow & Infusion Mathematics',
     objective: 'Calculate electronic volumetric pump rates (mL/hr) and gravity drop rates (gtt/min).',
     concept: 'Infusion rate formulas ensure continuous intravenous hydration, electrolyte delivery, and critical care drug stability.',
@@ -68,6 +84,7 @@ const TOPIC_LESSONS = {
     keyPoint: 'Gravity drip rates must be whole numbers (gtt/min); electronic pumps support decimals (mL/hr).'
   },
   'weight-based-practice': {
+    id: 'weight-based-practice',
     title: 'Weight-Based Calculations',
     objective: 'Calculate mg/kg/dose and pediatric safe range dose ceilings.',
     concept: 'Pediatric, chemotherapy, and ICU dosing is calibrated directly to patient mass in kilograms to avoid acute toxicity.',
@@ -81,6 +98,7 @@ const TOPIC_LESSONS = {
     keyPoint: 'Always verify weight units on the scale and double check pediatric safe ranges.'
   },
   'reconstitution-exercises': {
+    id: 'reconstitution-exercises',
     title: 'Reconstitution Exercises',
     objective: 'Reconstitute lyophilized powder vials with diluent and determine final concentration.',
     concept: 'Powdered medications lose potency in solution and must be reconstituted with sterile water or bacteriostatic saline before injection.',
@@ -94,6 +112,7 @@ const TOPIC_LESSONS = {
     keyPoint: 'Inspect vial label for expiration window after reconstitution and refrigeration requirements.'
   },
   'advanced-calculations': {
+    id: 'advanced-calculations',
     title: 'Advanced Clinical Titrations',
     objective: 'Calculate high-alert ICU inotropic and vasopressor titration rates (mcg/kg/min).',
     concept: 'Vasoactive medications (Dopamine, Norepinephrine, Nitroglycerin) require continuous hemodynamic rate calibration.',
@@ -111,24 +130,57 @@ const TOPIC_LESSONS = {
 export default function LessonView({ 
   lesson, 
   onBack, 
+  onSelectLesson,
   onStartPractice 
 }) {
   const lessonKey = typeof lesson === 'string' ? lesson : lesson?.id;
-  const currentLesson = (lessonKey && TOPIC_LESSONS[lessonKey]) || (typeof lesson === 'object' && lesson?.title ? lesson : TOPIC_LESSONS['medication-math-basics']);
+  const currentKey = (lessonKey && TOPIC_LESSONS[lessonKey]) ? lessonKey : 'medication-math-basics';
+  const currentLesson = TOPIC_LESSONS[currentKey];
+  
+  const currentIndex = TOPIC_KEYS.indexOf(currentKey);
+  const prevKey = currentIndex > 0 ? TOPIC_KEYS[currentIndex - 1] : null;
+  const nextKey = currentIndex < TOPIC_KEYS.length - 1 ? TOPIC_KEYS[currentIndex + 1] : null;
 
   return (
     <div className="space-y-5 pb-8 animate-fade-in">
-      <div className="flex items-center gap-2">
-        <button 
-          onClick={onBack}
-          className="w-10 h-10 -ml-2 rounded-xl flex items-center justify-center text-[#111111] hover:bg-[#F7F7F7] active:bg-[#EAEAEA] transition-all"
-          aria-label="Back to lessons"
-        >
-          <ArrowLeft className="w-5 h-5" />
-        </button>
-        <div>
-          <span className="text-xs font-medium uppercase tracking-wider text-[#888888]">Lesson</span>
-          <h1 className="text-lg font-bold text-[#111111] leading-tight">{currentLesson.title}</h1>
+      {/* Header with Navigation */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <button 
+            onClick={onBack}
+            className="w-10 h-10 -ml-2 rounded-xl flex items-center justify-center text-[#111111] hover:bg-[#F7F7F7] active:bg-[#EAEAEA] transition-all"
+            aria-label="Back to lessons"
+          >
+            <ArrowLeft className="w-5 h-5" />
+          </button>
+          <div>
+            <span className="text-xs font-medium uppercase tracking-wider text-[#888888]">
+              Lesson {currentIndex + 1} of {TOPIC_KEYS.length}
+            </span>
+            <h1 className="text-lg font-bold text-[#111111] leading-tight">{currentLesson.title}</h1>
+          </div>
+        </div>
+
+        {/* Quick Prev / Next Arrows */}
+        <div className="flex items-center gap-1">
+          <button
+            onClick={() => prevKey && onSelectLesson && onSelectLesson(prevKey)}
+            disabled={!prevKey}
+            className="w-8 h-8 rounded-lg flex items-center justify-center text-[#111111] hover:bg-[#F7F7F7] disabled:opacity-30 transition-all"
+            title="Previous Lesson"
+            aria-label="Previous Lesson"
+          >
+            <ChevronLeft className="w-4 h-4" />
+          </button>
+          <button
+            onClick={() => nextKey && onSelectLesson && onSelectLesson(nextKey)}
+            disabled={!nextKey}
+            className="w-8 h-8 rounded-lg flex items-center justify-center text-[#111111] hover:bg-[#F7F7F7] disabled:opacity-30 transition-all"
+            title="Next Lesson"
+            aria-label="Next Lesson"
+          >
+            <ChevronRight className="w-4 h-4" />
+          </button>
         </div>
       </div>
 
@@ -192,8 +244,8 @@ export default function LessonView({
         <p className="text-xs text-[#444444] font-medium leading-relaxed">{currentLesson.keyPoint}</p>
       </div>
 
-      {/* Action */}
-      <div className="pt-2">
+      {/* Next Lesson & Practice Action Buttons */}
+      <div className="space-y-2.5 pt-2">
         <button
           onClick={onStartPractice}
           className="nc-btn-primary w-full flex items-center justify-center gap-2"
@@ -201,6 +253,16 @@ export default function LessonView({
           <span>Practice These Questions</span>
           <ArrowRight className="w-4 h-4" />
         </button>
+
+        {nextKey && (
+          <button
+            onClick={() => onSelectLesson && onSelectLesson(nextKey)}
+            className="nc-btn-secondary w-full flex items-center justify-center gap-2 text-xs font-semibold py-3"
+          >
+            <span>Next Lesson: {TOPIC_LESSONS[nextKey]?.title}</span>
+            <ChevronRight className="w-4 h-4" />
+          </button>
+        )}
       </div>
     </div>
   );
