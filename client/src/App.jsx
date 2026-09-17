@@ -17,6 +17,7 @@ import SettingsView from './components/SettingsView';
 import AiTutorView from './components/AiTutorView';
 import QuestionPortfolioView from './components/QuestionPortfolioView';
 import { INITIAL_QUESTION_BANK } from './data/fallbackQuestions';
+import { Bookmark, ArrowRight, Trash2, BookOpen } from 'lucide-react';
 
 import CalculationEngine from './calculator/engine';
 
@@ -47,6 +48,33 @@ export default function App() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isAiTutorOpen, setIsAiTutorOpen] = useState(false);
   const [isSubscriptionOpen, setIsSubscriptionOpen] = useState(false);
+
+  // Dark Mode Theme Management
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    try {
+      const saved = localStorage.getItem('nursecalc_theme');
+      if (saved) return saved === 'dark';
+      return false;
+    } catch {
+      return false;
+    }
+  });
+
+  useEffect(() => {
+    if (isDarkMode) {
+      document.documentElement.classList.add('dark');
+      document.body.classList.add('dark');
+      localStorage.setItem('nursecalc_theme', 'dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+      document.body.classList.remove('dark');
+      localStorage.setItem('nursecalc_theme', 'light');
+    }
+  }, [isDarkMode]);
+
+  const handleToggleDarkMode = () => {
+    setIsDarkMode((prev) => !prev);
+  };
 
   // User State
   const [user, setUser] = useState({
@@ -83,7 +111,17 @@ export default function App() {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isChecking, setIsChecking] = useState(false);
   const [practiceResult, setPracticeResult] = useState(null);
-  const [bookmarks, setBookmarks] = useState(new Set());
+  
+  // Persistent Bookmarks State
+  const [bookmarks, setBookmarks] = useState(() => {
+    try {
+      const saved = localStorage.getItem('nursecalc_bookmarks');
+      return saved ? new Set(JSON.parse(saved)) : new Set();
+    } catch {
+      return new Set();
+    }
+  });
+
   const [aiExplanationText, setAiExplanationText] = useState(null);
   const [isAiLoading, setIsAiLoading] = useState(false);
 
@@ -128,7 +166,10 @@ export default function App() {
             accuracy: res.data.overallAccuracy ?? prev.accuracy,
             totalQuestions: res.data.totalAttempts ?? prev.totalQuestions,
             correctAnswers: res.data.correctAttempts ?? prev.correctAnswers,
-            streakDays: res.data.streak ?? prev.streakDays
+            incorrectAnswers: res.data.incorrectAttempts ?? prev.incorrectAnswers,
+            streakDays: res.data.streak ?? prev.streakDays,
+            weeklyActivity: res.data.weeklyActivity,
+            topicStats: res.data.topicStats
           }));
         }
       })
@@ -150,17 +191,32 @@ export default function App() {
   const currentQuestion = activeQuestions[currentQIndex] || null;
   const isCurrentBookmarked = currentQuestion ? bookmarks.has(currentQuestion.questionId) : false;
 
-  const handleToggleBookmark = () => {
-    if (!currentQuestion) return;
+  const handleToggleBookmark = (targetQId) => {
+    const qId = targetQId || currentQuestion?.questionId;
+    if (!qId) return;
+    
     setBookmarks(prev => {
       const next = new Set(prev);
-      if (next.has(currentQuestion.questionId)) {
-        next.delete(currentQuestion.questionId);
+      if (next.has(qId)) {
+        next.delete(qId);
       } else {
-        next.add(currentQuestion.questionId);
+        next.add(qId);
       }
+      try {
+        localStorage.setItem('nursecalc_bookmarks', JSON.stringify(Array.from(next)));
+      } catch {}
       return next;
     });
+
+    // Sync with backend API in background
+    fetch('http://localhost:5000/api/bookmarks/toggle', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        questionId: qId,
+        userId: 'demo_student'
+      })
+    }).catch(() => {});
   };
 
   const handleNavigate = (tabId) => {
@@ -178,6 +234,20 @@ export default function App() {
     setPracticeResult(null);
     setAiExplanationText(null);
     handleNavigate('practice');
+  };
+
+  const handlePracticeSingleQuestion = (qId) => {
+    const combined = [...customQuestions, ...allQuestions];
+    const targetIdx = combined.findIndex(q => q.questionId === qId);
+    if (targetIdx !== -1) {
+      setPracticeTopicFilter(null);
+      setCurrentQIndex(targetIdx);
+      setUserAnswer('');
+      setIsSubmitted(false);
+      setPracticeResult(null);
+      setAiExplanationText(null);
+      handleNavigate('practice');
+    }
   };
 
   const handleBack = () => {
@@ -223,6 +293,36 @@ export default function App() {
           explanation: res.aiExplanation || currentQuestion.explanation,
           mistakeType: res.mistakeType
         });
+
+        // Real-time immediate stats update
+        setStats(prev => {
+          const newTotal = (prev.totalQuestions || 0) + 1;
+          const newCorrect = isMatch ? (prev.correctAnswers || 0) + 1 : (prev.correctAnswers || 0);
+          const newAccuracy = Math.round((newCorrect / newTotal) * 1000) / 10;
+          return {
+            ...prev,
+            totalQuestions: newTotal,
+            correctAnswers: newCorrect,
+            incorrectAnswers: newTotal - newCorrect,
+            accuracy: newAccuracy
+          };
+        });
+
+        // Re-fetch backend progress to keep MongoDB in exact sync
+        fetch('http://localhost:5000/api/progress/demo_student')
+          .then(r => r.json())
+          .then(pRes => {
+            if (pRes.data) {
+              setStats(prev => ({
+                ...prev,
+                accuracy: pRes.data.overallAccuracy ?? prev.accuracy,
+                totalQuestions: pRes.data.totalAttempts ?? prev.totalQuestions,
+                correctAnswers: pRes.data.correctAttempts ?? prev.correctAnswers,
+                incorrectAnswers: (pRes.data.totalAttempts ?? prev.totalQuestions) - (pRes.data.correctAttempts ?? prev.correctAnswers)
+              }));
+            }
+          })
+          .catch(() => {});
       })
       .catch(() => {
         // Deterministic client fallback check
@@ -235,6 +335,20 @@ export default function App() {
           steps: currentQuestion.steps,
           explanation: currentQuestion.explanation || 'Apply standard clinical math calculation.',
           mistakeType: isMatch ? null : 'CALCULATION_ERROR'
+        });
+
+        // Real-time immediate stats update
+        setStats(prev => {
+          const newTotal = (prev.totalQuestions || 0) + 1;
+          const newCorrect = isMatch ? (prev.correctAnswers || 0) + 1 : (prev.correctAnswers || 0);
+          const newAccuracy = Math.round((newCorrect / newTotal) * 1000) / 10;
+          return {
+            ...prev,
+            totalQuestions: newTotal,
+            correctAnswers: newCorrect,
+            incorrectAnswers: newTotal - newCorrect,
+            accuracy: newAccuracy
+          };
         });
       });
   };
@@ -286,8 +400,16 @@ export default function App() {
     }
   };
 
+  const allCombinedQuestions = useMemo(() => {
+    return [...customQuestions, ...allQuestions];
+  }, [customQuestions, allQuestions]);
+
+  const bookmarkedQuestionsList = useMemo(() => {
+    return allCombinedQuestions.filter(q => bookmarks.has(q.questionId));
+  }, [allCombinedQuestions, bookmarks]);
+
   return (
-    <div className="min-h-screen bg-white text-[#111111] flex flex-col font-sans antialiased selection:bg-[#111111] selection:text-white">
+    <div className="min-h-screen bg-[#F8FAFC] dark:bg-[#0B0F19] text-slate-900 dark:text-slate-100 flex flex-col font-sans antialiased selection:bg-slate-900 selection:text-white dark:selection:bg-white dark:selection:text-slate-900 transition-colors duration-150">
       {/* Top Mobile Header */}
       <MobileHeader
         title={
@@ -313,8 +435,10 @@ export default function App() {
         onOpenProfile={() => handleNavigate('profile')}
         showBookmark={activeTab === 'practice'}
         isBookmarked={isCurrentBookmarked}
-        onToggleBookmark={handleToggleBookmark}
+        onToggleBookmark={() => handleToggleBookmark()}
         user={user}
+        isDarkMode={isDarkMode}
+        onToggleDarkMode={handleToggleDarkMode}
       />
 
       {/* Main Content View Container */}
@@ -370,7 +494,7 @@ export default function App() {
             onPreviousQuestion={() => setCurrentQIndex(prev => Math.max(0, prev - 1))}
             onOpenAiTutor={handleOpenAiTutor}
             isBookmarked={isCurrentBookmarked}
-            onToggleBookmark={handleToggleBookmark}
+            onToggleBookmark={() => handleToggleBookmark()}
           />
         )}
 
@@ -414,6 +538,8 @@ export default function App() {
         {activeTab === 'settings' && (
           <SettingsView
             user={user}
+            isDarkMode={isDarkMode}
+            onToggleDarkMode={handleToggleDarkMode}
             onNavigate={handleNavigate}
             onLogout={() => {
               localStorage.removeItem('nursecalc_token');
@@ -435,16 +561,16 @@ export default function App() {
         {/* Learning Goals View */}
         {activeTab === 'learning-goals' && (
           <div className="space-y-4 pb-8 animate-fade-in">
-            <h1 className="text-2xl font-bold tracking-tight text-[#111111]">Learning Goals</h1>
-            <div className="nc-card p-4 space-y-3">
-              <h2 className="font-semibold text-sm text-[#111111]">NCLEX Calculation Target</h2>
-              <p className="text-xs text-[#666666] leading-relaxed">
+            <h1 className="text-xl font-extrabold tracking-tight text-slate-900 dark:text-white">Learning Goals</h1>
+            <div className="nc-card p-4 space-y-3 bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-800 shadow-xs">
+              <h2 className="font-bold text-sm text-slate-900 dark:text-white">NCLEX Calculation Target</h2>
+              <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
                 Achieve 90%+ calculation accuracy across all 7 clinical areas with zero 10-fold decimal errors.
               </p>
-              <div className="w-full h-2 bg-[#EAEAEA] rounded-full overflow-hidden">
-                <div className="h-full bg-[#111111] rounded-full" style={{ width: '82%' }} />
+              <div className="w-full h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                <div className="h-full bg-slate-900 dark:bg-white rounded-full" style={{ width: '82%' }} />
               </div>
-              <span className="text-xs font-bold text-[#111111]">82% Completed (103/126 solved)</span>
+              <span className="text-xs font-bold text-slate-900 dark:text-white">82% Completed (103/126 solved)</span>
             </div>
           </div>
         )}
@@ -452,31 +578,87 @@ export default function App() {
         {/* Bookmarks View */}
         {activeTab === 'bookmarks' && (
           <div className="space-y-4 pb-8 animate-fade-in">
-            <h1 className="text-2xl font-bold tracking-tight text-[#111111]">Bookmarked Questions</h1>
-            {bookmarks.size === 0 ? (
-              <div className="nc-card p-8 text-center space-y-2">
-                <p className="text-sm font-semibold text-[#111111]">No Bookmarks Yet</p>
-                <p className="text-xs text-[#666666]">Bookmark questions during practice to review them here anytime.</p>
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-xl font-extrabold tracking-tight text-slate-900 dark:text-white">Saved Bookmarks</h1>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                  {bookmarkedQuestionsList.length} questions saved for clinical review
+                </p>
+              </div>
+            </div>
+
+            {bookmarkedQuestionsList.length === 0 ? (
+              <div className="nc-card p-8 text-center space-y-3 bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-800 shadow-xs">
+                <div className="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-400 flex items-center justify-center mx-auto">
+                  <Bookmark className="w-6 h-6" />
+                </div>
+                <div>
+                  <p className="text-sm font-bold text-slate-900 dark:text-white">No saved bookmarks yet</p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-xs mx-auto leading-relaxed">
+                    Tap the bookmark icon on any practice question to save it here for fast review.
+                  </p>
+                </div>
                 <button
-                  onClick={() => handleNavigate('practice')}
-                  className="nc-btn-primary px-4 py-2 text-xs mx-auto mt-2"
+                  onClick={() => handleStartTopicPractice(null)}
+                  className="nc-btn-secondary text-xs font-bold inline-flex items-center gap-1.5 mx-auto cursor-pointer"
                 >
-                  Go to Practice
+                  <BookOpen className="w-4 h-4" />
+                  <span>Start Practice Session</span>
                 </button>
               </div>
             ) : (
-              <div className="space-y-2">
-                {allQuestions
-                  .filter(q => bookmarks.has(q.questionId))
-                  .map((q, idx) => (
-                    <div key={idx} className="nc-card p-4 space-y-2">
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-[#888888] bg-[#F7F7F7] px-2 py-0.5 rounded border border-[#E5E5E5]">
-                        {q.topicId}
-                      </span>
-                      <p className="text-sm font-medium text-[#111111]">{q.scenario || q.prompt}</p>
-                      <p className="text-xs text-emerald-700 font-semibold">Answer: {q.correctAnswer} {q.unit}</p>
+              <div className="space-y-3">
+                {bookmarkedQuestionsList.map((q) => {
+                  const scenarioText = q.scenario || q.prompt || q.questionText || q.text || 'Clinical calculation problem';
+                  const topicLabel = q.topicId?.replace(/_/g, ' ') || 'Clinical Math';
+                  return (
+                    <div 
+                      key={q.questionId}
+                      className="nc-card p-4 space-y-3 bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-800 shadow-xs"
+                    >
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 bg-slate-100 dark:bg-slate-800 rounded-md text-slate-700 dark:text-slate-300">
+                          {topicLabel}
+                        </span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400">
+                            Answer: {q.correctAnswer} {q.unit || ''}
+                          </span>
+                          <button
+                            onClick={() => handleToggleBookmark(q.questionId)}
+                            className="p-1.5 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors cursor-pointer"
+                            title="Remove from bookmarks"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+
+                      {q.title && (
+                        <h3 className="font-bold text-sm text-slate-900 dark:text-white">
+                          {q.title}
+                        </h3>
+                      )}
+
+                      <p className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed font-medium">
+                        {scenarioText}
+                      </p>
+
+                      <div className="pt-1 flex items-center justify-between border-t border-slate-100 dark:border-slate-800">
+                        <span className="text-[11px] text-slate-400 font-mono">
+                          ID: {q.questionId}
+                        </span>
+                        <button
+                          onClick={() => handlePracticeSingleQuestion(q.questionId)}
+                          className="text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1 cursor-pointer"
+                        >
+                          <span>Practice This Question</span>
+                          <ArrowRight className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
                     </div>
-                  ))}
+                  );
+                })}
               </div>
             )}
           </div>
@@ -485,15 +667,20 @@ export default function App() {
         {/* Safety Standards View */}
         {activeTab === 'safety' && (
           <div className="space-y-4 pb-8 animate-fade-in">
-            <h1 className="text-2xl font-bold tracking-tight text-[#111111]">Safety & Educational Standards</h1>
-            <div className="nc-card p-4 space-y-3 bg-[#F8FAFC] border border-[#E2E8F0]">
-              <h2 className="font-bold text-sm text-[#0F172A]">WHO & ISMP Guidelines</h2>
-              <ul className="text-xs text-[#475569] space-y-2 list-disc pl-4 leading-relaxed">
-                <li><strong>Leading zero enforced:</strong> Always write 0.5 mL, never .5 mL.</li>
-                <li><strong>Trailing zero prohibited:</strong> Always write 5 mg, never 5.0 mg.</li>
-                <li><strong>Gravity Drips:</strong> Rounded to nearest integer drop (gtt/min).</li>
-                <li><strong>Electronic Infusion Pumps:</strong> Decimals supported (mL/hr).</li>
-              </ul>
+            <h1 className="text-xl font-extrabold tracking-tight text-slate-900 dark:text-white">Safety & ISMP Standards</h1>
+            <div className="nc-card p-4 space-y-3 bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-800 shadow-xs">
+              <h2 className="font-bold text-sm text-slate-900 dark:text-white">1. Leading Zero Rule</h2>
+              <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                Always write a zero before a decimal point for numbers less than 1 (e.g. write <strong>0.5 mg</strong>, NEVER <strong>.5 mg</strong>). Naked decimals can cause 10-fold overdoses.
+              </p>
+              <h2 className="font-bold text-sm text-slate-900 dark:text-white pt-2">2. Trailing Zero Prohibition</h2>
+              <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                Never write a decimal point or a following zero after a whole number (e.g. write <strong>5 mg</strong>, NEVER <strong>5.0 mg</strong>).
+              </p>
+              <h2 className="font-bold text-sm text-slate-900 dark:text-white pt-2">3. Drop Factor Gravity Rounding</h2>
+              <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                Gravity drips (gtt/min) must be rounded to the nearest integer drop because mechanical drip chambers cannot administer partial drops. Smart infusion pumps (mL/hr) accept tenths of a mL.
+              </p>
             </div>
           </div>
         )}
@@ -501,32 +688,33 @@ export default function App() {
         {/* Help & Support View */}
         {activeTab === 'help' && (
           <div className="space-y-4 pb-8 animate-fade-in">
-            <h1 className="text-2xl font-bold tracking-tight text-[#111111]">Help & Support</h1>
-            <div className="nc-card p-4 space-y-3">
-              <h2 className="font-bold text-sm text-[#111111]">NurseCalc Education Support</h2>
-              <p className="text-xs text-[#666666] leading-relaxed">
-                Need help with formulas or clinical calculation questions? Reach our team or review our accredited NCLEX guides.
-              </p>
-              <div className="pt-2">
-                <a
-                  href="mailto:support@nursecalc.app"
-                  className="nc-btn-primary w-full flex items-center justify-center gap-2 text-xs"
-                >
-                  Contact Support
-                </a>
-              </div>
+            <h1 className="text-xl font-extrabold tracking-tight text-slate-900 dark:text-white">Help & Support</h1>
+            <div className="nc-card p-4 space-y-3 bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-800 shadow-xs">
+              <h2 className="font-bold text-sm text-slate-900 dark:text-white">Clinical Math Quick Cheatsheet</h2>
+              <ul className="text-xs text-slate-600 dark:text-slate-400 space-y-2 list-disc pl-4">
+                <li><strong>Desired / Have:</strong> Tablets = Desired ÷ Have</li>
+                <li><strong>Liquid Volume:</strong> mL = (Desired ÷ Have) × Volume</li>
+                <li><strong>Pump Rate:</strong> mL/hr = Total Volume (mL) ÷ Hours</li>
+                <li><strong>Drip Rate:</strong> gtt/min = (Volume × Drop Factor) ÷ Minutes</li>
+                <li><strong>Weight-Based:</strong> Total mg = Weight (kg) × Dose (mg/kg)</li>
+              </ul>
             </div>
           </div>
         )}
       </main>
 
-      {/* Persistent Bottom Mobile Navigation */}
+      {/* Bottom Fixed Navigation */}
       <BottomNav
-        activeTab={['lesson', 'mistakes', 'progress', 'settings', 'learning-goals', 'bookmarks', 'safety', 'help'].includes(activeTab) ? '' : activeTab}
-        setActiveTab={handleNavigate}
+        activeTab={activeTab}
+        setActiveTab={(tab) => {
+          if (tab === 'practice') {
+            setPracticeTopicFilter(null);
+          }
+          handleNavigate(tab);
+        }}
       />
 
-      {/* Side Menu Drawer Modal */}
+      {/* Slide-out Menu Modal */}
       <SideMenuModal
         isOpen={isMenuOpen}
         onClose={() => setIsMenuOpen(false)}
@@ -538,7 +726,7 @@ export default function App() {
         }}
       />
 
-      {/* AI Concept Tutor Modal */}
+      {/* AI Concept Tutor Dialog Modal */}
       <AiTutorModal
         isOpen={isAiTutorOpen}
         onClose={() => setIsAiTutorOpen(false)}
@@ -550,7 +738,7 @@ export default function App() {
         isLoading={isAiLoading}
       />
 
-      {/* Subscription Billing Modal */}
+      {/* Subscription Info Modal */}
       <SubscriptionModal
         isOpen={isSubscriptionOpen}
         onClose={() => setIsSubscriptionOpen(false)}

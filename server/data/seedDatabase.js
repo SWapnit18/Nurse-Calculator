@@ -4,6 +4,12 @@
  * Does not duplicate records on re-run.
  */
 
+require('dotenv').config({ path: require('path').resolve(__dirname, '../.env') });
+const dns = require('dns');
+try {
+  dns.setServers(['8.8.8.8', '1.1.1.1']);
+} catch (e) {}
+
 const mongoose = require('mongoose');
 const { Topic, Lesson, Question, User } = require('../models');
 const { topicsData, lessonsData, questionsData } = require('./seedData');

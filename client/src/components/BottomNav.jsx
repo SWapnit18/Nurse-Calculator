@@ -12,7 +12,7 @@ export default function BottomNav({ activeTab, setActiveTab }) {
 
   return (
     <nav 
-      className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-[#E5E5E5] px-2 py-1.5 flex items-center justify-around shadow-[0_-2px_10px_rgba(0,0,0,0.02)] max-w-md mx-auto md:max-w-xl transition-colors"
+      className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-[#0B0F19]/95 backdrop-blur-md border-t border-slate-200 dark:border-slate-800 px-2 py-1.5 flex items-center justify-around shadow-[0_-2px_12px_rgba(0,0,0,0.03)] max-w-md mx-auto md:max-w-xl transition-colors"
       aria-label="Bottom Navigation"
     >
       {navItems.map((item) => {
@@ -23,15 +23,15 @@ export default function BottomNav({ activeTab, setActiveTab }) {
             key={item.id}
             id={`nav-${item.id}`}
             onClick={() => setActiveTab(item.id)}
-            className={`flex flex-col items-center justify-center min-w-[64px] min-h-[48px] py-1 px-2 rounded-xl transition-all ${
+            className={`flex flex-col items-center justify-center min-w-[62px] min-h-[48px] py-1 px-2.5 rounded-xl transition-all cursor-pointer ${
               isActive 
-                ? 'text-[#111111] font-semibold scale-105' 
-                : 'text-[#888888] hover:text-[#111111] hover:bg-[#F7F7F7]'
+                ? 'text-slate-900 dark:text-white font-bold scale-105 bg-slate-100 dark:bg-slate-800/80 shadow-xs' 
+                : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-850'
             }`}
             aria-label={item.label}
             aria-current={isActive ? 'page' : undefined}
           >
-            <Icon className={`w-5 h-5 mb-0.5 ${isActive ? 'stroke-[2.2]' : 'stroke-[1.6]'}`} />
+            <Icon className={`w-5 h-5 mb-0.5 ${isActive ? 'stroke-[2.4]' : 'stroke-[1.7]'}`} />
             <span className="text-[11px] tracking-tight">{item.label}</span>
           </button>
         );

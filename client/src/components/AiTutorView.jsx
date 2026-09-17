@@ -77,75 +77,72 @@ export default function AiTutorView({ onStartPractice }) {
     <div className="space-y-5 pb-8 animate-fade-in">
       <div>
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-xl bg-[#111111] text-white flex items-center justify-center">
+          <div className="w-8 h-8 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 flex items-center justify-center shadow-sm">
             <Sparkles className="w-4 h-4" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold tracking-tight text-[#111111]">AI Concept Tutor</h1>
-            <p className="text-xs text-[#666666]">Educational Concept Guide & Clinical Q&A</p>
+            <h1 className="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white">AI Concept Tutor</h1>
+            <p className="text-xs text-slate-500 dark:text-slate-400">Educational Concept Guide & Clinical Q&A</p>
           </div>
         </div>
       </div>
 
       {/* Safety Notice */}
-      <div className="p-3 bg-[#FAFAFA] rounded-xl border border-[#E5E5E5] flex items-start gap-2.5">
-        <ShieldAlert className="w-4 h-4 text-[#888888] flex-shrink-0 mt-0.5" />
-        <p className="text-[11px] text-[#666666] leading-tight">
+      <div className="p-3 bg-amber-50/50 dark:bg-amber-950/20 rounded-xl border border-amber-200/70 dark:border-amber-900/40 flex items-start gap-2.5">
+        <ShieldAlert className="w-4 h-4 text-amber-700 dark:text-amber-400 flex-shrink-0 mt-0.5" />
+        <p className="text-[11px] text-amber-900 dark:text-amber-200 leading-tight">
           Educational guidance only. AI explains mathematical and clinical concepts and does not calculate patient dosages or authorize medication administration.
         </p>
       </div>
 
       {/* Interactive Concept Inquiry Box */}
-      <div className="nc-card p-4 space-y-3">
-        <label className="block text-xs font-semibold uppercase tracking-wider text-[#666666]">
-          Ask a Nursing Math Concept
+      <div className="nc-card p-4 sm:p-5 space-y-3 bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-800 shadow-sm">
+        <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">
+          Ask a Clinical Calculation Question
         </label>
-        <form onSubmit={handleAsk} className="space-y-2">
+        
+        <form onSubmit={handleAsk} className="space-y-2.5">
           <div className="relative">
             <input
               type="text"
               value={customQuestion}
               onChange={(e) => setCustomQuestion(e.target.value)}
-              placeholder="e.g. How do I calculate drops per minute?"
-              className="nc-input pr-12 text-sm"
+              placeholder="e.g. How do I calculate drops per minute from mL/hr?"
+              className="nc-input pr-12 font-medium"
               disabled={isLoading}
             />
             <button
               type="submit"
               disabled={isLoading || !customQuestion.trim()}
-              className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-lg bg-[#111111] text-white flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed hover:bg-black active:scale-95 transition-all"
-              aria-label="Ask AI Tutor"
+              className="absolute right-2 top-1/2 -translate-y-1/2 p-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-lg hover:scale-105 active:scale-95 disabled:opacity-40 disabled:hover:scale-100 transition-all cursor-pointer"
             >
-              <Send className="w-3.5 h-3.5" />
+              <Send className="w-4 h-4" />
             </button>
           </div>
         </form>
 
-        {/* AI Answer Card */}
         {isLoading && (
           <div className="p-6 text-center space-y-2">
-            <div className="w-6 h-6 border-2 border-[#111111] border-t-transparent rounded-full animate-spin mx-auto" />
-            <p className="text-xs text-[#666666]">Formulating educational explanation...</p>
+            <div className="w-6 h-6 border-2 border-slate-900 dark:border-white border-t-transparent rounded-full animate-spin mx-auto" />
+            <p className="text-xs text-slate-500 dark:text-slate-400">Querying clinical tutor model...</p>
           </div>
         )}
 
         {aiResponse && (
-          <div className="p-4 bg-[#F7F7F7] rounded-xl border border-[#E5E5E5] space-y-2 animate-fade-in">
-            <div className="flex items-center gap-2 text-xs font-semibold text-[#111111] uppercase tracking-wider">
-              <Sparkles className="w-3.5 h-3.5 text-[#111111]" />
-              <span>AI Pedagogical Guidance</span>
+          <div className="p-4 bg-slate-50 dark:bg-slate-800/60 rounded-xl border border-slate-200 dark:border-slate-700 text-xs text-slate-800 dark:text-slate-200 leading-relaxed whitespace-pre-line font-medium animate-fade-in">
+            <div className="flex items-center gap-1.5 text-blue-600 dark:text-blue-400 font-bold mb-2">
+              <Sparkles className="w-3.5 h-3.5" />
+              <span>Tutor Guidance:</span>
             </div>
-            <p className="text-sm text-[#333333] leading-relaxed whitespace-pre-line">
-              {aiResponse}
-            </p>
+            {aiResponse}
           </div>
         )}
       </div>
 
-      {/* Core Nursing Math Concepts Breakdown */}
-      <div className="space-y-3">
-        <h2 className="text-xs font-semibold uppercase tracking-wider text-[#888888] px-1">
-          Essential Calculation Guides
+      {/* Core Topics Quick Browse */}
+      <div className="space-y-2.5">
+        <h2 className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 px-1">
+          High-Yield Clinical Concepts
         </h2>
 
         <div className="space-y-2.5">
@@ -153,35 +150,32 @@ export default function AiTutorView({ onStartPractice }) {
             <div
               key={idx}
               onClick={() => setSelectedConcept(concept)}
-              className={`nc-card p-4 cursor-pointer transition-all active:scale-[0.99] ${
-                selectedConcept.title === concept.title 
-                  ? 'border-[#111111] bg-[#FAFAFA]' 
-                  : 'hover:border-[#999999]'
+              className={`nc-card p-4 transition-all cursor-pointer border ${
+                selectedConcept?.title === concept.title
+                  ? 'border-slate-900 dark:border-white bg-slate-50 dark:bg-slate-800/60 shadow-md'
+                  : 'bg-white dark:bg-[#111827] border-slate-200 dark:border-slate-800 hover:border-slate-400'
               }`}
             >
-              <h3 className="font-bold text-sm text-[#111111]">{concept.title}</h3>
-              <p className="text-xs text-[#666666] mt-0.5">{concept.summary}</p>
+              <div className="flex items-center justify-between">
+                <h3 className="font-bold text-sm text-slate-900 dark:text-white">
+                  {concept.title}
+                </h3>
+                <span className="text-[10px] font-extrabold px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded">
+                  Concept
+                </span>
+              </div>
+              <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">
+                {concept.summary}
+              </p>
               
-              {selectedConcept.title === concept.title && (
-                <div className="mt-3 pt-3 border-t border-[#E5E5E5] text-xs text-[#333333] leading-relaxed animate-fade-in">
-                  <strong className="text-[#111111] block mb-1">Concept Rule:</strong>
+              {selectedConcept?.title === concept.title && (
+                <div className="mt-3 pt-3 border-t border-slate-200 dark:border-slate-700 text-xs text-slate-800 dark:text-slate-200 leading-relaxed font-medium bg-white dark:bg-[#111827] p-3 rounded-lg border">
                   {concept.explanation}
                 </div>
               )}
             </div>
           ))}
         </div>
-      </div>
-
-      {/* Practice CTA */}
-      <div className="pt-2">
-        <button
-          onClick={onStartPractice}
-          className="nc-btn-primary w-full flex items-center justify-center gap-2"
-        >
-          <span>Practice Calculations Now</span>
-          <ArrowRight className="w-4 h-4" />
-        </button>
       </div>
     </div>
   );

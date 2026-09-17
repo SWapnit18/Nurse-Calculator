@@ -1,16 +1,65 @@
 import React, { useState } from 'react';
 import { 
-  Calculator, RotateCcw, Copy, Check, ShieldAlert, Sparkles, HelpCircle 
+  Calculator, RotateCcw, Copy, Check, ShieldCheck,
+  Droplets, Clock, Scale, Pill, FlaskConical, ArrowLeftRight
 } from 'lucide-react';
 import CalculationEngine from '../calculator/engine';
 
 const CATEGORIES = [
-  { id: 'flow-rate', label: 'Flow Rate' },
-  { id: 'drip-rate', label: 'Drip Rate' },
-  { id: 'weight-based', label: 'Weight' },
-  { id: 'tablet', label: 'Tablet' },
-  { id: 'liquid', label: 'Liquid' },
-  { id: 'conversion', label: 'Conversion' },
+  { 
+    id: 'flow-rate', 
+    label: 'Flow Rate', 
+    unitBadge: 'mL/hr',
+    icon: Droplets,
+    title: 'Flow Rate', 
+    formula: 'Volume (mL) ÷ Hours',
+    desc: 'Volumetric infusion pump rate'
+  },
+  { 
+    id: 'drip-rate', 
+    label: 'Drip Rate', 
+    unitBadge: 'gtt/min',
+    icon: Clock,
+    title: 'Gravity Drip Rate', 
+    formula: '(Volume × Drop Factor) ÷ Minutes',
+    desc: 'Manual tubing drop rate'
+  },
+  { 
+    id: 'weight-based', 
+    label: 'Weight', 
+    unitBadge: 'mg/kg',
+    icon: Scale,
+    title: 'Weight-Based Dose', 
+    formula: 'Weight (kg) × Dose (mg/kg)',
+    desc: 'Dosage by body mass'
+  },
+  { 
+    id: 'tablet', 
+    label: 'Tablet', 
+    unitBadge: 'tabs',
+    icon: Pill,
+    title: 'Tablet Dosage', 
+    formula: 'Desired ÷ Have',
+    desc: 'Solid oral tablet count'
+  },
+  { 
+    id: 'liquid', 
+    label: 'Liquid', 
+    unitBadge: 'mL',
+    icon: FlaskConical,
+    title: 'Liquid Dosage', 
+    formula: '(Desired ÷ Have) × Volume',
+    desc: 'Liquid oral / injectable volume'
+  },
+  { 
+    id: 'conversion', 
+    label: 'Conversion', 
+    unitBadge: 'g ⇄ mg',
+    icon: ArrowLeftRight,
+    title: 'Unit Conversion', 
+    formula: 'Metric Factor',
+    desc: 'Metric clinical conversion'
+  },
 ];
 
 export default function CalculatorView() {
@@ -48,6 +97,8 @@ export default function CalculatorView() {
   const [calcFormula, setCalcFormula] = useState(null);
   const [copied, setCopied] = useState(false);
   const [errorMsg, setErrorMsg] = useState(null);
+
+  const activeCategoryObj = CATEGORIES.find((c) => c.id === category) || CATEGORIES[0];
 
   const handleCalculate = () => {
     setErrorMsg(null);
@@ -131,47 +182,74 @@ export default function CalculatorView() {
   };
 
   return (
-    <div className="space-y-4 pb-12 animate-fade-in w-full max-w-full overflow-hidden">
+    <div className="space-y-4 pb-8 animate-fade-in w-full max-w-full">
+      {/* Minimal Header */}
       <div>
-        <h1 className="text-2xl font-bold tracking-tight text-[#111111]">Calculator</h1>
-        <p className="text-sm text-[#666666] mt-0.5">Clinical dosage verification engine.</p>
-      </div>
-
-      {/* Category Pills Selector */}
-      <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar -mx-1 px-1">
-        {CATEGORIES.map((cat) => (
-          <button
-            key={cat.id}
-            onClick={() => {
-              setCategory(cat.id);
-              setCalcResult(null);
-              setCalcFormula(null);
-              setErrorMsg(null);
-            }}
-            className={`nc-pill flex-shrink-0 ${
-              category === cat.id ? 'nc-pill-active' : 'nc-pill-inactive'
-            }`}
-          >
-            {cat.label}
-          </button>
-        ))}
-      </div>
-
-      {/* Safety Note */}
-      <div className="p-3 bg-[#FAFAFA] rounded-xl border border-[#E5E5E5] flex items-start gap-2.5">
-        <ShieldAlert className="w-4 h-4 text-[#888888] flex-shrink-0 mt-0.5" />
-        <p className="text-[11px] text-[#666666] leading-tight">
-          Educational use only. This tool helps you practice calculations. It does not provide medical advice or authorize medication administration.
+        <h1 className="text-xl font-extrabold tracking-tight text-slate-900 dark:text-white">
+          Calculator
+        </h1>
+        <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+          Select a category to compute exact clinical dosages.
         </p>
       </div>
 
-      {/* Dynamic Inputs Form */}
-      <div className="nc-card p-4 sm:p-5 space-y-4">
+      {/* Clean Segmented Category Bar */}
+      <div className="flex gap-1.5 overflow-x-auto no-scrollbar py-1 -mx-1 px-1">
+        {CATEGORIES.map((cat) => {
+          const isSelected = category === cat.id;
+          const Icon = cat.icon;
+          return (
+            <button
+              key={cat.id}
+              onClick={() => {
+                setCategory(cat.id);
+                setCalcResult(null);
+                setCalcFormula(null);
+                setErrorMsg(null);
+              }}
+              className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex-shrink-0 ${
+                isSelected
+                  ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-sm'
+                  : 'bg-white dark:bg-[#111827] text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white border border-slate-200/80 dark:border-slate-800'
+              }`}
+            >
+              <Icon className="w-3.5 h-3.5" />
+              <span>{cat.label}</span>
+              <span className={`text-[10px] font-mono px-1 py-0.2 rounded ${
+                isSelected 
+                  ? 'bg-white/20 dark:bg-slate-900/20 text-white dark:text-slate-900' 
+                  : 'text-slate-400 dark:text-slate-500'
+              }`}>
+                {cat.unitBadge}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Clean Unified Calculation Card */}
+      <div className="nc-card p-5 space-y-4 bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-800 shadow-xs">
+        {/* Card Header with Formula Hint */}
+        <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+          <div>
+            <h2 className="text-sm font-bold text-slate-900 dark:text-white">
+              {activeCategoryObj.title}
+            </h2>
+            <span className="text-[11px] text-slate-500 dark:text-slate-400">
+              {activeCategoryObj.desc}
+            </span>
+          </div>
+          <span className="text-[10px] font-mono text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-800 px-2 py-1 rounded-md border border-slate-200/60 dark:border-slate-700">
+            {activeCategoryObj.formula}
+          </span>
+        </div>
+
+        {/* Input Fields */}
         {category === 'flow-rate' && (
-          <>
-            <div className="space-y-1.5">
-              <label className="block text-xs font-semibold uppercase tracking-wider text-[#666666]">
-                Infusion Volume (mL)
+          <div className="space-y-3">
+            <div className="space-y-1">
+              <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400">
+                Infusion Volume
               </label>
               <div className="relative">
                 <input
@@ -179,16 +257,16 @@ export default function CalculatorView() {
                   inputMode="decimal"
                   value={volume}
                   onChange={(e) => setVolume(e.target.value)}
-                  placeholder="e.g. 500"
+                  placeholder="500"
                   className="nc-input pr-12 font-medium"
                 />
-                <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-semibold text-[#888888]">mL</span>
+                <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-semibold text-slate-400">mL</span>
               </div>
             </div>
 
-            <div className="space-y-1.5">
-              <label className="block text-xs font-semibold uppercase tracking-wider text-[#666666]">
-                Infusion Time (Hours)
+            <div className="space-y-1">
+              <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400">
+                Infusion Time
               </label>
               <div className="relative">
                 <input
@@ -196,34 +274,37 @@ export default function CalculatorView() {
                   inputMode="decimal"
                   value={timeHours}
                   onChange={(e) => setTimeHours(e.target.value)}
-                  placeholder="e.g. 4"
+                  placeholder="4"
                   className="nc-input pr-12 font-medium"
                 />
-                <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-semibold text-[#888888]">hr</span>
+                <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-semibold text-slate-400">hr</span>
               </div>
             </div>
-          </>
+          </div>
         )}
 
         {category === 'drip-rate' && (
-          <>
-            <div className="space-y-1.5">
-              <label className="block text-xs font-semibold uppercase tracking-wider text-[#666666]">
-                Total Volume (mL)
+          <div className="space-y-3">
+            <div className="space-y-1">
+              <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400">
+                Total Volume
               </label>
-              <input
-                type="text"
-                inputMode="decimal"
-                value={dripVolume}
-                onChange={(e) => setDripVolume(e.target.value)}
-                placeholder="e.g. 1000"
-                className="nc-input font-medium"
-              />
+              <div className="relative">
+                <input
+                  type="text"
+                  inputMode="decimal"
+                  value={dripVolume}
+                  onChange={(e) => setDripVolume(e.target.value)}
+                  placeholder="1000"
+                  className="nc-input pr-12 font-medium"
+                />
+                <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-semibold text-slate-400">mL</span>
+              </div>
             </div>
 
             <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-1.5">
-                <label className="block text-xs font-semibold uppercase tracking-wider text-[#666666]">
+              <div className="space-y-1">
+                <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400">
                   Time (Minutes)
                 </label>
                 <input
@@ -231,18 +312,18 @@ export default function CalculatorView() {
                   inputMode="decimal"
                   value={dripTimeMin}
                   onChange={(e) => setDripTimeMin(e.target.value)}
-                  placeholder="e.g. 480"
+                  placeholder="480"
                   className="nc-input font-medium"
                 />
               </div>
-              <div className="space-y-1.5">
-                <label className="block text-xs font-semibold uppercase tracking-wider text-[#666666]">
+              <div className="space-y-1">
+                <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400">
                   Drop Factor
                 </label>
                 <select
                   value={dropFactor}
                   onChange={(e) => setDropFactor(e.target.value)}
-                  className="nc-input font-medium bg-white"
+                  className="nc-input font-medium bg-white dark:bg-[#1A2234]"
                 >
                   <option value="10">10 gtt/mL (Macro)</option>
                   <option value="15">15 gtt/mL (Macro)</option>
@@ -251,13 +332,13 @@ export default function CalculatorView() {
                 </select>
               </div>
             </div>
-          </>
+          </div>
         )}
 
         {category === 'tablet' && (
-          <>
-            <div className="space-y-1.5">
-              <label className="block text-xs font-semibold uppercase tracking-wider text-[#666666]">
+          <div className="space-y-3">
+            <div className="space-y-1">
+              <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400">
                 Desired Dose (mg)
               </label>
               <input
@@ -265,12 +346,12 @@ export default function CalculatorView() {
                 inputMode="decimal"
                 value={desiredTablet}
                 onChange={(e) => setDesiredTablet(e.target.value)}
-                placeholder="e.g. 500"
+                placeholder="500"
                 className="nc-input font-medium"
               />
             </div>
-            <div className="space-y-1.5">
-              <label className="block text-xs font-semibold uppercase tracking-wider text-[#666666]">
+            <div className="space-y-1">
+              <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400">
                 Dose on Hand (mg / tab)
               </label>
               <input
@@ -278,17 +359,17 @@ export default function CalculatorView() {
                 inputMode="decimal"
                 value={haveTablet}
                 onChange={(e) => setHaveTablet(e.target.value)}
-                placeholder="e.g. 250"
+                placeholder="250"
                 className="nc-input font-medium"
               />
             </div>
-          </>
+          </div>
         )}
 
         {category === 'liquid' && (
-          <>
-            <div className="space-y-1.5">
-              <label className="block text-xs font-semibold uppercase tracking-wider text-[#666666]">
+          <div className="space-y-3">
+            <div className="space-y-1">
+              <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400">
                 Desired Dose (mg)
               </label>
               <input
@@ -296,13 +377,13 @@ export default function CalculatorView() {
                 inputMode="decimal"
                 value={desiredLiquid}
                 onChange={(e) => setDesiredLiquid(e.target.value)}
-                placeholder="e.g. 80"
+                placeholder="80"
                 className="nc-input font-medium"
               />
             </div>
             <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-1.5">
-                <label className="block text-xs font-semibold uppercase tracking-wider text-[#666666]">
+              <div className="space-y-1">
+                <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400">
                   Available (mg)
                 </label>
                 <input
@@ -310,12 +391,12 @@ export default function CalculatorView() {
                   inputMode="decimal"
                   value={haveLiquid}
                   onChange={(e) => setHaveLiquid(e.target.value)}
-                  placeholder="e.g. 200"
+                  placeholder="200"
                   className="nc-input font-medium"
                 />
               </div>
-              <div className="space-y-1.5">
-                <label className="block text-xs font-semibold uppercase tracking-wider text-[#666666]">
+              <div className="space-y-1">
+                <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400">
                   In Volume (mL)
                 </label>
                 <input
@@ -323,18 +404,18 @@ export default function CalculatorView() {
                   inputMode="decimal"
                   value={quantityLiquid}
                   onChange={(e) => setQuantityLiquid(e.target.value)}
-                  placeholder="e.g. 1"
+                  placeholder="1"
                   className="nc-input font-medium"
                 />
               </div>
             </div>
-          </>
+          </div>
         )}
 
         {category === 'weight-based' && (
-          <>
-            <div className="space-y-1.5">
-              <label className="block text-xs font-semibold uppercase tracking-wider text-[#666666]">
+          <div className="space-y-3">
+            <div className="space-y-1">
+              <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400">
                 Patient Weight (kg)
               </label>
               <input
@@ -342,30 +423,30 @@ export default function CalculatorView() {
                 inputMode="decimal"
                 value={patientWeight}
                 onChange={(e) => setPatientWeight(e.target.value)}
-                placeholder="e.g. 70"
+                placeholder="70"
                 className="nc-input font-medium"
               />
             </div>
-            <div className="space-y-1.5">
-              <label className="block text-xs font-semibold uppercase tracking-wider text-[#666666]">
-                Dose (mg/kg)
+            <div className="space-y-1">
+              <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400">
+                Dose (mg / kg)
               </label>
               <input
                 type="text"
                 inputMode="decimal"
                 value={dosePerKg}
                 onChange={(e) => setDosePerKg(e.target.value)}
-                placeholder="e.g. 5"
+                placeholder="5"
                 className="nc-input font-medium"
               />
             </div>
-          </>
+          </div>
         )}
 
         {category === 'conversion' && (
-          <>
-            <div className="space-y-1.5">
-              <label className="block text-xs font-semibold uppercase tracking-wider text-[#666666]">
+          <div className="space-y-3">
+            <div className="space-y-1">
+              <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400">
                 Value to Convert
               </label>
               <input
@@ -373,19 +454,19 @@ export default function CalculatorView() {
                 inputMode="decimal"
                 value={convValue}
                 onChange={(e) => setConvValue(e.target.value)}
-                placeholder="e.g. 2.5"
+                placeholder="2.5"
                 className="nc-input font-medium"
               />
             </div>
             <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-1.5">
-                <label className="block text-xs font-semibold uppercase tracking-wider text-[#666666]">
+              <div className="space-y-1">
+                <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400">
                   From
                 </label>
                 <select
                   value={convFrom}
                   onChange={(e) => setConvFrom(e.target.value)}
-                  className="nc-input font-medium bg-white"
+                  className="nc-input font-medium bg-white dark:bg-[#1A2234]"
                 >
                   <option value="kg">Kilograms (kg)</option>
                   <option value="g">Grams (g)</option>
@@ -396,14 +477,14 @@ export default function CalculatorView() {
                   <option value="lb">Pounds (lb)</option>
                 </select>
               </div>
-              <div className="space-y-1.5">
-                <label className="block text-xs font-semibold uppercase tracking-wider text-[#666666]">
+              <div className="space-y-1">
+                <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400">
                   To
                 </label>
                 <select
                   value={convTo}
                   onChange={(e) => setConvTo(e.target.value)}
-                  className="nc-input font-medium bg-white"
+                  className="nc-input font-medium bg-white dark:bg-[#1A2234]"
                 >
                   <option value="mg">Milligrams (mg)</option>
                   <option value="mcg">Micrograms (mcg)</option>
@@ -414,65 +495,68 @@ export default function CalculatorView() {
                 </select>
               </div>
             </div>
-          </>
+          </div>
         )}
 
-        {/* Buttons */}
-        <div className="space-y-2 pt-2">
+        {/* Action Buttons */}
+        <div className="flex items-center gap-2 pt-2">
           <button
             onClick={handleCalculate}
-            className="nc-btn-primary w-full flex items-center justify-center gap-2"
+            className="nc-btn-primary flex-1 flex items-center justify-center gap-2 cursor-pointer"
           >
-            <Calculator className="w-5 h-5" />
+            <Calculator className="w-4 h-4" />
             <span>Calculate</span>
           </button>
           <button
             onClick={handleClear}
-            className="nc-btn-secondary w-full flex items-center justify-center gap-2"
+            className="nc-btn-secondary px-4 text-xs font-semibold flex items-center justify-center gap-1.5 cursor-pointer"
+            title="Reset fields"
           >
-            <RotateCcw className="w-4 h-4" />
+            <RotateCcw className="w-3.5 h-3.5 text-slate-500" />
             <span>Clear</span>
           </button>
         </div>
+
+        {/* Error Alert */}
+        {errorMsg && (
+          <div className="p-3 bg-red-50 dark:bg-red-950/30 text-red-700 dark:text-red-300 text-xs font-semibold rounded-xl border border-red-200 dark:border-red-900 animate-fade-in">
+            {errorMsg}
+          </div>
+        )}
+
+        {/* Calculation Result */}
+        {calcResult && (
+          <div className="p-4 rounded-xl bg-emerald-50/50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-900/50 space-y-2 animate-fade-in">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-800 dark:text-emerald-300">
+                Calculated Dose
+              </span>
+              <button
+                onClick={handleCopy}
+                className="flex items-center gap-1 text-[11px] font-bold text-emerald-800 dark:text-emerald-300 hover:text-emerald-950 px-2 py-0.5 bg-white dark:bg-[#111827] rounded-md border border-emerald-200 dark:border-emerald-800 cursor-pointer"
+              >
+                {copied ? <Check className="w-3 h-3 text-emerald-600" /> : <Copy className="w-3 h-3" />}
+                <span>{copied ? 'Copied' : 'Copy'}</span>
+              </button>
+            </div>
+
+            <div className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
+              {calcResult}
+            </div>
+
+            {calcFormula && (
+              <p className="text-[11px] font-mono text-slate-600 dark:text-slate-400 pt-1 border-t border-emerald-200/50 dark:border-emerald-900/40">
+                {calcFormula}
+              </p>
+            )}
+          </div>
+        )}
       </div>
 
-      {/* Error Banner */}
-      {errorMsg && (
-        <div className="nc-card p-4 border-red-300 bg-red-50 text-red-700 text-xs font-medium animate-fade-in">
-          {errorMsg}
-        </div>
-      )}
-
-      {/* Result Card */}
-      {calcResult && (
-        <div className="nc-card p-4 sm:p-5 border-2 border-emerald-500/40 bg-emerald-50/20 space-y-3 animate-fade-in">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold uppercase tracking-wider text-emerald-800">
-              Deterministic Result
-            </span>
-            <button
-              onClick={handleCopy}
-              className="flex items-center gap-1 text-xs font-medium text-emerald-800 hover:text-emerald-950 px-2.5 py-1 bg-white rounded-lg border border-emerald-200"
-            >
-              {copied ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
-              <span>{copied ? 'Copied' : 'Copy'}</span>
-            </button>
-          </div>
-
-          <div className="text-2xl font-bold text-[#111111] tracking-tight">
-            {calcResult}
-          </div>
-
-          {calcFormula && (
-            <div className="pt-2 border-t border-[#E5E5E5]/60 text-xs text-[#555555]">
-              <span className="font-semibold text-[#111111] block mb-0.5">Formula Applied:</span>
-              <span className="font-mono text-[11px] bg-white px-2 py-1 rounded border border-[#E5E5E5] inline-block">
-                {calcFormula}
-              </span>
-            </div>
-          )}
-        </div>
-      )}
+      {/* Quiet Minimal Footer Disclaimer */}
+      <p className="text-[11px] text-center text-slate-400 dark:text-slate-500 pt-1">
+        Clinical math practice tool · Follow ISMP guidelines & 5 Rights
+      </p>
     </div>
   );
 }

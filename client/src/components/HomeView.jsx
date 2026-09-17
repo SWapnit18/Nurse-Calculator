@@ -21,31 +21,31 @@ export default function HomeView({
       {/* Welcome Banner */}
       <div className="space-y-1">
         <div className="flex items-center gap-2">
-          <h1 className="text-2xl font-bold tracking-tight text-[#111111]">
+          <h1 className="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white">
             Good morning, {user?.name?.split(' ')[0] || 'Nurse'} 👋
           </h1>
         </div>
-        <p className="text-sm text-[#666666]">
-          Keep learning, you're doing great!
+        <p className="text-sm text-slate-600 dark:text-slate-400">
+          Ready to master your clinical calculations today?
         </p>
       </div>
 
       {/* Metrics Row */}
       <div className="grid grid-cols-3 gap-2.5">
-        <div className="nc-card p-3.5 text-center flex flex-col justify-center items-center">
-          <span className="text-xl font-bold text-[#111111] tracking-tight">{accuracy}%</span>
-          <span className="text-[11px] font-medium text-[#666666] mt-0.5">Accuracy</span>
+        <div className="nc-card p-3.5 text-center flex flex-col justify-center items-center bg-white dark:bg-[#111827]">
+          <span className="text-xl font-black text-slate-900 dark:text-white tracking-tight">{accuracy}%</span>
+          <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 mt-0.5">Accuracy</span>
         </div>
-        <div className="nc-card p-3.5 text-center flex flex-col justify-center items-center">
-          <span className="text-xl font-bold text-[#111111] tracking-tight">{totalQuestions}</span>
-          <span className="text-[11px] font-medium text-[#666666] mt-0.5">Questions</span>
+        <div className="nc-card p-3.5 text-center flex flex-col justify-center items-center bg-white dark:bg-[#111827]">
+          <span className="text-xl font-black text-slate-900 dark:text-white tracking-tight">{totalQuestions}</span>
+          <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 mt-0.5">Solved</span>
         </div>
-        <div className="nc-card p-3.5 text-center flex flex-col justify-center items-center">
+        <div className="nc-card p-3.5 text-center flex flex-col justify-center items-center bg-white dark:bg-[#111827]">
           <div className="flex items-center justify-center gap-1">
-            <span className="text-xl font-bold text-[#111111] tracking-tight">{streakDays}</span>
+            <span className="text-xl font-black text-slate-900 dark:text-white tracking-tight">{streakDays}</span>
             <span className="text-xs">🔥</span>
           </div>
-          <span className="text-[11px] font-medium text-[#666666] mt-0.5">Day Streak</span>
+          <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 mt-0.5">Day Streak</span>
         </div>
       </div>
 
@@ -54,9 +54,9 @@ export default function HomeView({
         <button
           id="btn-start-practice"
           onClick={onStartPractice}
-          className="nc-btn-primary w-full flex items-center justify-center gap-2 text-base shadow-sm"
+          className="nc-btn-primary w-full flex items-center justify-center gap-2 text-base shadow-sm cursor-pointer"
         >
-          <span>Start Practice</span>
+          <span>Start Daily Practice</span>
           <ArrowRight className="w-4 h-4" />
         </button>
       </div>
@@ -64,12 +64,12 @@ export default function HomeView({
       {/* Continue Learning Card */}
       <div className="space-y-2">
         <div className="flex items-center justify-between px-1">
-          <h2 className="text-xs font-semibold uppercase tracking-wider text-[#888888]">
+          <h2 className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
             Continue Learning
           </h2>
           <button 
             onClick={() => onNavigate('learn')}
-            className="text-xs font-medium text-[#111111] hover:underline"
+            className="text-xs font-semibold text-slate-900 dark:text-slate-200 hover:underline cursor-pointer"
           >
             See all
           </button>
@@ -77,46 +77,46 @@ export default function HomeView({
 
         <div 
           onClick={() => onContinueTopic('unit-conversions')}
-          className="nc-card p-4 hover:border-[#111111] cursor-pointer transition-all active:scale-[0.99] flex items-center justify-between gap-3"
+          className="nc-card p-4 hover:border-slate-400 dark:hover:border-slate-600 cursor-pointer transition-all active:scale-[0.99] flex items-center justify-between gap-3 bg-white dark:bg-[#111827]"
         >
           <div className="flex items-center gap-3.5 min-w-0">
-            <div className="w-10 h-10 rounded-xl bg-[#F7F7F7] border border-[#E5E5E5] flex items-center justify-center text-[#111111] flex-shrink-0">
+            <div className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-800 dark:text-slate-200 flex-shrink-0">
               <BookOpen className="w-5 h-5" />
             </div>
             <div className="min-w-0">
-              <h3 className="font-semibold text-sm text-[#111111] truncate">Unit Conversions</h3>
-              <p className="text-xs text-[#666666] mt-0.5">Lesson 4 of 6</p>
-              <div className="w-32 h-1.5 bg-[#EAEAEA] rounded-full mt-2 overflow-hidden">
-                <div className="h-full bg-[#111111] rounded-full" style={{ width: '67%' }} />
+              <h3 className="font-bold text-sm text-slate-900 dark:text-white truncate">Unit Conversions</h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Lesson 4 of 6 · Metric Factor Analysis</p>
+              <div className="w-32 h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full mt-2 overflow-hidden">
+                <div className="h-full bg-slate-900 dark:bg-white rounded-full" style={{ width: '67%' }} />
               </div>
             </div>
           </div>
-          <ChevronRight className="w-5 h-5 text-[#888888] flex-shrink-0" />
+          <ChevronRight className="w-5 h-5 text-slate-400 dark:text-slate-500 flex-shrink-0" />
         </div>
       </div>
 
       {/* Weak Area Targeted Card */}
       <div className="space-y-2">
         <div className="px-1">
-          <h2 className="text-xs font-semibold uppercase tracking-wider text-[#888888]">
-            Weak Area
+          <h2 className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+            Target Focus Area
           </h2>
         </div>
-        <div className="nc-card p-4 flex items-center justify-between gap-3">
+        <div className="nc-card p-4 flex items-center justify-between gap-3 bg-amber-50/40 dark:bg-amber-950/20 border-amber-200 dark:border-amber-900/40">
           <div className="flex items-center gap-3 min-w-0">
-            <div className="w-10 h-10 rounded-xl bg-amber-50 border border-amber-200 text-amber-700 flex items-center justify-center flex-shrink-0">
+            <div className="w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-900/50 border border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-300 flex items-center justify-center flex-shrink-0">
               <AlertCircle className="w-5 h-5" />
             </div>
             <div className="min-w-0">
-              <h3 className="font-semibold text-sm text-[#111111] truncate">{weakTopic.title}</h3>
-              <p className="text-xs text-[#666666] mt-0.5">{weakTopic.accuracy}% accuracy</p>
+              <h3 className="font-bold text-sm text-slate-900 dark:text-white truncate">{weakTopic.title}</h3>
+              <p className="text-xs text-amber-700 dark:text-amber-400 mt-0.5 font-medium">{weakTopic.accuracy}% accuracy · Low confidence</p>
             </div>
           </div>
           <button
-            onClick={() => onContinueTopic('iv-mathematics')}
-            className="nc-btn-secondary px-3.5 py-2 text-xs font-semibold h-auto flex-shrink-0"
+            onClick={() => onContinueTopic('iv-flow-mathematics')}
+            className="nc-btn-secondary px-3.5 py-2 text-xs font-bold h-auto flex-shrink-0 cursor-pointer"
           >
-            Practice
+            Review
           </button>
         </div>
       </div>
@@ -124,8 +124,8 @@ export default function HomeView({
       {/* Quick Access Grid */}
       <div className="space-y-2 pt-1">
         <div className="px-1">
-          <h2 className="text-xs font-semibold uppercase tracking-wider text-[#888888]">
-            Quick Access
+          <h2 className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+            Quick Tools
           </h2>
         </div>
         <div className="grid grid-cols-4 gap-2">
@@ -140,12 +140,12 @@ export default function HomeView({
               <button
                 key={item.id}
                 onClick={() => onNavigate(item.id)}
-                className="nc-card p-3 flex flex-col items-center justify-center text-center hover:border-[#111111] active:scale-95 transition-all"
+                className="nc-card p-3 flex flex-col items-center justify-center text-center hover:border-slate-400 dark:hover:border-slate-600 active:scale-95 transition-all bg-white dark:bg-[#111827] cursor-pointer"
               >
-                <div className="w-8 h-8 rounded-lg bg-[#F7F7F7] flex items-center justify-center text-[#111111] mb-1.5">
+                <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-800 dark:text-slate-200 mb-1.5">
                   <Icon className="w-4 h-4" />
                 </div>
-                <span className="text-[11px] font-medium text-[#111111] truncate max-w-full">
+                <span className="text-[11px] font-bold text-slate-800 dark:text-slate-200 truncate max-w-full">
                   {item.label}
                 </span>
               </button>

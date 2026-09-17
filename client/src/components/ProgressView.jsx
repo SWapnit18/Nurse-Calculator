@@ -2,101 +2,114 @@ import React from 'react';
 import { TrendingUp, Award, Calendar, CheckCircle2 } from 'lucide-react';
 
 export default function ProgressView({ stats }) {
-  const accuracy = stats?.accuracy ?? 82;
-  const total = stats?.totalQuestions ?? 126;
-  const correct = stats?.correctAnswers ?? 103;
-  const incorrect = stats?.incorrectAnswers ?? 23;
+  const accuracy = stats?.accuracy ?? 0;
+  const total = stats?.totalQuestions ?? 0;
+  const correct = stats?.correctAnswers ?? 0;
+  const incorrect = stats?.incorrectAnswers ?? 0;
 
-  const weeklyActivity = [
-    { day: 'M', value: 65 },
-    { day: 'T', value: 85 },
-    { day: 'W', value: 40 },
-    { day: 'T', value: 90 },
-    { day: 'F', value: 75 },
-    { day: 'S', value: 100 },
-    { day: 'S', value: 50 },
+  const defaultWeekly = [
+    { day: 'Mon', value: 0 },
+    { day: 'Tue', value: 0 },
+    { day: 'Wed', value: 0 },
+    { day: 'Thu', value: 0 },
+    { day: 'Fri', value: 0 },
+    { day: 'Sat', value: 0 },
+    { day: 'Sun', value: 0 },
   ];
 
-  const topicAccuracies = [
-    { name: 'Unit Conversions', pct: 78 },
-    { name: 'Tablet Calculations', pct: 88 },
-    { name: 'Liquid Calculations', pct: 92 },
-    { name: 'IV Flow Mathematics', pct: 51 },
-    { name: 'Weight-Based Calculations', pct: 70 },
+  const weeklyActivity = (stats?.weeklyActivity && stats.weeklyActivity.length > 0)
+    ? stats.weeklyActivity
+    : defaultWeekly;
+
+  const defaultTopics = [
+    { name: 'Unit Conversions', pct: stats?.topicStats?.unit_conversions ? Math.round((stats.topicStats.unit_conversions.correct / stats.topicStats.unit_conversions.total) * 100) : 78 },
+    { name: 'Tablet Calculations', pct: stats?.topicStats?.tablet_calculations ? Math.round((stats.topicStats.tablet_calculations.correct / stats.topicStats.tablet_calculations.total) * 100) : 88 },
+    { name: 'Liquid Calculations', pct: stats?.topicStats?.liquid_calculations ? Math.round((stats.topicStats.liquid_calculations.correct / stats.topicStats.liquid_calculations.total) * 100) : 92 },
+    { name: 'IV Flow Mathematics', pct: stats?.topicStats?.iv_flow_mathematics ? Math.round((stats.topicStats.iv_flow_mathematics.correct / stats.topicStats.iv_flow_mathematics.total) * 100) : 51 },
+    { name: 'Med Math Basics', pct: stats?.topicStats?.med_math_basics ? Math.round((stats.topicStats.med_math_basics.correct / stats.topicStats.med_math_basics.total) * 100) : 80 },
   ];
+
+  const topicAccuracies = defaultTopics;
 
   return (
     <div className="space-y-5 pb-8 animate-fade-in">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight text-[#111111]">Your Progress</h1>
-        <p className="text-sm text-[#666666] mt-0.5">Track your improvement over time.</p>
+        <h1 className="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white">Your Progress</h1>
+        <p className="text-sm text-slate-600 dark:text-slate-400 mt-0.5">Track your clinical calculation mastery and score trends.</p>
       </div>
 
       {/* Summary Metrics */}
       <div className="grid grid-cols-4 gap-2">
-        <div className="nc-card p-3 text-center">
-          <span className="text-base font-bold text-[#111111]">{accuracy}%</span>
-          <span className="text-[10px] font-medium text-[#666666] block mt-0.5">Accuracy</span>
+        <div className="nc-card p-3 text-center bg-white dark:bg-[#111827]">
+          <span className="text-base font-extrabold text-slate-900 dark:text-white">{accuracy}%</span>
+          <span className="text-[10px] font-semibold text-slate-500 dark:text-slate-400 block mt-0.5">Accuracy</span>
         </div>
-        <div className="nc-card p-3 text-center">
-          <span className="text-base font-bold text-[#111111]">{total}</span>
-          <span className="text-[10px] font-medium text-[#666666] block mt-0.5">Total</span>
+        <div className="nc-card p-3 text-center bg-white dark:bg-[#111827]">
+          <span className="text-base font-extrabold text-slate-900 dark:text-white">{total}</span>
+          <span className="text-[10px] font-semibold text-slate-500 dark:text-slate-400 block mt-0.5">Solved</span>
         </div>
-        <div className="nc-card p-3 text-center">
-          <span className="text-base font-bold text-emerald-700">{correct}</span>
-          <span className="text-[10px] font-medium text-[#666666] block mt-0.5">Correct</span>
+        <div className="nc-card p-3 text-center bg-white dark:bg-[#111827]">
+          <span className="text-base font-extrabold text-emerald-600 dark:text-emerald-400">{correct}</span>
+          <span className="text-[10px] font-semibold text-slate-500 dark:text-slate-400 block mt-0.5">Correct</span>
         </div>
-        <div className="nc-card p-3 text-center">
-          <span className="text-base font-bold text-red-600">{incorrect}</span>
-          <span className="text-[10px] font-medium text-[#666666] block mt-0.5">Incorrect</span>
+        <div className="nc-card p-3 text-center bg-white dark:bg-[#111827]">
+          <span className="text-base font-extrabold text-red-500 dark:text-red-400">{incorrect}</span>
+          <span className="text-[10px] font-semibold text-slate-500 dark:text-slate-400 block mt-0.5">Missed</span>
         </div>
       </div>
 
-      {/* Weekly Activity Monochrome Bar Chart */}
-      <div className="nc-card p-4 space-y-3">
+      {/* Weekly Activity Bar Chart */}
+      <div className="nc-card p-4 sm:p-5 space-y-3 bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-800">
         <div className="flex items-center justify-between">
-          <h2 className="text-xs font-semibold uppercase tracking-wider text-[#888888]">
-            Recent Activity
+          <h2 className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+            Weekly Study Activity
           </h2>
-          <span className="text-xs font-medium text-[#666666]">Last 7 days</span>
+          <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">Past 7 Days</span>
         </div>
 
-        <div className="flex items-end justify-between h-28 pt-4 px-2">
+        <div className="flex items-end justify-between h-32 pt-4 px-2">
           {weeklyActivity.map((item, idx) => (
-            <div key={idx} className="flex flex-col items-center gap-1.5 flex-1">
-              <div className="w-6 bg-[#F0F0F0] rounded-t-md h-full flex items-end">
+            <div key={idx} className="flex flex-col items-center gap-2 flex-1">
+              <div className="w-7 bg-slate-100 dark:bg-slate-800 rounded-t-lg h-full flex items-end overflow-hidden">
                 <div 
-                  className="w-full bg-[#111111] rounded-t-md transition-all duration-500" 
+                  className="w-full bg-slate-900 dark:bg-white rounded-t-lg transition-all duration-500" 
                   style={{ height: `${item.value}%` }}
                 />
               </div>
-              <span className="text-[11px] font-semibold text-[#888888]">{item.day}</span>
+              <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400">{item.day}</span>
             </div>
           ))}
         </div>
       </div>
 
       {/* Topic Accuracy Progress Bars */}
-      <div className="nc-card p-4 space-y-4">
-        <h2 className="text-xs font-semibold uppercase tracking-wider text-[#888888]">
-          Topic Accuracy Breakdown
+      <div className="nc-card p-4 sm:p-5 space-y-4 bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-800">
+        <h2 className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+          Accuracy by Clinical Area
         </h2>
 
-        <div className="space-y-3">
-          {topicAccuracies.map((topic, idx) => (
-            <div key={idx} className="space-y-1.5">
-              <div className="flex items-center justify-between text-xs">
-                <span className="font-medium text-[#111111]">{topic.name}</span>
-                <span className="font-semibold text-[#111111]">{topic.pct}%</span>
+        <div className="space-y-3.5">
+          {topicAccuracies.map((topic, idx) => {
+            const isLow = topic.pct < 60;
+            return (
+              <div key={idx} className="space-y-1.5">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="font-bold text-slate-800 dark:text-slate-200">{topic.name}</span>
+                  <span className={`font-extrabold ${isLow ? 'text-amber-600 dark:text-amber-400' : 'text-slate-900 dark:text-white'}`}>
+                    {topic.pct}%
+                  </span>
+                </div>
+                <div className="w-full h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                  <div 
+                    className={`h-full rounded-full transition-all duration-500 ${
+                      isLow ? 'bg-amber-500' : 'bg-slate-900 dark:bg-white'
+                    }`}
+                    style={{ width: `${topic.pct}%` }}
+                  />
+                </div>
               </div>
-              <div className="w-full h-1.5 bg-[#EAEAEA] rounded-full overflow-hidden">
-                <div 
-                  className="h-full bg-[#111111] rounded-full" 
-                  style={{ width: `${topic.pct}%` }}
-                />
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </div>

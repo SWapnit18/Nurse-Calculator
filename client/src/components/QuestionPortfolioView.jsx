@@ -78,13 +78,13 @@ export default function QuestionPortfolioView({
       {/* Top Banner */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-[#111111]">Question Portfolio</h1>
-          <p className="text-sm text-[#666666] mt-0.5">Author and manage your custom clinical calculation questions.</p>
+          <h1 className="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white">Question Portfolio</h1>
+          <p className="text-sm text-slate-600 dark:text-slate-400 mt-0.5">Author and manage your custom clinical calculation questions.</p>
         </div>
 
         <button
           onClick={() => setIsCreating(!isCreating)}
-          className="nc-btn-primary px-3.5 py-2 text-xs font-semibold flex items-center gap-1.5 shadow-sm"
+          className="nc-btn-primary px-3.5 py-2 text-xs font-bold flex items-center gap-1.5 shadow-sm cursor-pointer"
         >
           <PlusCircle className="w-4 h-4" />
           <span>{isCreating ? 'Cancel' : 'Create Question'}</span>
@@ -93,234 +93,183 @@ export default function QuestionPortfolioView({
 
       {/* Success Alert */}
       {successMsg && (
-        <div className="nc-card p-3.5 border-emerald-300 bg-emerald-50 text-emerald-800 text-xs font-medium flex items-center gap-2 animate-fade-in">
+        <div className="nc-card p-3.5 border-emerald-300 bg-emerald-50 dark:bg-emerald-950/30 text-emerald-800 dark:text-emerald-300 text-xs font-bold flex items-center gap-2 animate-fade-in">
           <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
           <span>{successMsg}</span>
         </div>
       )}
 
-      {/* Create Question Modal / Form Accordion */}
+      {/* Creation Form Modal / Card */}
       {isCreating && (
-        <form onSubmit={handleSubmit} className="nc-card p-4 sm:p-5 space-y-4 bg-white border border-[#111111]/20 shadow-md animate-fade-in">
-          <div className="flex items-center gap-2 pb-2 border-b border-[#E5E5E5]">
-            <Sparkles className="w-4 h-4 text-[#111111]" />
-            <h2 className="font-bold text-sm text-[#111111]">Author New Clinical Question</h2>
+        <form onSubmit={handleSubmit} className="nc-card p-5 space-y-4 border-2 border-slate-900 dark:border-slate-100 bg-white dark:bg-[#111827] animate-fade-in">
+          <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800">
+            <h2 className="font-extrabold text-base text-slate-900 dark:text-white">Create Custom Clinical Question</h2>
+            <span className="text-[10px] font-bold px-2 py-0.5 bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 rounded">
+              Author Mode
+            </span>
           </div>
 
           {formError && (
-            <div className="p-3 bg-red-50 border border-red-200 text-red-700 text-xs font-medium rounded-xl">
+            <div className="p-3 bg-red-50 dark:bg-red-950/30 text-red-700 dark:text-red-300 text-xs font-bold rounded-lg">
               {formError}
             </div>
           )}
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-[#666666] mb-1">
-                Question Title
-              </label>
-              <input
-                type="text"
-                placeholder="e.g. Pediatric Ceftriaxone Dose"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                className="nc-input text-sm"
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-[#666666] mb-1">
-                Clinical Topic
-              </label>
-              <select
-                value={topicId}
-                onChange={(e) => setTopicId(e.target.value)}
-                className="nc-input text-sm font-medium bg-white"
-              >
-                {TOPIC_OPTIONS.map((opt) => (
-                  <option key={opt.id} value={opt.id}>
-                    {opt.label}
-                  </option>
-                ))}
-              </select>
-            </div>
+          <div className="space-y-1.5">
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">
+              Clinical Title
+            </label>
+            <input
+              type="text"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="e.g. Digoxin Pediatric Oral Elixir"
+              className="nc-input font-medium"
+            />
           </div>
 
-          <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-[#666666] mb-1">
-              Clinical Scenario / Problem Prompt
+          <div className="space-y-1.5">
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">
+              Clinical Topic Area
+            </label>
+            <select
+              value={topicId}
+              onChange={(e) => setTopicId(e.target.value)}
+              className="nc-input font-medium bg-white dark:bg-[#1A2234]"
+            >
+              {TOPIC_OPTIONS.map((t) => (
+                <option key={t.id} value={t.id}>{t.label}</option>
+              ))}
+            </select>
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">
+              Prescription & Patient Scenario
             </label>
             <textarea
               rows={3}
-              placeholder="e.g. Order: Morphine 4 mg IM. Available: 10 mg/mL vial. How many mL should the nurse administer?"
               value={scenario}
               onChange={(e) => setScenario(e.target.value)}
-              className="nc-input text-sm py-2"
+              placeholder="e.g. Order: Digoxin 0.05 mg PO daily. Available: Digoxin elixir 0.05 mg/mL. How many mL will you administer?"
+              className="nc-input h-auto py-2.5 font-medium resize-none"
             />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-[#666666] mb-1">
-                Correct Answer
+            <div className="space-y-1.5">
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">
+                Correct Answer (Number)
               </label>
               <input
                 type="text"
                 inputMode="decimal"
-                placeholder="e.g. 0.4"
                 value={correctAnswer}
                 onChange={(e) => setCorrectAnswer(e.target.value)}
-                className="nc-input text-sm font-semibold"
+                placeholder="e.g. 1"
+                className="nc-input font-medium"
               />
             </div>
-
-            <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-[#666666] mb-1">
-                Unit of Measure
+            <div className="space-y-1.5">
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">
+                Unit (e.g. mL, tabs)
               </label>
               <input
                 type="text"
-                placeholder="e.g. mL, tablets, gtt/min, mg"
                 value={unit}
                 onChange={(e) => setUnit(e.target.value)}
-                className="nc-input text-sm font-semibold"
+                placeholder="mL"
+                className="nc-input font-medium"
               />
             </div>
           </div>
 
-          <div className="space-y-2">
-            <label className="block text-xs font-semibold uppercase tracking-wider text-[#666666]">
-              Educational Step-by-Step Breakdown (Optional)
-            </label>
-            <input
-              type="text"
-              placeholder="Step 1: Formula Setup (e.g. Desired ÷ Have × Volume)"
-              value={step1}
-              onChange={(e) => setStep1(e.target.value)}
-              className="nc-input text-xs"
-            />
-            <input
-              type="text"
-              placeholder="Step 2: Calculation (e.g. 4 mg ÷ 10 mg/mL = 0.4 mL)"
-              value={step2}
-              onChange={(e) => setStep2(e.target.value)}
-              className="nc-input text-xs"
-            />
-          </div>
-
-          <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-[#666666] mb-1">
-              Clinical Key Takeaway / ISMP Rule (Optional)
-            </label>
-            <input
-              type="text"
-              placeholder="e.g. Always write 0.4 mL with leading zero to prevent 10-fold overdose."
-              value={keyPoint}
-              onChange={(e) => setKeyPoint(e.target.value)}
-              className="nc-input text-xs"
-            />
-          </div>
-
-          <div className="flex items-center gap-2 pt-2">
+          <div className="space-y-2 pt-2">
             <button
               type="submit"
-              className="nc-btn-primary flex-1 flex items-center justify-center gap-1.5"
+              className="nc-btn-primary w-full cursor-pointer"
             >
-              <PlusCircle className="w-4 h-4" />
-              <span>Save to Portfolio</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setIsCreating(false)}
-              className="nc-btn-secondary px-4"
-            >
-              Cancel
+              Save to Portfolio
             </button>
           </div>
         </form>
       )}
 
-      {/* Portfolio Stats Card */}
-      <div className="nc-card p-4 bg-[#FAFAFA] flex items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-[#111111] text-white flex items-center justify-center">
-            <BookOpen className="w-5 h-5" />
-          </div>
-          <div>
-            <span className="text-xs font-semibold uppercase tracking-wider text-[#888888]">Portfolio Size</span>
-            <h3 className="text-lg font-bold text-[#111111]">{customQuestions.length} Custom Questions</h3>
-          </div>
-        </div>
-
-        {customQuestions.length > 0 && (
-          <button
-            onClick={onPracticeCustom}
-            className="nc-btn-primary px-3.5 py-2 text-xs font-semibold flex items-center gap-1.5"
-          >
-            <span>Practice My Portfolio</span>
-            <ArrowRight className="w-3.5 h-3.5" />
-          </button>
-        )}
-      </div>
-
-      {/* Question List */}
+      {/* Portfolio Questions List */}
       <div className="space-y-3">
         {customQuestions.length === 0 ? (
-          <div className="nc-card p-8 text-center space-y-3 border-dashed border-2">
-            <div className="w-12 h-12 rounded-full bg-[#F7F7F7] flex items-center justify-center mx-auto text-[#888888]">
-              <PlusCircle className="w-6 h-6" />
+          <div className="nc-card p-8 text-center space-y-3 bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-800">
+            <div className="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 flex items-center justify-center mx-auto">
+              <BookOpen className="w-6 h-6" />
             </div>
             <div>
-              <h2 className="font-bold text-base text-[#111111]">No Custom Questions Yet</h2>
-              <p className="text-xs text-[#666666] max-w-sm mx-auto mt-1 leading-relaxed">
-                Build your own question bank for NCLEX exam review or nursing school lectures.
+              <h2 className="font-extrabold text-base text-slate-900 dark:text-white">No Custom Questions Yet</h2>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-xs mx-auto">
+                Author your own clinical dosage scenarios, homework problems, and custom exams.
               </p>
             </div>
             <button
               onClick={() => setIsCreating(true)}
-              className="nc-btn-primary px-4 py-2 text-xs mx-auto mt-2 inline-flex items-center gap-1.5"
+              className="nc-btn-secondary text-xs font-bold inline-flex items-center gap-1.5 mx-auto cursor-pointer"
             >
-              <PlusCircle className="w-3.5 h-3.5" />
-              <span>Author Your First Question</span>
+              <PlusCircle className="w-4 h-4" />
+              <span>Create First Question</span>
             </button>
           </div>
         ) : (
-          customQuestions.map((q) => (
-            <div key={q.questionId} className="nc-card p-4 space-y-3 relative group">
-              <div className="flex items-start justify-between gap-3">
-                <div className="space-y-1 min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-[#111111] text-white rounded text-[10px] font-bold uppercase tracking-wider">
-                      Author: You
-                    </span>
-                    <span className="text-[11px] font-medium text-[#666666]">
-                      {q.topicId?.replace(/_/g, ' ')}
-                    </span>
-                  </div>
-                  <h3 className="font-bold text-sm text-[#111111] pt-1">{q.title}</h3>
-                </div>
-
-                <button
-                  onClick={() => onDeleteQuestion(q.questionId)}
-                  className="w-8 h-8 rounded-lg text-red-500 hover:bg-red-50 flex items-center justify-center transition-colors flex-shrink-0"
-                  title="Delete question"
-                  aria-label="Delete question"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
-              </div>
-
-              <p className="text-xs text-[#333333] leading-relaxed bg-[#F7F7F7] p-3 rounded-xl border border-[#E5E5E5]">
-                {q.scenario || q.prompt}
-              </p>
-
-              <div className="flex items-center justify-between text-xs pt-1 border-t border-[#E5E5E5]">
-                <div className="flex items-center gap-1.5 font-semibold text-emerald-700">
-                  <ShieldCheck className="w-3.5 h-3.5" />
-                  <span>Correct Answer: {q.correctAnswer} {q.unit}</span>
-                </div>
-              </div>
+          <div className="space-y-3">
+            <div className="flex items-center justify-between px-1">
+              <span className="text-xs font-bold text-slate-500 dark:text-slate-400">
+                {customQuestions.length} Custom Questions
+              </span>
+              <button
+                onClick={onPracticeCustom}
+                className="text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1 cursor-pointer"
+              >
+                <span>Practice Custom Set</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </button>
             </div>
-          ))
+
+            {customQuestions.map((q) => (
+              <div
+                key={q.questionId}
+                className="nc-card p-4 sm:p-5 border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#111827] space-y-2.5 shadow-sm"
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <span className="text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded">
+                      {q.topicId?.replace(/_/g, ' ') || 'Clinical Scenario'}
+                    </span>
+                    <h3 className="font-bold text-sm text-slate-900 dark:text-white mt-1">
+                      {q.title}
+                    </h3>
+                  </div>
+
+                  <button
+                    onClick={() => onDeleteQuestion(q.questionId)}
+                    className="p-1.5 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors cursor-pointer"
+                    title="Delete question"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+
+                <p className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed font-medium">
+                  {q.scenario}
+                </p>
+
+                <div className="flex items-center justify-between text-xs pt-1 border-t border-slate-100 dark:border-slate-800 font-bold">
+                  <span className="text-emerald-600 dark:text-emerald-400">
+                    Correct Target: {q.correctAnswer} {q.unit}
+                  </span>
+                  <span className="text-slate-400 text-[10px]">
+                    Created {new Date(q.createdAt || Date.now()).toLocaleDateString()}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
         )}
       </div>
     </div>

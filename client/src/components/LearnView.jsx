@@ -1,5 +1,5 @@
 import React from 'react';
-import { BookOpen, ChevronRight, CheckCircle2, ShieldCheck, ExternalLink, Globe, Award } from 'lucide-react';
+import { BookOpen, ChevronRight, CheckCircle2, ShieldCheck, ExternalLink, Globe, Award, Sparkles } from 'lucide-react';
 
 const TOPICS = [
   {
@@ -61,9 +61,9 @@ const TOPICS = [
   {
     id: 'advanced-calculations',
     title: 'Advanced Clinical Titrations',
-    desc: 'Critical care inotrope and sedative rate adjustments.',
+    desc: 'Heparin weight-based protocols, insulin scale, and critical care drips.',
     lessonsCompleted: 0,
-    totalLessons: 4,
+    totalLessons: 6,
     progress: 0
   }
 ];
@@ -72,83 +72,52 @@ export default function LearnView({ onSelectTopic }) {
   return (
     <div className="space-y-5 pb-8 animate-fade-in">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight text-[#111111]">Learn</h1>
-        <p className="text-sm text-[#666666] mt-0.5">Master key concepts step by step.</p>
+        <h1 className="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white">Learn & Review</h1>
+        <p className="text-sm text-slate-600 dark:text-slate-400 mt-0.5">High-yield clinical calculation curricula and formula breakdowns.</p>
       </div>
 
-      {/* WHO & NCLEX Standards Banner */}
-      <div className="nc-card p-4 bg-[#F8FAFC] border border-[#E2E8F0] space-y-3">
-        <div className="flex items-center gap-2">
-          <ShieldCheck className="w-5 h-5 text-[#0284C7]" />
-          <span className="text-xs font-bold uppercase tracking-wider text-[#0F172A]">
-            Accredited Clinical Guidelines
-          </span>
-        </div>
-        <p className="text-xs text-[#475569] leading-relaxed">
-          NurseCalc curriculum follows World Health Organization (WHO) Patient Safety standards and NCLEX Next-Gen clinical judgment measurement models.
-        </p>
-        <div className="grid grid-cols-2 gap-2 pt-1">
-          <a
-            href="https://www.who.int/initiatives/medication-without-harm"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center justify-between p-2.5 bg-white border border-[#CBD5E1] rounded-xl text-xs font-medium text-[#1E293B] hover:border-[#0284C7] transition-all"
-          >
-            <div className="flex items-center gap-2 min-w-0">
-              <Globe className="w-4 h-4 text-[#0284C7] flex-shrink-0" />
-              <span className="truncate">WHO Med Safety</span>
-            </div>
-            <ExternalLink className="w-3.5 h-3.5 text-[#94A3B8] flex-shrink-0" />
-          </a>
-
-          <a
-            href="https://www.ncsbn.org/nclex.page"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center justify-between p-2.5 bg-white border border-[#CBD5E1] rounded-xl text-xs font-medium text-[#1E293B] hover:border-[#0284C7] transition-all"
-          >
-            <div className="flex items-center gap-2 min-w-0">
-              <Award className="w-4 h-4 text-[#0284C7] flex-shrink-0" />
-              <span className="truncate">NCLEX NCSBN</span>
-            </div>
-            <ExternalLink className="w-3.5 h-3.5 text-[#94A3B8] flex-shrink-0" />
-          </a>
-        </div>
-      </div>
-
-      {/* Curriculum Topic List */}
+      {/* Topics List */}
       <div className="space-y-3">
         {TOPICS.map((topic) => (
-          <button
+          <div
             key={topic.id}
-            type="button"
-            onClick={() => onSelectTopic(topic)}
-            className="w-full nc-card p-4 text-left hover:border-[#111111] hover:bg-[#FAFAFA] cursor-pointer transition-all active:scale-[0.99] flex items-center justify-between gap-3"
+            onClick={() => onSelectTopic(topic.id)}
+            className="nc-card p-4 hover:border-slate-400 dark:hover:border-slate-600 cursor-pointer transition-all active:scale-[0.99] flex items-center justify-between gap-3 group bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-800"
           >
-            <div className="min-w-0 flex-1">
-              <div className="flex items-center justify-between gap-2">
-                <h2 className="font-bold text-sm text-[#111111] truncate">{topic.title}</h2>
-                <span className="text-xs text-[#666666] flex-shrink-0">
-                  {topic.lessonsCompleted} / {topic.totalLessons} lessons
-                </span>
+            <div className="flex items-center gap-3.5 min-w-0 flex-1">
+              <div className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-800 dark:text-slate-200 flex-shrink-0 group-hover:scale-105 transition-transform">
+                <BookOpen className="w-5 h-5" />
               </div>
-              <p className="text-xs text-[#666666] mt-1 line-clamp-1">{topic.desc}</p>
-              
-              <div className="mt-3 flex items-center gap-3">
-                <div className="flex-1 h-1.5 bg-[#EAEAEA] rounded-full overflow-hidden">
-                  <div 
-                    className="h-full bg-[#111111] rounded-full transition-all duration-300"
-                    style={{ width: `${topic.progress}%` }}
-                  />
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-2">
+                  <h2 className="font-bold text-sm text-slate-900 dark:text-white truncate group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                    {topic.title}
+                  </h2>
+                  {topic.progress === 100 && (
+                    <span className="text-[10px] font-bold px-1.5 py-0.5 bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 rounded">
+                      Completed
+                    </span>
+                  )}
                 </div>
-                <span className="text-[11px] font-semibold text-[#111111] w-8 text-right">
-                  {topic.progress}%
-                </span>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 line-clamp-1">{topic.desc}</p>
+                
+                {/* Progress bar */}
+                <div className="flex items-center gap-2 mt-2">
+                  <div className="w-28 h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                    <div 
+                      className="h-full bg-slate-900 dark:bg-white rounded-full transition-all duration-300" 
+                      style={{ width: `${topic.progress}%` }} 
+                    />
+                  </div>
+                  <span className="text-[10px] font-semibold text-slate-500 dark:text-slate-400">
+                    {topic.lessonsCompleted}/{topic.totalLessons} lessons
+                  </span>
+                </div>
               </div>
             </div>
-
-            <ChevronRight className="w-5 h-5 text-[#888888] flex-shrink-0 ml-1" />
-          </button>
+            
+            <ChevronRight className="w-5 h-5 text-slate-400 dark:text-slate-500 flex-shrink-0 group-hover:translate-x-0.5 transition-transform" />
+          </div>
         ))}
       </div>
     </div>

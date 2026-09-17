@@ -17,5 +17,8 @@
     "@supabase/server": "^1.6.0",
     "@supabase/ssr": "^0.12.7",
     "@supabase/supabase-js": "^2.116.0"
+  },
+  "devDependencies": {
+    "concurrently": "^10.0.5"
   }
 }

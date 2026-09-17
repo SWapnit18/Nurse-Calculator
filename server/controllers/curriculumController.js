@@ -171,22 +171,95 @@ const getProgress = async (req, res) => {
 
   let attempts = [];
   try {
-    attempts = await Attempt.find({ userId: uid });
+    attempts = await Attempt.find({ userId: uid }).sort({ timestamp: 1 });
   } catch (e) {
     attempts = memAttempts.filter(a => a.userId === uid);
   }
 
   const total = attempts.length;
   const correct = attempts.filter(a => a.isCorrect).length;
-  const accuracy = total === 0 ? 100.0 : Math.round((correct / total) * 1000) / 10;
+  const accuracy = total === 0 ? 0 : Math.round((correct / total) * 1000) / 10;
+
+  // Real-time Day Streak calculation based on distinct activity calendar days
+  const activeDateSet = new Set();
+  attempts.forEach(a => {
+    if (a.timestamp) {
+      const d = new Date(a.timestamp);
+      const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+      activeDateSet.add(dateStr);
+    }
+  });
+
+  const sortedDates = Array.from(activeDateSet).sort().reverse();
+  let streak = 0;
+  
+  if (sortedDates.length > 0) {
+    const today = new Date();
+    const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+    
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+    const yesterdayStr = `${yesterday.getFullYear()}-${String(yesterday.getMonth() + 1).padStart(2, '0')}-${String(yesterday.getDate()).padStart(2, '0')}`;
+
+    // Streak is active if user practiced today or yesterday
+    let checkDate = sortedDates[0] === todayStr ? today : (sortedDates[0] === yesterdayStr ? yesterday : null);
+
+    if (checkDate) {
+      let currentCheck = new Date(checkDate);
+      while (true) {
+        const checkStr = `${currentCheck.getFullYear()}-${String(currentCheck.getMonth() + 1).padStart(2, '0')}-${String(currentCheck.getDate()).padStart(2, '0')}`;
+        if (activeDateSet.has(checkStr)) {
+          streak++;
+          currentCheck.setDate(currentCheck.getDate() - 1);
+        } else {
+          break;
+        }
+      }
+    }
+  }
+
+  // Calculate past 7 days weekly study activity
+  const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const past7Days = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    const dayLabel = daysOfWeek[d.getDay()];
+    const count = attempts.filter(a => {
+      if (!a.timestamp) return false;
+      const ad = new Date(a.timestamp);
+      return `${ad.getFullYear()}-${String(ad.getMonth() + 1).padStart(2, '0')}-${String(ad.getDate()).padStart(2, '0')}` === dateStr;
+    }).length;
+    past7Days.push({ day: dayLabel, date: dateStr, count });
+  }
+
+  const maxCount = Math.max(...past7Days.map(p => p.count), 1);
+  const weeklyActivity = past7Days.map(p => ({
+    day: p.day,
+    value: p.count > 0 ? Math.max(Math.round((p.count / maxCount) * 100), 25) : 0,
+    count: p.count
+  }));
+
+  // Topic accuracies
+  const topicStats = {};
+  attempts.forEach(a => {
+    if (!topicStats[a.topicId]) topicStats[a.topicId] = { total: 0, correct: 0 };
+    topicStats[a.topicId].total++;
+    if (a.isCorrect) topicStats[a.topicId].correct++;
+  });
 
   res.json({
     success: true,
     data: {
       userId: uid,
-      totalAttempts: total || 105,
-      correctAttempts: correct || 105,
+      totalAttempts: total,
+      correctAttempts: correct,
+      incorrectAttempts: total - correct,
       overallAccuracy: accuracy,
+      streak: streak,
+      weeklyActivity,
+      topicStats,
       recentMistakesCount: total - correct,
       masteryStatus: accuracy >= 85 ? 'NCLEX Mastered (Above 85% Benchmark)' : 'Remediation Required'
     }

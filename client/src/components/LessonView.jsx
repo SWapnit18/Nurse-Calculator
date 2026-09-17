@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowLeft, BookOpen, CheckCircle2, AlertTriangle, Lightbulb, ArrowRight, ChevronRight, ChevronLeft } from 'lucide-react';
+import { ArrowLeft, BookOpen, CheckCircle2, AlertTriangle, Lightbulb, ArrowRight, ChevronRight, ChevronLeft, Sparkles, ShieldCheck } from 'lucide-react';
 
 const TOPIC_KEYS = [
   'medication-math-basics',
@@ -100,169 +100,165 @@ const TOPIC_LESSONS = {
   'reconstitution-exercises': {
     id: 'reconstitution-exercises',
     title: 'Reconstitution Exercises',
-    objective: 'Reconstitute lyophilized powder vials with diluent and determine final concentration.',
-    concept: 'Powdered medications lose potency in solution and must be reconstituted with sterile water or bacteriostatic saline before injection.',
-    example: 'Vial contains Ampicillin 1 g powder. Add 3.5 mL sterile water to yield 250 mg/mL.',
+    objective: 'Calculate diluent addition and extract active medication concentration per mL.',
+    concept: 'Unstable lyophilized antibiotics are packaged as dry powders and require sterile reconstituting diluents.',
+    example: 'Order: Ampicillin 250 mg IM. Vial: 1 g powder. Add 3.5 mL sterile water for a concentration of 250 mg/mL.',
     steps: [
-      'Identify order: Ampicillin 500 mg IM.',
-      'Stock concentration post-reconstitution: 250 mg/mL.',
-      'Calculate volume: 500 mg ÷ 250 mg/mL = 2.0 mL.'
+      'Read vial label: Dissolved powder yields 250 mg per 1.0 mL.',
+      'Calculate volume to administer: 250 mg ordered ÷ 250 mg/mL = 1.0 mL.',
+      'Label remainder: Mark date, time, concentration, and initials on reconstituted vial.'
     ],
-    mistakes: 'Confusing diluent volume added with the resulting solution concentration.',
-    keyPoint: 'Inspect vial label for expiration window after reconstitution and refrigeration requirements.'
+    mistakes: 'Using the total diluent added (3.5 mL) instead of the final resulting concentration per mL.',
+    keyPoint: 'Powder displacement increases final volume; always refer to the label concentration statement.'
   },
   'advanced-calculations': {
     id: 'advanced-calculations',
     title: 'Advanced Clinical Titrations',
-    objective: 'Calculate high-alert ICU inotropic and vasopressor titration rates (mcg/kg/min).',
-    concept: 'Vasoactive medications (Dopamine, Norepinephrine, Nitroglycerin) require continuous hemodynamic rate calibration.',
-    example: 'Order: Dopamine 5 mcg/kg/min for 70 kg patient. Bag: 400 mg in 250 mL D5W (1,600 mcg/mL).',
+    objective: 'Master continuous IV titrations (mcg/kg/min) and dynamic rate adjustment.',
+    concept: 'Vasopressors (Norepinephrine, Dopamine) are titrated minute-by-minute based on real-time arterial blood pressure.',
+    example: 'Order: Dopamine 5 mcg/kg/min for 70 kg patient. Bag: 400 mg in 250 mL D5W.',
     steps: [
+      'Bag concentration: 400 mg × 1,000 = 400,000 mcg ÷ 250 mL = 1,600 mcg/mL.',
       'Hourly mcg requirement: 5 mcg/kg/min × 70 kg × 60 min/hr = 21,000 mcg/hr.',
-      'Bag concentration: (400 mg × 1,000) ÷ 250 mL = 1,600 mcg/mL.',
-      'Pump Rate: 21,000 mcg/hr ÷ 1,600 mcg/mL = 13.13 mL/hr.'
+      'Pump flow rate: 21,000 mcg/hr ÷ 1,600 mcg/mL = 13.1 mL/hr.'
     ],
-    mistakes: 'Forgetting the 60 min/hr multiplier when converting from mcg/min to hourly pump rate.',
-    keyPoint: 'High-alert infusions require independent two-nurse double verification before starting.'
+    mistakes: 'Forgetting the 60 minutes/hour multiplier when calculating continuous microgram titrations.',
+    keyPoint: 'Always double-check infusion bag concentrations and program smart pumps using drug guardrails.'
   }
 };
 
-export default function LessonView({ 
-  lesson, 
-  onBack, 
+export default function LessonView({
+  lesson: lessonKey,
+  onBack,
   onSelectLesson,
-  onStartPractice 
+  onStartPractice
 }) {
-  const lessonKey = typeof lesson === 'string' ? lesson : lesson?.id;
-  const currentKey = (lessonKey && TOPIC_LESSONS[lessonKey]) ? lessonKey : 'medication-math-basics';
-  const currentLesson = TOPIC_LESSONS[currentKey];
-  
+  const currentKey = lessonKey || 'medication-math-basics';
+  const lesson = TOPIC_LESSONS[currentKey] || TOPIC_LESSONS['medication-math-basics'];
+
   const currentIndex = TOPIC_KEYS.indexOf(currentKey);
   const prevKey = currentIndex > 0 ? TOPIC_KEYS[currentIndex - 1] : null;
   const nextKey = currentIndex < TOPIC_KEYS.length - 1 ? TOPIC_KEYS[currentIndex + 1] : null;
 
   return (
-    <div className="space-y-5 pb-8 animate-fade-in">
-      {/* Header with Navigation */}
+    <div className="space-y-4 pb-8 animate-fade-in">
+      {/* Top Breadcrumb & Actions */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <button 
-            onClick={onBack}
-            className="w-10 h-10 -ml-2 rounded-xl flex items-center justify-center text-[#111111] hover:bg-[#F7F7F7] active:bg-[#EAEAEA] transition-all"
-            aria-label="Back to lessons"
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </button>
-          <div>
-            <span className="text-xs font-medium uppercase tracking-wider text-[#888888]">
-              Lesson {currentIndex + 1} of {TOPIC_KEYS.length}
-            </span>
-            <h1 className="text-lg font-bold text-[#111111] leading-tight">{currentLesson.title}</h1>
-          </div>
-        </div>
-
-        {/* Quick Prev / Next Arrows */}
-        <div className="flex items-center gap-1">
-          <button
-            onClick={() => prevKey && onSelectLesson && onSelectLesson(prevKey)}
-            disabled={!prevKey}
-            className="w-8 h-8 rounded-lg flex items-center justify-center text-[#111111] hover:bg-[#F7F7F7] disabled:opacity-30 transition-all"
-            title="Previous Lesson"
-            aria-label="Previous Lesson"
-          >
-            <ChevronLeft className="w-4 h-4" />
-          </button>
-          <button
-            onClick={() => nextKey && onSelectLesson && onSelectLesson(nextKey)}
-            disabled={!nextKey}
-            className="w-8 h-8 rounded-lg flex items-center justify-center text-[#111111] hover:bg-[#F7F7F7] disabled:opacity-30 transition-all"
-            title="Next Lesson"
-            aria-label="Next Lesson"
-          >
-            <ChevronRight className="w-4 h-4" />
-          </button>
-        </div>
-      </div>
-
-      {/* Learning Objective */}
-      <div className="nc-card p-4 bg-[#FAFAFA]">
-        <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-[#111111] mb-1">
-          <BookOpen className="w-4 h-4 text-[#111111]" />
-          <span>Learning Objective</span>
-        </div>
-        <p className="text-sm text-[#444444] leading-relaxed">{currentLesson.objective}</p>
-      </div>
-
-      {/* Concept */}
-      <div className="space-y-2">
-        <h2 className="text-xs font-semibold uppercase tracking-wider text-[#888888] px-1">
-          Core Concept
-        </h2>
-        <div className="nc-card p-4 text-sm text-[#333333] leading-relaxed">
-          {currentLesson.concept}
-        </div>
-      </div>
-
-      {/* Worked Example */}
-      <div className="space-y-2">
-        <h2 className="text-xs font-semibold uppercase tracking-wider text-[#888888] px-1">
-          Worked Example
-        </h2>
-        <div className="nc-card p-4 space-y-3">
-          <div className="p-3 bg-[#F7F7F7] rounded-xl font-medium text-xs text-[#111111] border border-[#E5E5E5]">
-            {currentLesson.example}
-          </div>
-          <div className="space-y-2 pt-1">
-            <span className="text-xs font-semibold text-[#111111] block">Step-by-Step Breakdown:</span>
-            {currentLesson.steps && currentLesson.steps.map((step, idx) => (
-              <div key={idx} className="flex items-start gap-2.5 text-xs text-[#444444]">
-                <span className="w-5 h-5 rounded-full bg-[#111111] text-white flex items-center justify-center text-[10px] font-bold flex-shrink-0 mt-0.5">
-                  {idx + 1}
-                </span>
-                <span className="leading-relaxed">{step}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* Common Mistakes */}
-      <div className="nc-card p-4 border-amber-200 bg-amber-50/50">
-        <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-amber-900 mb-1">
-          <AlertTriangle className="w-4 h-4 text-amber-700" />
-          <span>Common Pitfalls</span>
-        </div>
-        <p className="text-xs text-amber-900/90 leading-relaxed">{currentLesson.mistakes}</p>
-      </div>
-
-      {/* Key Point */}
-      <div className="nc-card p-4 bg-[#F7F7F7]">
-        <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-[#111111] mb-1">
-          <Lightbulb className="w-4 h-4 text-[#111111]" />
-          <span>Key Point</span>
-        </div>
-        <p className="text-xs text-[#444444] font-medium leading-relaxed">{currentLesson.keyPoint}</p>
-      </div>
-
-      {/* Next Lesson & Practice Action Buttons */}
-      <div className="space-y-2.5 pt-2">
         <button
-          onClick={onStartPractice}
-          className="nc-btn-primary w-full flex items-center justify-center gap-2"
+          onClick={onBack}
+          className="flex items-center gap-1.5 text-xs font-semibold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer"
         >
-          <span>Practice These Questions</span>
-          <ArrowRight className="w-4 h-4" />
+          <ArrowLeft className="w-4 h-4" />
+          <span>All Topics</span>
         </button>
 
-        {nextKey && (
-          <button
-            onClick={() => onSelectLesson && onSelectLesson(nextKey)}
-            className="nc-btn-secondary w-full flex items-center justify-center gap-2 text-xs font-semibold py-3"
-          >
-            <span>Next Lesson: {TOPIC_LESSONS[nextKey]?.title}</span>
-            <ChevronRight className="w-4 h-4" />
-          </button>
-        )}
+        <span className="text-[11px] font-bold uppercase tracking-wider px-2.5 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-full">
+          Lesson {currentIndex + 1} of {TOPIC_KEYS.length}
+        </span>
+      </div>
+
+      {/* Lesson Header */}
+      <div className="space-y-1">
+        <h1 className="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white">
+          {lesson.title}
+        </h1>
+        <p className="text-xs text-blue-600 dark:text-blue-400 font-semibold flex items-center gap-1.5">
+          <Sparkles className="w-3.5 h-3.5" />
+          <span>Objective: {lesson.objective}</span>
+        </p>
+      </div>
+
+      {/* Core Clinical Concept */}
+      <div className="nc-card p-4 sm:p-5 space-y-2 bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-800">
+        <div className="flex items-center gap-2">
+          <BookOpen className="w-4 h-4 text-slate-800 dark:text-slate-200" />
+          <h2 className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+            Core Concept
+          </h2>
+        </div>
+        <p className="text-sm text-slate-800 dark:text-slate-200 leading-relaxed font-normal">
+          {lesson.concept}
+        </p>
+      </div>
+
+      {/* Step-by-Step Example */}
+      <div className="nc-card p-4 sm:p-5 space-y-3 bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-800">
+        <div className="flex items-center gap-2">
+          <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+          <h2 className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+            Clinical Example & Calculation Steps
+          </h2>
+        </div>
+        
+        <div className="p-3 bg-slate-50 dark:bg-slate-800/60 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-medium text-slate-800 dark:text-slate-200">
+          <span className="font-bold block text-slate-900 dark:text-white mb-0.5">Scenario:</span>
+          {lesson.example}
+        </div>
+
+        <div className="space-y-2 pt-1">
+          {lesson.steps.map((step, idx) => (
+            <div key={idx} className="flex items-start gap-2.5 text-xs text-slate-700 dark:text-slate-300">
+              <span className="w-5 h-5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 font-bold flex items-center justify-center flex-shrink-0 text-[10px]">
+                {idx + 1}
+              </span>
+              <span className="pt-0.5 leading-relaxed">{step}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* High-Alert Clinical Pitfall */}
+      <div className="nc-card p-4 sm:p-5 bg-red-50/50 dark:bg-red-950/20 border-red-200 dark:border-red-900/40 space-y-2">
+        <div className="flex items-center gap-2">
+          <AlertTriangle className="w-4 h-4 text-red-600 dark:text-red-400" />
+          <h2 className="text-xs font-bold uppercase tracking-wider text-red-700 dark:text-red-400">
+            Common NCLEX Pitfall
+          </h2>
+        </div>
+        <p className="text-xs text-red-900 dark:text-red-200 leading-relaxed font-medium">
+          {lesson.mistakes}
+        </p>
+      </div>
+
+      {/* Key Safety Rule */}
+      <div className="p-3.5 bg-emerald-50/50 dark:bg-emerald-950/20 rounded-xl border border-emerald-200 dark:border-emerald-900/40 flex items-start gap-2.5">
+        <ShieldCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400 flex-shrink-0 mt-0.5" />
+        <div className="text-xs text-emerald-900 dark:text-emerald-200 leading-relaxed">
+          <span className="font-bold">Golden Safety Rule: </span>
+          {lesson.keyPoint}
+        </div>
+      </div>
+
+      {/* Practice CTA */}
+      <div className="pt-2">
+        <button
+          onClick={onStartPractice}
+          className="nc-btn-primary w-full flex items-center justify-center gap-2 text-sm shadow-sm cursor-pointer"
+        >
+          <span>Practice {lesson.title} Questions</span>
+          <ArrowRight className="w-4 h-4" />
+        </button>
+      </div>
+
+      {/* Lesson Navigation Footer */}
+      <div className="flex items-center justify-between gap-3 pt-2">
+        <button
+          onClick={() => prevKey && onSelectLesson(prevKey)}
+          disabled={!prevKey}
+          className="nc-btn-secondary flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-bold disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+        >
+          <ChevronLeft className="w-4 h-4" />
+          <span>Previous Topic</span>
+        </button>
+
+        <button
+          onClick={() => nextKey && onSelectLesson(nextKey)}
+          disabled={!nextKey}
+          className="nc-btn-secondary flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-bold disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+        >
+          <span>Next Topic</span>
+          <ChevronRight className="w-4 h-4" />
+        </button>
       </div>
     </div>
   );
