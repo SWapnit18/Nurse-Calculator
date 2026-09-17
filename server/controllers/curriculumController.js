@@ -289,11 +289,38 @@ const toggleBookmark = async (req, res) => {
   }
 };
 
+// 7. Reset Progress & Clean Real-Time State
+const resetProgress = async (req, res) => {
+  const { userId } = req.body || {};
+  const uid = userId || 'demo_student';
+  try {
+    await Attempt.deleteMany({ userId: uid });
+    await Mistake.deleteMany({ userId: uid });
+    await Bookmark.deleteMany({ userId: uid });
+  } catch (e) {}
+
+  memAttempts = memAttempts.filter(a => a.userId !== uid);
+  memMistakes = memMistakes.filter(m => m.userId !== uid);
+  memBookmarks = memBookmarks.filter(b => b.userId !== uid);
+
+  return res.json({
+    success: true,
+    message: 'All student activity reset to 0 initial level.',
+    data: {
+      totalAttempts: 0,
+      correctAttempts: 0,
+      accuracy: 0,
+      streak: 0
+    }
+  });
+};
+
 module.exports = {
   getTopics,
   getLessons,
   getQuestions,
   submitPractice,
   getProgress,
-  toggleBookmark
+  toggleBookmark,
+  resetProgress
 };

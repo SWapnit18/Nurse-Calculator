@@ -7,14 +7,20 @@ import {
 export default function HomeView({ 
   user, 
   stats, 
+  completedLessons = new Set(),
   onStartPractice, 
   onContinueTopic, 
   onNavigate 
 }) {
-  const accuracy = stats?.accuracy ?? 82;
-  const totalQuestions = stats?.totalQuestions ?? 126;
-  const streakDays = stats?.streakDays ?? 6;
-  const weakTopic = stats?.weakTopic || { title: 'IV Flow Mathematics', accuracy: 51 };
+  const accuracy = stats?.accuracy ?? 0;
+  const totalQuestions = stats?.totalQuestions ?? 0;
+  const streakDays = stats?.streakDays ?? 0;
+  const weakTopic = stats?.weakTopic;
+
+  const completedSet = completedLessons instanceof Set ? completedLessons : new Set(completedLessons);
+  const unitConvLessons = ['les_uc_1', 'les_uc_2', 'les_uc_3', 'les_uc_4', 'les_uc_5', 'les_uc_6'];
+  const unitConvDone = unitConvLessons.filter(l => completedSet.has(l) || completedSet.has('unit-conversions')).length;
+  const unitConvPct = Math.round((unitConvDone / 6) * 100);
 
   return (
     <div className="space-y-5 pb-8 animate-fade-in">
@@ -26,7 +32,7 @@ export default function HomeView({
           </h1>
         </div>
         <p className="text-sm text-slate-600 dark:text-slate-400">
-          Ready to master your clinical calculations today?
+          Ready to master your 42 clinical calculation lessons today?
         </p>
       </div>
 
@@ -65,13 +71,13 @@ export default function HomeView({
       <div className="space-y-2">
         <div className="flex items-center justify-between px-1">
           <h2 className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-            Continue Learning
+            Continue Learning (42 Lessons)
           </h2>
           <button 
             onClick={() => onNavigate('learn')}
             className="text-xs font-semibold text-slate-900 dark:text-slate-200 hover:underline cursor-pointer"
           >
-            See all
+            See all 42
           </button>
         </div>
 
@@ -84,10 +90,15 @@ export default function HomeView({
               <BookOpen className="w-5 h-5" />
             </div>
             <div className="min-w-0">
-              <h3 className="font-bold text-sm text-slate-900 dark:text-white truncate">Unit Conversions</h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Lesson 4 of 6 · Metric Factor Analysis</p>
+              <h3 className="font-bold text-sm text-slate-900 dark:text-white truncate">Metric & Unit Conversions</h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                {unitConvPct > 0 ? `${unitConvDone}/6 lessons completed (${unitConvPct}%)` : 'Initial Level · 0/6 lessons (0% Completed)'}
+              </p>
               <div className="w-32 h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full mt-2 overflow-hidden">
-                <div className="h-full bg-slate-900 dark:bg-white rounded-full" style={{ width: '67%' }} />
+                <div 
+                  className="h-full bg-slate-900 dark:bg-white rounded-full transition-all duration-500" 
+                  style={{ width: `${unitConvPct}%` }} 
+                />
               </div>
             </div>
           </div>
@@ -95,28 +106,32 @@ export default function HomeView({
         </div>
       </div>
 
-      {/* Weak Area Targeted Card */}
+      {/* Focus Area Targeted Card - Monochrome */}
       <div className="space-y-2">
         <div className="px-1">
           <h2 className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
             Target Focus Area
           </h2>
         </div>
-        <div className="nc-card p-4 flex items-center justify-between gap-3 bg-amber-50/40 dark:bg-amber-950/20 border-amber-200 dark:border-amber-900/40">
+        <div className="nc-card p-4 flex items-center justify-between gap-3 bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-800 shadow-2xs">
           <div className="flex items-center gap-3 min-w-0">
-            <div className="w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-900/50 border border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-300 flex items-center justify-center flex-shrink-0">
+            <div className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white flex items-center justify-center flex-shrink-0">
               <AlertCircle className="w-5 h-5" />
             </div>
             <div className="min-w-0">
-              <h3 className="font-bold text-sm text-slate-900 dark:text-white truncate">{weakTopic.title}</h3>
-              <p className="text-xs text-amber-700 dark:text-amber-400 mt-0.5 font-medium">{weakTopic.accuracy}% accuracy · Low confidence</p>
+              <h3 className="font-bold text-sm text-slate-900 dark:text-white truncate">
+                {weakTopic?.hasData ? weakTopic.title : 'Unit 2: Metric & Unit Conversions'}
+              </h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 font-medium">
+                {weakTopic?.hasData ? `${weakTopic.accuracy}% accuracy · Practice recommended` : 'Initial Level · 0% completed · Ready to start'}
+              </p>
             </div>
           </div>
           <button
-            onClick={() => onContinueTopic('iv-flow-mathematics')}
+            onClick={() => onContinueTopic(weakTopic?.hasData ? weakTopic.id : 'unit-conversions')}
             className="nc-btn-secondary px-3.5 py-2 text-xs font-bold h-auto flex-shrink-0 cursor-pointer"
           >
-            Review
+            Start
           </button>
         </div>
       </div>

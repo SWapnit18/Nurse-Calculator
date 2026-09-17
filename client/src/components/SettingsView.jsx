@@ -10,7 +10,9 @@ export default function SettingsView({
   onToggleDarkMode,
   onNavigate,
   onLogout, 
-  onOpenSubscriptionModal 
+  onOpenSubscriptionModal,
+  onSeedRealisticData,
+  onResetAllData
 }) {
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [activeModal, setActiveModal] = useState(null); // 'account' | 'practice-pref' | 'about' | 'privacy' | null
@@ -145,6 +147,32 @@ export default function SettingsView({
             </div>
             <ChevronRight className="w-4 h-4 text-slate-400 dark:text-slate-500" />
           </button>
+        </div>
+      </div>
+
+      {/* Real-Time Data Controls */}
+      <div className="space-y-2">
+        <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 px-1">
+          Real-Time Data Management
+        </span>
+        <div className="nc-card p-4 space-y-3 border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#111827] shadow-sm">
+          <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+            All practice attempts, scores, streaks, and mistakes sync live with the backend and local storage in real time.
+          </p>
+          <div className="flex flex-wrap items-center gap-2 pt-1">
+            <button
+              onClick={onSeedRealisticData}
+              className="nc-btn-secondary px-3.5 py-2 text-xs font-bold cursor-pointer"
+            >
+              Load Sample Clinical History
+            </button>
+            <button
+              onClick={onResetAllData}
+              className="px-3.5 py-2 text-xs font-bold rounded-xl border border-red-200 dark:border-red-900/50 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 transition-colors cursor-pointer"
+            >
+              Reset All Data to 0 (Clean Slate)
+            </button>
+          </div>
         </div>
       </div>
     </div>

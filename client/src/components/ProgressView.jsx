@@ -1,5 +1,13 @@
 import React from 'react';
-import { TrendingUp, Award, Calendar, CheckCircle2 } from 'lucide-react';
+import { TrendingUp, Award, Calendar, CheckCircle2, BookOpen } from 'lucide-react';
+
+const TOPIC_CONFIG = [
+  { id: 'unit_conversions', name: 'Unit Conversions' },
+  { id: 'tablet_calculations', name: 'Tablet Calculations' },
+  { id: 'liquid_calculations', name: 'Liquid Calculations' },
+  { id: 'iv_flow_mathematics', name: 'IV Flow Mathematics' },
+  { id: 'med_math_basics', name: 'Med Math Basics' },
+];
 
 export default function ProgressView({ stats }) {
   const accuracy = stats?.accuracy ?? 0;
@@ -8,34 +16,38 @@ export default function ProgressView({ stats }) {
   const incorrect = stats?.incorrectAnswers ?? 0;
 
   const defaultWeekly = [
-    { day: 'Mon', value: 0 },
-    { day: 'Tue', value: 0 },
-    { day: 'Wed', value: 0 },
-    { day: 'Thu', value: 0 },
-    { day: 'Fri', value: 0 },
-    { day: 'Sat', value: 0 },
-    { day: 'Sun', value: 0 },
+    { day: 'Mon', value: 0, count: 0 },
+    { day: 'Tue', value: 0, count: 0 },
+    { day: 'Wed', value: 0, count: 0 },
+    { day: 'Thu', value: 0, count: 0 },
+    { day: 'Fri', value: 0, count: 0 },
+    { day: 'Sat', value: 0, count: 0 },
+    { day: 'Sun', value: 0, count: 0 },
   ];
 
   const weeklyActivity = (stats?.weeklyActivity && stats.weeklyActivity.length > 0)
     ? stats.weeklyActivity
     : defaultWeekly;
 
-  const defaultTopics = [
-    { name: 'Unit Conversions', pct: stats?.topicStats?.unit_conversions ? Math.round((stats.topicStats.unit_conversions.correct / stats.topicStats.unit_conversions.total) * 100) : 78 },
-    { name: 'Tablet Calculations', pct: stats?.topicStats?.tablet_calculations ? Math.round((stats.topicStats.tablet_calculations.correct / stats.topicStats.tablet_calculations.total) * 100) : 88 },
-    { name: 'Liquid Calculations', pct: stats?.topicStats?.liquid_calculations ? Math.round((stats.topicStats.liquid_calculations.correct / stats.topicStats.liquid_calculations.total) * 100) : 92 },
-    { name: 'IV Flow Mathematics', pct: stats?.topicStats?.iv_flow_mathematics ? Math.round((stats.topicStats.iv_flow_mathematics.correct / stats.topicStats.iv_flow_mathematics.total) * 100) : 51 },
-    { name: 'Med Math Basics', pct: stats?.topicStats?.med_math_basics ? Math.round((stats.topicStats.med_math_basics.correct / stats.topicStats.med_math_basics.total) * 100) : 80 },
-  ];
-
-  const topicAccuracies = defaultTopics;
+  const topicAccuracies = TOPIC_CONFIG.map(t => {
+    const topicStat = stats?.topicStats?.[t.id];
+    const hasAttempts = topicStat && topicStat.total > 0;
+    const pct = hasAttempts ? Math.round((topicStat.correct / topicStat.total) * 100) : null;
+    return {
+      name: t.name,
+      id: t.id,
+      pct: pct,
+      total: topicStat?.total || 0,
+      correct: topicStat?.correct || 0,
+      hasAttempts
+    };
+  });
 
   return (
     <div className="space-y-5 pb-8 animate-fade-in">
       <div>
         <h1 className="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white">Your Progress</h1>
-        <p className="text-sm text-slate-600 dark:text-slate-400 mt-0.5">Track your clinical calculation mastery and score trends.</p>
+        <p className="text-sm text-slate-600 dark:text-slate-400 mt-0.5">Real-time tracking of your calculation mastery, attempts, and score trends.</p>
       </div>
 
       {/* Summary Metrics */}
@@ -73,7 +85,7 @@ export default function ProgressView({ stats }) {
               <div className="w-7 bg-slate-100 dark:bg-slate-800 rounded-t-lg h-full flex items-end overflow-hidden">
                 <div 
                   className="w-full bg-slate-900 dark:bg-white rounded-t-lg transition-all duration-500" 
-                  style={{ height: `${item.value}%` }}
+                  style={{ height: `${item.value || 0}%` }}
                 />
               </div>
               <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400">{item.day}</span>
@@ -90,13 +102,16 @@ export default function ProgressView({ stats }) {
 
         <div className="space-y-3.5">
           {topicAccuracies.map((topic, idx) => {
-            const isLow = topic.pct < 60;
+            const isLow = topic.hasAttempts && topic.pct < 60;
+            const displayPct = topic.hasAttempts ? `${topic.pct}%` : 'Not attempted';
+            const barWidth = topic.hasAttempts ? `${topic.pct}%` : '0%';
+
             return (
               <div key={idx} className="space-y-1.5">
                 <div className="flex items-center justify-between text-xs">
                   <span className="font-bold text-slate-800 dark:text-slate-200">{topic.name}</span>
                   <span className={`font-extrabold ${isLow ? 'text-amber-600 dark:text-amber-400' : 'text-slate-900 dark:text-white'}`}>
-                    {topic.pct}%
+                    {displayPct} {topic.hasAttempts ? `(${topic.correct}/${topic.total})` : ''}
                   </span>
                 </div>
                 <div className="w-full h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
@@ -104,7 +119,7 @@ export default function ProgressView({ stats }) {
                     className={`h-full rounded-full transition-all duration-500 ${
                       isLow ? 'bg-amber-500' : 'bg-slate-900 dark:bg-white'
                     }`}
-                    style={{ width: `${topic.pct}%` }}
+                    style={{ width: barWidth }}
                   />
                 </div>
               </div>

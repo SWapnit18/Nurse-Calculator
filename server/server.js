@@ -11,7 +11,8 @@ const {
   getQuestions,
   submitPractice,
   getProgress,
-  toggleBookmark
+  toggleBookmark,
+  resetProgress
 } = require('./controllers/curriculumController');
 
 const app = express();
@@ -61,9 +62,10 @@ app.get('/api/topics/:topicId/lessons', getLessons);
 app.get('/api/questions', getQuestions);
 app.post('/api/practice/submit', submitPractice);
 
-// Progress & Bookmarks
+// Progress, Reset & Bookmarks
 app.get('/api/progress/:userId', getProgress);
 app.get('/api/progress', getProgress);
+app.post('/api/progress/reset', resetProgress);
 app.post('/api/bookmarks/toggle', toggleBookmark);
 
 // Student & User Specific APIs

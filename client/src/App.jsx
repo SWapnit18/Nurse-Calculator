@@ -16,26 +16,79 @@ import ProfileView from './components/ProfileView';
 import SettingsView from './components/SettingsView';
 import AiTutorView from './components/AiTutorView';
 import QuestionPortfolioView from './components/QuestionPortfolioView';
+import LearningGoalsView from './components/LearningGoalsView';
 import { INITIAL_QUESTION_BANK } from './data/fallbackQuestions';
 import { Bookmark, ArrowRight, Trash2, BookOpen } from 'lucide-react';
 
 import CalculationEngine from './calculator/engine';
 
-// Maps frontend lesson IDs and mistake category IDs to question topicIds
+// Maps frontend lesson IDs, 42 lesson keys, and mistake category IDs to question topicIds
 const LESSON_TO_TOPIC_MAP = {
   'medication-math-basics': ['med_math_basics'],
+  'les_mmb_1': ['med_math_basics'],
+  'les_mmb_2': ['med_math_basics'],
+  'les_mmb_3': ['med_math_basics'],
+  'les_mmb_4': ['med_math_basics'],
+  'les_mmb_5': ['med_math_basics'],
+  'les_mmb_6': ['med_math_basics'],
+
   'unit-conversions': ['unit_conversions'],
   'unit-conversion': ['unit_conversions'],
+  'les_uc_1': ['unit_conversions'],
+  'les_uc_2': ['unit_conversions'],
+  'les_uc_3': ['unit_conversions'],
+  'les_uc_4': ['unit_conversions'],
+  'les_uc_5': ['unit_conversions'],
+  'les_uc_6': ['unit_conversions'],
+
   'tablet-calculations': ['tablet_calculations'],
   'tablet-calculation': ['tablet_calculations'],
+  'les_tab_1': ['tablet_calculations'],
+  'les_tab_2': ['tablet_calculations'],
+  'les_tab_3': ['tablet_calculations'],
+  'les_tab_4': ['tablet_calculations'],
+  'les_tab_5': ['tablet_calculations'],
+
   'liquid-calculations': ['liquid_calculations'],
+  'les_liq_1': ['liquid_calculations'],
+  'les_liq_2': ['liquid_calculations'],
+  'les_liq_3': ['liquid_calculations'],
+  'les_liq_4': ['liquid_calculations'],
+  'les_liq_5': ['liquid_calculations'],
+
   'iv-flow-mathematics': ['iv_flow_mathematics'],
   'flow-rate': ['iv_flow_mathematics'],
-  'decimals-rounding': ['med_math_basics'],
+  'les_flow_1': ['iv_flow_mathematics'],
+  'les_flow_2': ['iv_flow_mathematics'],
+  'les_flow_3': ['iv_flow_mathematics'],
+  'les_flow_4': ['iv_flow_mathematics'],
+  'les_flow_5': ['iv_flow_mathematics'],
+
+  'volumetric-infusion-pumps': ['iv_flow_mathematics'],
+  'les_pump_1': ['iv_flow_mathematics'],
+  'les_pump_2': ['iv_flow_mathematics'],
+  'les_pump_3': ['iv_flow_mathematics'],
+  'les_pump_4': ['iv_flow_mathematics'],
+  'les_pump_5': ['iv_flow_mathematics'],
+
   'weight-based-practice': ['med_math_basics', 'weight_based'],
-  'reconstitution-exercises': ['liquid_calculations', 'reconstitution'],
-  'reconstitution': ['liquid_calculations', 'reconstitution'],
-  'advanced-calculations': ['unit_conversions', 'iv_flow_mathematics', 'advanced_calc']
+  'les_peds_1': ['med_math_basics', 'weight_based'],
+  'les_peds_2': ['med_math_basics', 'weight_based'],
+  'les_peds_3': ['med_math_basics', 'weight_based'],
+  'les_peds_4': ['med_math_basics', 'weight_based'],
+  'les_peds_5': ['med_math_basics', 'weight_based'],
+
+  'critical-care-titrations': ['iv_flow_mathematics', 'med_math_basics', 'unit_conversions'],
+  'les_crit_1': ['iv_flow_mathematics', 'unit_conversions'],
+  'les_crit_2': ['iv_flow_mathematics', 'unit_conversions'],
+  'les_crit_3': ['iv_flow_mathematics', 'unit_conversions'],
+  'les_crit_4': ['iv_flow_mathematics', 'unit_conversions'],
+  'les_crit_5': ['iv_flow_mathematics', 'unit_conversions'],
+
+  'decimals-rounding': ['med_math_basics'],
+  'reconstitution-exercises': ['liquid_calculations'],
+  'reconstitution': ['liquid_calculations'],
+  'advanced-calculations': ['unit_conversions', 'iv_flow_mathematics']
 };
 
 export default function App() {
@@ -77,20 +130,176 @@ export default function App() {
   };
 
   // User State
+  // Calculation helper for 100% REAL dynamic stats
+  const computeStatsFromAttempts = (attemptsList) => {
+    const list = Array.isArray(attemptsList) ? attemptsList : [];
+    const total = list.length;
+    const correct = list.filter(a => a.isCorrect).length;
+    const incorrect = total - correct;
+    const accuracy = total === 0 ? 0 : Math.round((correct / total) * 1000) / 10;
+
+    // Real-time Day Streak calculation
+    const activeDateSet = new Set();
+    list.forEach(a => {
+      if (a.timestamp) {
+        const d = new Date(a.timestamp);
+        const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        activeDateSet.add(dateStr);
+      }
+    });
+
+    const sortedDates = Array.from(activeDateSet).sort().reverse();
+    let streak = 0;
+    if (sortedDates.length > 0) {
+      const today = new Date();
+      const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+      const yesterday = new Date(today);
+      yesterday.setDate(yesterday.getDate() - 1);
+      const yesterdayStr = `${yesterday.getFullYear()}-${String(yesterday.getMonth() + 1).padStart(2, '0')}-${String(yesterday.getDate()).padStart(2, '0')}`;
+
+      let checkDate = sortedDates[0] === todayStr ? today : (sortedDates[0] === yesterdayStr ? yesterday : null);
+      if (checkDate) {
+        let currentCheck = new Date(checkDate);
+        while (true) {
+          const checkStr = `${currentCheck.getFullYear()}-${String(currentCheck.getMonth() + 1).padStart(2, '0')}-${String(currentCheck.getDate()).padStart(2, '0')}`;
+          if (activeDateSet.has(checkStr)) {
+            streak++;
+            currentCheck.setDate(currentCheck.getDate() - 1);
+          } else {
+            break;
+          }
+        }
+      }
+    }
+
+    // Weekly study activity (past 7 days)
+    const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const past7Days = [];
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+      const dayLabel = daysOfWeek[d.getDay()];
+      const count = list.filter(a => {
+        if (!a.timestamp) return false;
+        const ad = new Date(a.timestamp);
+        return `${ad.getFullYear()}-${String(ad.getMonth() + 1).padStart(2, '0')}-${String(ad.getDate()).padStart(2, '0')}` === dateStr;
+      }).length;
+      past7Days.push({ day: dayLabel, date: dateStr, count });
+    }
+
+    const maxCount = Math.max(...past7Days.map(p => p.count), 1);
+    const weeklyActivity = past7Days.map(p => ({
+      day: p.day,
+      value: p.count > 0 ? Math.max(Math.round((p.count / maxCount) * 100), 20) : 0,
+      count: p.count
+    }));
+
+    // Topic accuracies
+    const topicStats = {};
+    list.forEach(a => {
+      const tid = a.topicId || 'med_math_basics';
+      if (!topicStats[tid]) topicStats[tid] = { total: 0, correct: 0 };
+      topicStats[tid].total++;
+      if (a.isCorrect) topicStats[tid].correct++;
+    });
+
+    const topicNames = {
+      'unit_conversions': 'Unit Conversions',
+      'tablet_calculations': 'Tablet Calculations',
+      'liquid_calculations': 'Liquid Calculations',
+      'iv_flow_mathematics': 'IV Flow Mathematics',
+      'med_math_basics': 'Med Math Basics'
+    };
+
+    let weakTopic = { id: 'iv_flow_mathematics', title: 'IV Flow Mathematics', accuracy: 0, hasData: false };
+    let minPct = 101;
+    Object.keys(topicStats).forEach(tid => {
+      if (topicStats[tid].total > 0) {
+        const pct = Math.round((topicStats[tid].correct / topicStats[tid].total) * 100);
+        if (pct < minPct) {
+          minPct = pct;
+          weakTopic = {
+            id: tid,
+            title: topicNames[tid] || tid,
+            accuracy: pct,
+            hasData: true
+          };
+        }
+      }
+    });
+
+    return {
+      accuracy,
+      totalQuestions: total,
+      correctAnswers: correct,
+      incorrectAnswers: incorrect,
+      streakDays: streak,
+      weeklyActivity,
+      topicStats,
+      weakTopic
+    };
+  };
+
+  // User State
   const [user, setUser] = useState({
     name: 'Nurse Student',
     email: 'student@nursecalc.app'
   });
 
-  // Dynamic Dashboard / Progress Stats
-  const [stats, setStats] = useState({
-    accuracy: 82,
-    totalQuestions: 126,
-    correctAnswers: 103,
-    incorrectAnswers: 23,
-    streakDays: 6,
-    weakTopic: { title: 'IV Flow Mathematics', accuracy: 51 }
+  // Persistent Real Attempts History
+  const [attempts, setAttempts] = useState(() => {
+    try {
+      const saved = localStorage.getItem('nursecalc_student_attempts');
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
   });
+
+  // Persistent Real Mistakes Log
+  const [mistakesData, setMistakesData] = useState(() => {
+    try {
+      const saved = localStorage.getItem('nursecalc_student_mistakes');
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  // Persistent Real Completed Lessons Set
+  const [completedLessons, setCompletedLessons] = useState(() => {
+    try {
+      const saved = localStorage.getItem('nursecalc_completed_lessons');
+      return saved ? new Set(JSON.parse(saved)) : new Set();
+    } catch {
+      return new Set();
+    }
+  });
+
+  const handleToggleLessonComplete = (lessonKey) => {
+    if (!lessonKey) return;
+    setCompletedLessons(prev => {
+      const next = new Set(prev);
+      if (next.has(lessonKey)) {
+        next.delete(lessonKey);
+      } else {
+        next.add(lessonKey);
+      }
+      try {
+        localStorage.setItem('nursecalc_completed_lessons', JSON.stringify(Array.from(next)));
+      } catch {}
+      return next;
+    });
+  };
+
+  // Dynamic Dashboard / Progress Stats computed directly from real attempts
+  const [stats, setStats] = useState(() => computeStatsFromAttempts(attempts));
+
+  // Keep stats continuously synced whenever attempts change
+  useEffect(() => {
+    setStats(computeStatsFromAttempts(attempts));
+  }, [attempts]);
 
   // Learn State & Practice Filter
   const [selectedTopic, setSelectedTopic] = useState(null);
@@ -142,8 +351,9 @@ export default function App() {
     });
   };
 
-  // Load questions from backend on mount
+  // Load questions, backend attempts and mistakes on mount
   useEffect(() => {
+    // 1. Fetch questions bank
     fetch('http://localhost:5000/api/questions')
       .then(r => r.json())
       .then(res => {
@@ -152,25 +362,39 @@ export default function App() {
         }
       })
       .catch(() => {
-        // Fallback to local high-yield clinical question bank
         setAllQuestions(INITIAL_QUESTION_BANK);
       });
 
-    // Fetch dynamic progress
-    fetch('http://localhost:5000/api/progress')
+    // 2. Fetch backend attempts
+    fetch('http://localhost:5000/api/attempts')
       .then(r => r.json())
       .then(res => {
-        if (res.data) {
-          setStats(prev => ({
-            ...prev,
-            accuracy: res.data.overallAccuracy ?? prev.accuracy,
-            totalQuestions: res.data.totalAttempts ?? prev.totalQuestions,
-            correctAnswers: res.data.correctAttempts ?? prev.correctAnswers,
-            incorrectAnswers: res.data.incorrectAttempts ?? prev.incorrectAnswers,
-            streakDays: res.data.streak ?? prev.streakDays,
-            weeklyActivity: res.data.weeklyActivity,
-            topicStats: res.data.topicStats
-          }));
+        if (res.data && res.data.length > 0) {
+          setAttempts(prev => {
+            const map = new Map();
+            prev.forEach(a => map.set(a.id || `${a.questionId}_${a.timestamp}`, a));
+            res.data.forEach(a => map.set(a._id || a.id || `${a.questionId}_${a.timestamp}`, a));
+            const merged = Array.from(map.values());
+            localStorage.setItem('nursecalc_student_attempts', JSON.stringify(merged));
+            return merged;
+          });
+        }
+      })
+      .catch(() => {});
+
+    // 3. Fetch backend mistakes
+    fetch('http://localhost:5000/api/mistakes')
+      .then(r => r.json())
+      .then(res => {
+        if (res.data?.recentMistakes && res.data.recentMistakes.length > 0) {
+          setMistakesData(prev => {
+            const map = new Map();
+            prev.forEach(m => map.set(m.id || `${m.questionId}_${m.timestamp}`, m));
+            res.data.recentMistakes.forEach(m => map.set(m._id || m.id || `${m.questionId}_${m.timestamp}`, m));
+            const merged = Array.from(map.values());
+            localStorage.setItem('nursecalc_student_mistakes', JSON.stringify(merged));
+            return merged;
+          });
         }
       })
       .catch(() => {});
@@ -208,7 +432,6 @@ export default function App() {
       return next;
     });
 
-    // Sync with backend API in background
     fetch('http://localhost:5000/api/bookmarks/toggle', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -262,12 +485,13 @@ export default function App() {
     }
   };
 
-  // Practice submission logic
+  // Practice submission logic with instant real-time state & storage synchronization
   const handleCheckAnswer = () => {
     if (!currentQuestion || !userAnswer.trim() || isChecking) return;
     setIsChecking(true);
 
     const inputVal = parseFloat(userAnswer.trim());
+    const isLocalMatch = Math.abs(inputVal - currentQuestion.correctAnswer) <= (currentQuestion.tolerance || 0.05);
 
     fetch('http://localhost:5000/api/practice/submit', {
       method: 'POST',
@@ -282,9 +506,7 @@ export default function App() {
       .then(res => {
         setIsChecking(false);
         setIsSubmitted(true);
-        const isMatch = res.isCorrect !== undefined 
-          ? res.isCorrect 
-          : Math.abs(inputVal - currentQuestion.correctAnswer) <= (currentQuestion.tolerance || 0.05);
+        const isMatch = res.isCorrect !== undefined ? res.isCorrect : isLocalMatch;
 
         setPracticeResult({
           isCorrect: isMatch,
@@ -294,41 +516,49 @@ export default function App() {
           mistakeType: res.mistakeType
         });
 
-        // Real-time immediate stats update
-        setStats(prev => {
-          const newTotal = (prev.totalQuestions || 0) + 1;
-          const newCorrect = isMatch ? (prev.correctAnswers || 0) + 1 : (prev.correctAnswers || 0);
-          const newAccuracy = Math.round((newCorrect / newTotal) * 1000) / 10;
-          return {
-            ...prev,
-            totalQuestions: newTotal,
-            correctAnswers: newCorrect,
-            incorrectAnswers: newTotal - newCorrect,
-            accuracy: newAccuracy
-          };
+        // Record real attempt
+        const newAttempt = {
+          id: `att_${Date.now()}`,
+          questionId: currentQuestion.questionId,
+          topicId: currentQuestion.topicId,
+          studentAnswer: inputVal,
+          correctAnswer: currentQuestion.correctAnswer,
+          isCorrect: isMatch,
+          timestamp: new Date().toISOString()
+        };
+
+        setAttempts(prev => {
+          const updated = [newAttempt, ...prev];
+          localStorage.setItem('nursecalc_student_attempts', JSON.stringify(updated));
+          return updated;
         });
 
-        // Re-fetch backend progress to keep MongoDB in exact sync
-        fetch('http://localhost:5000/api/progress/demo_student')
-          .then(r => r.json())
-          .then(pRes => {
-            if (pRes.data) {
-              setStats(prev => ({
-                ...prev,
-                accuracy: pRes.data.overallAccuracy ?? prev.accuracy,
-                totalQuestions: pRes.data.totalAttempts ?? prev.totalQuestions,
-                correctAnswers: pRes.data.correctAttempts ?? prev.correctAnswers,
-                incorrectAnswers: (pRes.data.totalAttempts ?? prev.totalQuestions) - (pRes.data.correctAttempts ?? prev.correctAnswers)
-              }));
-            }
-          })
-          .catch(() => {});
+        // If mistake, record real mistake
+        if (!isMatch) {
+          const newMistake = {
+            id: `mis_${Date.now()}`,
+            questionId: currentQuestion.questionId,
+            questionTitle: currentQuestion.prompt || currentQuestion.title,
+            topicId: currentQuestion.topicId,
+            studentAnswer: inputVal,
+            correctAnswer: currentQuestion.correctAnswer,
+            mistakeType: res.mistakeType || (currentQuestion.topicId === 'unit_conversions' ? 'UNIT_CONVERSION_ERROR' : 'CALCULATION_ERROR'),
+            aiExplanation: res.aiExplanation || currentQuestion.explanation,
+            timestamp: new Date().toISOString()
+          };
+          setMistakesData(prev => {
+            const updated = [newMistake, ...prev];
+            localStorage.setItem('nursecalc_student_mistakes', JSON.stringify(updated));
+            return updated;
+          });
+        }
       })
       .catch(() => {
-        // Deterministic client fallback check
+        // Fallback local deterministic validation
         setIsChecking(false);
         setIsSubmitted(true);
-        const isMatch = Math.abs(inputVal - currentQuestion.correctAnswer) <= (currentQuestion.tolerance || 0.05);
+        const isMatch = isLocalMatch;
+
         setPracticeResult({
           isCorrect: isMatch,
           correctAnswer: currentQuestion.correctAnswer,
@@ -337,20 +567,106 @@ export default function App() {
           mistakeType: isMatch ? null : 'CALCULATION_ERROR'
         });
 
-        // Real-time immediate stats update
-        setStats(prev => {
-          const newTotal = (prev.totalQuestions || 0) + 1;
-          const newCorrect = isMatch ? (prev.correctAnswers || 0) + 1 : (prev.correctAnswers || 0);
-          const newAccuracy = Math.round((newCorrect / newTotal) * 1000) / 10;
-          return {
-            ...prev,
-            totalQuestions: newTotal,
-            correctAnswers: newCorrect,
-            incorrectAnswers: newTotal - newCorrect,
-            accuracy: newAccuracy
-          };
+        const newAttempt = {
+          id: `att_${Date.now()}`,
+          questionId: currentQuestion.questionId,
+          topicId: currentQuestion.topicId,
+          studentAnswer: inputVal,
+          correctAnswer: currentQuestion.correctAnswer,
+          isCorrect: isMatch,
+          timestamp: new Date().toISOString()
+        };
+
+        setAttempts(prev => {
+          const updated = [newAttempt, ...prev];
+          localStorage.setItem('nursecalc_student_attempts', JSON.stringify(updated));
+          return updated;
         });
+
+        if (!isMatch) {
+          const newMistake = {
+            id: `mis_${Date.now()}`,
+            questionId: currentQuestion.questionId,
+            questionTitle: currentQuestion.prompt || currentQuestion.title,
+            topicId: currentQuestion.topicId,
+            studentAnswer: inputVal,
+            correctAnswer: currentQuestion.correctAnswer,
+            mistakeType: 'CALCULATION_ERROR',
+            aiExplanation: currentQuestion.explanation || 'Review the formula setup.',
+            timestamp: new Date().toISOString()
+          };
+          setMistakesData(prev => {
+            const updated = [newMistake, ...prev];
+            localStorage.setItem('nursecalc_student_mistakes', JSON.stringify(updated));
+            return updated;
+          });
+        }
       });
+  };
+
+  // Real Data Seed & Reset Handlers
+  const handleResetAllData = () => {
+    localStorage.removeItem('nursecalc_student_attempts');
+    localStorage.removeItem('nursecalc_student_mistakes');
+    localStorage.removeItem('nursecalc_completed_lessons');
+    setAttempts([]);
+    setMistakesData([]);
+    setCompletedLessons(new Set());
+
+    fetch('http://localhost:5000/api/progress/reset', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId: 'demo_student' })
+    }).catch(() => {});
+  };
+
+  const handleSeedRealisticData = () => {
+    const sampleAttempts = [
+      { id: 'sa1', questionId: 'q_med_1', topicId: 'med_math_basics', studentAnswer: 2, correctAnswer: 2, isCorrect: true, timestamp: new Date().toISOString() },
+      { id: 'sa2', questionId: 'q_unit_1', topicId: 'unit_conversions', studentAnswer: 500, correctAnswer: 500, isCorrect: true, timestamp: new Date().toISOString() },
+      { id: 'sa3', questionId: 'q_unit_2', topicId: 'unit_conversions', studentAnswer: 2.5, correctAnswer: 2.5, isCorrect: true, timestamp: new Date().toISOString() },
+      { id: 'sa4', questionId: 'q_tab_1', topicId: 'tablet_calculations', studentAnswer: 1, correctAnswer: 1, isCorrect: true, timestamp: new Date().toISOString() },
+      { id: 'sa5', questionId: 'q_flow_1', topicId: 'iv_flow_mathematics', studentAnswer: 100, correctAnswer: 125, isCorrect: false, timestamp: new Date().toISOString() },
+      { id: 'sa6', questionId: 'q_flow_2', topicId: 'iv_flow_mathematics', studentAnswer: 20, correctAnswer: 21, isCorrect: false, timestamp: new Date().toISOString() },
+      { id: 'sa7', questionId: 'q_liq_1', topicId: 'liquid_calculations', studentAnswer: 5, correctAnswer: 5, isCorrect: true, timestamp: new Date().toISOString() },
+      { id: 'sa8', questionId: 'q_med_2', topicId: 'med_math_basics', studentAnswer: 0.5, correctAnswer: 0.5, isCorrect: true, timestamp: new Date(Date.now() - 86400000).toISOString() },
+      { id: 'sa9', questionId: 'q_unit_3', topicId: 'unit_conversions', studentAnswer: 1000, correctAnswer: 1000, isCorrect: true, timestamp: new Date(Date.now() - 86400000).toISOString() },
+      { id: 'sa10', questionId: 'q_tab_2', topicId: 'tablet_calculations', studentAnswer: 2, correctAnswer: 2, isCorrect: true, timestamp: new Date(Date.now() - 86400000 * 2).toISOString() },
+    ];
+
+    const sampleMistakes = [
+      {
+        id: 'sm1',
+        questionId: 'q_flow_1',
+        questionTitle: '1000 mL Normal Saline over 8 hours (mL/hr)',
+        topicId: 'iv_flow_mathematics',
+        studentAnswer: 100,
+        correctAnswer: 125,
+        mistakeType: 'PUMP_RATE_ERROR',
+        aiExplanation: 'Formula: Total Volume ÷ Total Hours = 1,000 mL ÷ 8 hr = 125 mL/hr.',
+        timestamp: new Date().toISOString()
+      },
+      {
+        id: 'sm2',
+        questionId: 'q_flow_2',
+        questionTitle: '500 mL D5W over 4 hours with 10 gtt/mL tubing',
+        topicId: 'iv_flow_mathematics',
+        studentAnswer: 20,
+        correctAnswer: 21,
+        mistakeType: 'ROUNDING_MISMATCH',
+        aiExplanation: '500 mL × 10 gtt/mL ÷ 240 min = 20.83. Gravity drops must be rounded to nearest whole integer (21 gtt/min).',
+        timestamp: new Date().toISOString()
+      }
+    ];
+
+    const sampleCompleted = new Set(['medication-math-basics', 'les_mmb_1', 'unit-conversions']);
+
+    setAttempts(sampleAttempts);
+    setMistakesData(sampleMistakes);
+    setCompletedLessons(sampleCompleted);
+    localStorage.setItem('nursecalc_student_attempts', JSON.stringify(sampleAttempts));
+    localStorage.setItem('nursecalc_student_mistakes', JSON.stringify(sampleMistakes));
+    localStorage.setItem('nursecalc_completed_lessons', JSON.stringify(Array.from(sampleCompleted)));
   };
 
   const handleNextQuestion = () => {
@@ -447,6 +763,7 @@ export default function App() {
           <HomeView
             user={user}
             stats={stats}
+            completedLessons={completedLessons}
             onStartPractice={() => {
               setPracticeTopicFilter(null);
               setCurrentQIndex(0);
@@ -462,8 +779,13 @@ export default function App() {
 
         {activeTab === 'learn' && (
           <LearnView
+            completedLessons={completedLessons}
             onSelectTopic={(topic) => {
               setSelectedTopic(topic);
+              handleNavigate('lesson');
+            }}
+            onSelectLesson={(lessonId) => {
+              setSelectedTopic(lessonId);
               handleNavigate('lesson');
             }}
           />
@@ -472,6 +794,8 @@ export default function App() {
         {activeTab === 'lesson' && (
           <LessonView
             lesson={selectedTopic}
+            completedLessons={completedLessons}
+            onToggleLessonComplete={handleToggleLessonComplete}
             onBack={() => handleNavigate('learn')}
             onSelectLesson={(newTopicId) => setSelectedTopic(newTopicId)}
             onStartPractice={() => handleStartTopicPractice(selectedTopic)}
@@ -504,6 +828,7 @@ export default function App() {
 
         {activeTab === 'mistakes' && (
           <MistakesView
+            mistakesData={mistakesData}
             onPracticeCategory={(catId) => {
               handleStartTopicPractice(catId);
             }}
@@ -546,6 +871,8 @@ export default function App() {
               handleNavigate('home');
             }}
             onOpenSubscriptionModal={() => setIsSubscriptionOpen(true)}
+            onSeedRealisticData={handleSeedRealisticData}
+            onResetAllData={handleResetAllData}
           />
         )}
 
@@ -560,19 +887,12 @@ export default function App() {
 
         {/* Learning Goals View */}
         {activeTab === 'learning-goals' && (
-          <div className="space-y-4 pb-8 animate-fade-in">
-            <h1 className="text-xl font-extrabold tracking-tight text-slate-900 dark:text-white">Learning Goals</h1>
-            <div className="nc-card p-4 space-y-3 bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-800 shadow-xs">
-              <h2 className="font-bold text-sm text-slate-900 dark:text-white">NCLEX Calculation Target</h2>
-              <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-                Achieve 90%+ calculation accuracy across all 7 clinical areas with zero 10-fold decimal errors.
-              </p>
-              <div className="w-full h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-                <div className="h-full bg-slate-900 dark:bg-white rounded-full" style={{ width: '82%' }} />
-              </div>
-              <span className="text-xs font-bold text-slate-900 dark:text-white">82% Completed (103/126 solved)</span>
-            </div>
-          </div>
+          <LearningGoalsView
+            stats={stats}
+            completedLessons={completedLessons}
+            onStartPractice={() => handleStartTopicPractice(null)}
+            onNavigate={handleNavigate}
+          />
         )}
 
         {/* Bookmarks View */}
