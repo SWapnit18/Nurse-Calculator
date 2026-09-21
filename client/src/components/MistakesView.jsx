@@ -1,53 +1,47 @@
 import React from 'react';
 import { 
-  AlertCircle, ArrowRight, RotateCcw, ShieldAlert, Sparkles, CheckCircle2, History
+  AlertCircle, ArrowRight, RotateCcw, ShieldAlert, History, CheckCircle2, ChevronRight
 } from 'lucide-react';
 
 const CATEGORY_METADATA = {
+  'med_math_basics': {
+    id: 'med_math_basics',
+    title: 'Decimals & Rounding',
+    tag: 'High Alert',
+    tagColor: 'bg-rose-50 text-rose-700 dark:bg-rose-950/50 dark:text-rose-300 border-rose-200 dark:border-rose-900/50',
+    rule: 'Always use leading zero (0.5). Never use trailing zero (5).'
+  },
   'unit_conversions': {
     id: 'unit_conversions',
-    title: 'Unit Conversion',
-    tag: 'HIGH PRIORITY',
-    tagColor: 'bg-red-100 dark:bg-red-950 text-red-700 dark:text-red-300 border-red-200 dark:border-red-900',
-    description: 'Metric miscalculations (mcg ↔ mg, grams, lbs ↔ kg). Risk: 1,000-fold overdose.',
-    clinicalAdvice: 'Multiply by 1,000 when going from large to small units (g → mg). Divide when going small to large.'
+    title: 'Unit Conversions',
+    tag: 'Priority',
+    tagColor: 'bg-amber-50 text-amber-700 dark:bg-amber-950/50 dark:text-amber-300 border-amber-200 dark:border-amber-900/50',
+    rule: 'Multiply by 1,000 going large to small (g → mg). Divide small to large.'
   },
   'tablet_calculations': {
     id: 'tablet_calculations',
-    title: 'Tablet Calculation',
-    tag: 'MODERATE',
-    tagColor: 'bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300 border-amber-200 dark:border-amber-900',
-    description: 'Desired over Have (D/H × V) & scored pill splitting rules.',
-    clinicalAdvice: 'Never split non-scored tablets. If math results in >4 tablets for one dose, pause and recheck with pharmacy.'
+    title: 'Oral Tablets',
+    tag: 'Moderate',
+    tagColor: 'bg-blue-50 text-blue-700 dark:bg-blue-950/50 dark:text-blue-300 border-blue-200 dark:border-blue-900/50',
+    rule: 'D/H × V. Only score tablets with break lines. Check doses >4 tablets.'
   },
   'iv_flow_mathematics': {
     id: 'iv_flow_mathematics',
-    title: 'Flow Rate (mL/hr & gtt/min)',
-    tag: 'REVIEW',
-    tagColor: 'bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-900',
-    description: 'Volumetric smart pump rates and gravity drip timing.',
-    clinicalAdvice: 'Gravity drops (gtt/min) must always be rounded to whole drops. Smart pump rates (mL/hr) support decimals.'
-  },
-  'med_math_basics': {
-    id: 'med_math_basics',
-    title: 'Decimals & Rounding Rules',
-    tag: 'HIGH ALERT',
-    tagColor: 'bg-red-100 dark:bg-red-950 text-red-700 dark:text-red-300 border-red-200 dark:border-red-900',
-    description: 'ISMP & Joint Commission zero-slip syntax standards.',
-    clinicalAdvice: 'Always enforce leading zeros (0.5 mg, NEVER .5 mg). Never use trailing zeros (5 mg, NEVER 5.0 mg).'
+    title: 'IV Flow Rates',
+    tag: 'Review',
+    tagColor: 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border-slate-200 dark:border-slate-700',
+    rule: 'Gravity drops (gtt/min) round to whole numbers; pumps (mL/hr) use decimals.'
   },
   'liquid_calculations': {
     id: 'liquid_calculations',
-    title: 'Liquid & Reconstitution Exercises',
-    tag: 'STABLE',
-    tagColor: 'bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 border-emerald-200 dark:border-emerald-900',
-    description: 'Lyophilized powder vials, diluent volumes, and final concentration.',
-    clinicalAdvice: 'Focus on the final concentration per mL printed on the label, not the raw diluent volume injected.'
+    title: 'Liquids & Reconstitution',
+    tag: 'Standard',
+    tagColor: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300 border-emerald-200 dark:border-emerald-900/50',
+    rule: 'Use concentration on vial label, not total diluent volume.'
   },
 };
 
 export default function MistakesView({ mistakesData = [], onPracticeCategory }) {
-  // Aggregate real mistakes by category
   const mistakesList = Array.isArray(mistakesData) ? mistakesData : [];
   const totalLoggedMistakes = mistakesList.length;
 
@@ -69,134 +63,147 @@ export default function MistakesView({ mistakesData = [], onPracticeCategory }) 
   const topCategory = categories.slice().sort((a, b) => b.mistakesCount - a.mistakesCount)[0];
 
   return (
-    <div className="space-y-5 pb-8 animate-fade-in">
-      {/* Title & Subheader */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white">Mistake Review</h1>
-          <p className="text-sm text-slate-600 dark:text-slate-400 mt-0.5">Real-time tracking of clinical calculation divergence and safety remediation.</p>
-        </div>
-        <div className="flex items-center gap-1.5 px-3 py-1 bg-red-100 dark:bg-red-950/60 border border-red-200 dark:border-red-900 text-red-700 dark:text-red-300 text-xs font-bold rounded-full">
-          <AlertCircle className="w-3.5 h-3.5" />
-          <span>{totalLoggedMistakes} Errors Tracked</span>
-        </div>
-      </div>
-
-      {/* Clinical Diagnostic Summary Card */}
-      <div className="nc-card p-4 sm:p-5 bg-slate-50 dark:bg-[#111827] border border-slate-200 dark:border-slate-800 space-y-3">
+    <div className="space-y-4 pb-12 animate-fade-in max-w-lg mx-auto">
+      {/* Minimal Top Subheader */}
+      <div className="flex items-center justify-between pt-1">
         <div className="flex items-center gap-2">
-          <ShieldAlert className="w-4 h-4 text-slate-900 dark:text-white" />
-          <span className="text-xs font-extrabold uppercase tracking-wider text-slate-900 dark:text-white">
-            Real-Time Error Diagnostic
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 border border-rose-200/80 dark:border-rose-900/60">
+            <AlertCircle className="w-3.5 h-3.5" />
+            <span>{totalLoggedMistakes} Logged Mistakes</span>
           </span>
         </div>
-        <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed font-medium">
-          {totalLoggedMistakes > 0
-            ? `You have ${totalLoggedMistakes} active error records in your study log. The ISMP identifies decimal slips and unit conversion as the highest risk factors for acute overdosing.`
-            : `No calculation errors logged yet! Every mistake you make during practice will be automatically classified and logged here in real time.`}
-        </p>
-        {totalLoggedMistakes > 0 && topCategory && (
-          <div className="flex flex-wrap items-center gap-2 pt-1">
-            <button
-              onClick={() => onPracticeCategory(topCategory.id)}
-              className="nc-btn-primary px-3.5 py-1.5 text-xs font-bold flex items-center gap-1.5 shadow-sm cursor-pointer"
-            >
-              <RotateCcw className="w-3.5 h-3.5" />
-              <span>Practice Top Missed Topic: {topCategory.title} ({topCategory.mistakesCount})</span>
-            </button>
-          </div>
+        {topCategory && topCategory.mistakesCount > 0 && (
+          <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">
+            Main focus: <b className="text-slate-900 dark:text-white">{topCategory.title}</b>
+          </span>
         )}
       </div>
 
-      {/* Recent Real Mistakes Stream */}
-      {mistakesList.length > 0 && (
-        <div className="space-y-2">
-          <div className="flex items-center gap-1.5 px-1">
-            <History className="w-4 h-4 text-slate-600 dark:text-slate-400" />
-            <h2 className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-              Recent Logged Calculation Errors ({mistakesList.length})
-            </h2>
+      {/* Actionable Practice Focus Card */}
+      {totalLoggedMistakes > 0 && topCategory && (
+        <div className="p-4 rounded-2xl bg-slate-900 text-white dark:bg-[#111827] dark:border dark:border-slate-800 shadow-sm flex items-center justify-between gap-3">
+          <div className="min-w-0">
+            <span className="text-[11px] font-semibold text-rose-400 uppercase tracking-wider block">
+              High-Risk Topic
+            </span>
+            <h3 className="font-bold text-sm text-white truncate mt-0.5">
+              {topCategory.title}
+            </h3>
+            <p className="text-xs text-slate-400 mt-0.5">
+              {topCategory.mistakesCount} errors recorded in recent practice
+            </p>
           </div>
-          <div className="space-y-2.5">
-            {mistakesList.slice(0, 5).map((m, idx) => (
-              <div key={idx} className="nc-card p-3.5 bg-white dark:bg-[#111827] border border-red-200 dark:border-red-900/40 rounded-xl space-y-2">
-                <div className="flex items-center justify-between text-xs">
-                  <span className="font-extrabold text-red-600 dark:text-red-400">
-                    {m.mistakeType?.replace(/_/g, ' ') || 'CALCULATION ERROR'}
-                  </span>
-                  <span className="text-[11px] text-slate-400">
-                    {m.timestamp ? new Date(m.timestamp).toLocaleDateString() : 'Today'}
-                  </span>
+
+          <button
+            onClick={() => onPracticeCategory(topCategory.id)}
+            className="px-3.5 py-2 rounded-xl text-xs font-bold bg-white text-slate-900 hover:bg-slate-100 dark:bg-emerald-500 dark:text-white dark:hover:bg-emerald-400 transition-all flex items-center gap-1.5 flex-shrink-0 cursor-pointer shadow-xs"
+          >
+            <RotateCcw className="w-3.5 h-3.5" />
+            <span>Practice</span>
+          </button>
+        </div>
+      )}
+
+      {/* Recent Mistake Stream (Minimal & Punchy) */}
+      {mistakesList.length > 0 && (
+        <div className="space-y-2.5">
+          <div className="flex items-center justify-between px-1">
+            <h2 className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+              Recent Errors
+            </h2>
+            <span className="text-xs text-slate-400">Latest 5</span>
+          </div>
+
+          <div className="space-y-2">
+            {mistakesList.slice(0, 5).map((m, idx) => {
+              const typeLabel = m.mistakeType === 'DECIMAL_SLIP_10X'
+                ? '10x Decimal Slip'
+                : m.mistakeType === 'UNIT_CONVERSION_ERROR'
+                ? 'Unit Conversion'
+                : m.mistakeType === 'ROUNDING_MISMATCH'
+                ? 'Rounding Mismatch'
+                : 'Formula Error';
+
+              return (
+                <div 
+                  key={idx} 
+                  className="p-3.5 rounded-2xl bg-white dark:bg-[#111827] border border-slate-200/90 dark:border-slate-800 shadow-2xs space-y-2"
+                >
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="font-bold text-slate-900 dark:text-white truncate">
+                      {m.questionTitle || 'Clinical Calculation'}
+                    </span>
+                    <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-rose-50 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 border border-rose-200/60 dark:border-rose-900/40 flex-shrink-0">
+                      {typeLabel}
+                    </span>
+                  </div>
+
+                  {/* Answers Comparison */}
+                  <div className="flex items-center gap-3 text-xs bg-slate-50 dark:bg-slate-800/40 p-2 rounded-xl border border-slate-100 dark:border-slate-800">
+                    <span className="text-slate-500 dark:text-slate-400">
+                      Entered: <b className="text-rose-600 dark:text-rose-400 line-through">{m.studentAnswer}</b>
+                    </span>
+                    <span className="text-slate-300 dark:text-slate-700">|</span>
+                    <span className="text-slate-500 dark:text-slate-400">
+                      Correct: <b className="text-emerald-600 dark:text-emerald-400">{m.correctAnswer}</b>
+                    </span>
+                  </div>
+
+                  {/* Concise One-Line Takeaway */}
+                  {m.aiExplanation && (
+                    <p className="text-[11px] text-slate-600 dark:text-slate-400 leading-relaxed pl-1">
+                      💡 {m.aiExplanation}
+                    </p>
+                  )}
                 </div>
-                <p className="text-xs font-semibold text-slate-800 dark:text-slate-200">
-                  {m.questionTitle || m.prompt || 'Clinical Calculation Practice'}
-                </p>
-                <div className="flex items-center gap-3 text-xs">
-                  <span className="text-red-600 dark:text-red-400 font-medium">Entered: <b>{m.studentAnswer}</b></span>
-                  <span className="text-emerald-600 dark:text-emerald-400 font-medium">Correct: <b>{m.correctAnswer}</b></span>
-                </div>
-                {m.aiExplanation && (
-                  <p className="text-[11px] text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-800/50 p-2 rounded-lg leading-relaxed">
-                    💡 {m.aiExplanation}
-                  </p>
-                )}
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       )}
 
-      {/* Mistake Categories List */}
-      <div className="space-y-3.5">
+      {/* Category Breakdown (Clean List) */}
+      <div className="space-y-2.5 pt-1">
         <div className="px-1">
           <h2 className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
             Error Category Breakdown
           </h2>
         </div>
-        {categories.map((cat) => (
-          <div
-            key={cat.id}
-            className="nc-card p-4 sm:p-5 border border-slate-200 dark:border-slate-800 hover:border-slate-400 dark:hover:border-slate-600 transition-all space-y-3 group shadow-sm bg-white dark:bg-[#111827]"
-          >
-            <div className="flex items-start justify-between gap-4">
-              <div className="min-w-0 space-y-1.5 flex-1">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <h3 className="font-bold text-base text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+
+        <div className="nc-card divide-y divide-slate-100 dark:divide-slate-800 overflow-hidden bg-white dark:bg-[#111827] border border-slate-200/90 dark:border-slate-800 rounded-2xl shadow-2xs">
+          {categories.map((cat) => (
+            <div
+              key={cat.id}
+              onClick={() => onPracticeCategory(cat.id)}
+              className="p-3.5 flex items-center justify-between text-left hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-colors cursor-pointer"
+            >
+              <div className="min-w-0 pr-3">
+                <div className="flex items-center gap-2">
+                  <h3 className="text-xs font-bold text-slate-900 dark:text-white truncate">
                     {cat.title}
                   </h3>
-                  <span className={`text-[10px] font-extrabold px-2.5 py-0.5 rounded-full border ${cat.tagColor}`}>
+                  <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded border ${cat.tagColor}`}>
                     {cat.tag}
                   </span>
                 </div>
-                <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-                  {cat.description}
+                <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 line-clamp-1">
+                  {cat.rule}
                 </p>
               </div>
 
-              <button
-                onClick={() => onPracticeCategory(cat.id)}
-                className="nc-btn-secondary px-3.5 py-2 text-xs font-bold flex items-center gap-1.5 flex-shrink-0 cursor-pointer"
-              >
-                <span>Practice</span>
-                <ArrowRight className="w-3.5 h-3.5" />
-              </button>
-            </div>
-
-            {/* Clinical Rule Box */}
-            <div className="p-3 bg-slate-50 dark:bg-slate-800/60 rounded-xl border border-slate-200 dark:border-slate-700 text-xs text-slate-700 dark:text-slate-300 flex items-start gap-2.5">
-              <Sparkles className="w-4 h-4 text-slate-900 dark:text-white flex-shrink-0 mt-0.5" />
-              <div className="leading-relaxed">
-                <span className="font-bold text-slate-900 dark:text-white">Safety Rule: </span>
-                {cat.clinicalAdvice}
+              <div className="flex items-center gap-2 flex-shrink-0">
+                {cat.mistakesCount > 0 ? (
+                  <span className="text-xs font-bold px-2 py-0.5 bg-rose-50 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 rounded-full border border-rose-200 dark:border-rose-900/60">
+                    {cat.mistakesCount}
+                  </span>
+                ) : (
+                  <span className="text-[11px] text-slate-400 font-medium">0</span>
+                )}
+                <ChevronRight className="w-4 h-4 text-slate-400" />
               </div>
             </div>
-
-            <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 pt-1 font-semibold">
-              <span className="text-slate-700 dark:text-slate-300 font-bold">{cat.mistakesCount} logged in history</span>
-              <span className="text-[11px] uppercase tracking-wider">NCLEX Focus</span>
-            </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
     </div>
   );
