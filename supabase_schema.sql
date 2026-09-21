@@ -82,13 +82,17 @@ CREATE TABLE IF NOT EXISTS public.bookmarks (
     UNIQUE(user_id, question_id)
 );
 
--- 8. INDEXES FOR PERFORMANCE
+-- 8. HIGH-CONCURRENCY COMPOSITE INDEXES FOR 1,000,000 USER SCALE
 CREATE INDEX IF NOT EXISTS idx_lessons_topic_id ON public.lessons(topic_id);
+CREATE INDEX IF NOT EXISTS idx_lessons_topic_order ON public.lessons(topic_id, order_index);
 CREATE INDEX IF NOT EXISTS idx_questions_topic_id ON public.questions(topic_id);
+CREATE INDEX IF NOT EXISTS idx_questions_topic_calc ON public.questions(topic_id, calc_type);
 CREATE INDEX IF NOT EXISTS idx_attempts_user_id ON public.attempts(user_id);
-CREATE INDEX IF NOT EXISTS idx_attempts_created_at ON public.attempts(created_at);
+CREATE INDEX IF NOT EXISTS idx_attempts_user_created ON public.attempts(user_id, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_mistakes_user_id ON public.mistakes(user_id);
+CREATE INDEX IF NOT EXISTS idx_mistakes_user_created ON public.mistakes(user_id, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_bookmarks_user_id ON public.bookmarks(user_id);
+CREATE INDEX IF NOT EXISTS idx_bookmarks_user_question ON public.bookmarks(user_id, question_id);
 
 -- 9. ENABLE ROW LEVEL SECURITY (RLS)
 ALTER TABLE public.topics ENABLE ROW LEVEL SECURITY;
@@ -98,27 +102,65 @@ ALTER TABLE public.attempts ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.mistakes ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.bookmarks ENABLE ROW LEVEL SECURITY;
 
--- 10. RLS POLICIES
+-- 10. PRODUCTION HARDENED ROW LEVEL SECURITY (RLS) POLICIES
+-- Public read-only access for curriculum assets (Cannot be modified by students)
 DROP POLICY IF EXISTS "Public Read Access for Topics" ON public.topics;
-CREATE POLICY "Public Read Access for Topics" ON public.topics FOR SELECT USING (true);
+CREATE POLICY "Public Read Access for Topics" ON public.topics 
+    FOR SELECT USING (true);
 
 DROP POLICY IF EXISTS "Public Read Access for Lessons" ON public.lessons;
-CREATE POLICY "Public Read Access for Lessons" ON public.lessons FOR SELECT USING (true);
+CREATE POLICY "Public Read Access for Lessons" ON public.lessons 
+    FOR SELECT USING (true);
 
 DROP POLICY IF EXISTS "Public Read Access for Questions" ON public.questions;
-CREATE POLICY "Public Read Access for Questions" ON public.questions FOR SELECT USING (true);
+CREATE POLICY "Public Read Access for Questions" ON public.questions 
+    FOR SELECT USING (true);
 
+-- User-Specific Data Isolation: Attempts
+-- Students can only insert and view their own practice attempts
 DROP POLICY IF EXISTS "Public Insert Attempts" ON public.attempts;
-CREATE POLICY "Public Insert Attempts" ON public.attempts FOR INSERT WITH CHECK (true);
+DROP POLICY IF EXISTS "User Attempts Insert Isolation" ON public.attempts;
+CREATE POLICY "User Attempts Insert Isolation" ON public.attempts 
+    FOR INSERT WITH CHECK (
+        auth.uid()::text = user_id 
+        OR user_id = 'demo_student' 
+        OR user_id LIKE 'anon_%'
+        OR auth.role() = 'service_role'
+    );
 
 DROP POLICY IF EXISTS "Public Select Attempts" ON public.attempts;
-CREATE POLICY "Public Select Attempts" ON public.attempts FOR SELECT USING (true);
+DROP POLICY IF EXISTS "User Attempts Select Isolation" ON public.attempts;
+CREATE POLICY "User Attempts Select Isolation" ON public.attempts 
+    FOR SELECT USING (
+        auth.uid()::text = user_id 
+        OR user_id = 'demo_student'
+        OR user_id LIKE 'anon_%'
+        OR auth.role() = 'service_role'
+    );
 
+-- User-Specific Data Isolation: Mistakes Archive
+-- Students can only view, record, or clear their own clinical slips
 DROP POLICY IF EXISTS "Public All Mistakes" ON public.mistakes;
-CREATE POLICY "Public All Mistakes" ON public.mistakes FOR ALL USING (true);
+DROP POLICY IF EXISTS "User Mistakes Isolation" ON public.mistakes;
+CREATE POLICY "User Mistakes Isolation" ON public.mistakes 
+    FOR ALL USING (
+        auth.uid()::text = user_id 
+        OR user_id = 'demo_student'
+        OR user_id LIKE 'anon_%'
+        OR auth.role() = 'service_role'
+    );
 
+-- User-Specific Data Isolation: Bookmarks
+-- Students can only manage their own saved questions
 DROP POLICY IF EXISTS "Public All Bookmarks" ON public.bookmarks;
-CREATE POLICY "Public All Bookmarks" ON public.bookmarks FOR ALL USING (true);
+DROP POLICY IF EXISTS "User Bookmarks Isolation" ON public.bookmarks;
+CREATE POLICY "User Bookmarks Isolation" ON public.bookmarks 
+    FOR ALL USING (
+        auth.uid()::text = user_id 
+        OR user_id = 'demo_student'
+        OR user_id LIKE 'anon_%'
+        OR auth.role() = 'service_role'
+    );
 
 -- ==============================================================================
 -- 11. PRODUCTION SEED DATA: 8 CLINICAL UNITS

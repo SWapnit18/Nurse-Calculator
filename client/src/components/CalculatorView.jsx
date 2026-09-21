@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { 
-  Calculator, RotateCcw, Copy, Check, ShieldCheck,
+  Calculator, RotateCcw, Copy, Check,
   Droplets, Clock, Scale, Pill, FlaskConical, ArrowLeftRight
 } from 'lucide-react';
 import CalculationEngine from '../calculator/engine';

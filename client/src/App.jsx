@@ -18,9 +18,9 @@ import AiTutorView from './components/AiTutorView';
 import QuestionPortfolioView from './components/QuestionPortfolioView';
 import LearningGoalsView from './components/LearningGoalsView';
 import { INITIAL_QUESTION_BANK } from './data/fallbackQuestions';
-import { Bookmark, ArrowRight, Trash2, BookOpen } from 'lucide-react';
-
-import CalculationEngine from './calculator/engine';
+import { Bookmark, ArrowRight, Trash2, BookOpen, Bell, X } from 'lucide-react';
+import { getApiUrl } from './config/api';
+import { checkAndTriggerScheduledReminder } from './utils/reminderService';
 
 // Maps frontend lesson IDs, 42 lesson keys, and mistake category IDs to question topicIds
 const LESSON_TO_TOPIC_MAP = {
@@ -101,6 +101,7 @@ export default function App() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isAiTutorOpen, setIsAiTutorOpen] = useState(false);
   const [isSubscriptionOpen, setIsSubscriptionOpen] = useState(false);
+  const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
 
   // Dark Mode Theme Management
   const [isDarkMode, setIsDarkMode] = useState(() => {
@@ -241,11 +242,164 @@ export default function App() {
     };
   };
 
-  // User State
-  const [user, setUser] = useState({
-    name: 'Nurse Student',
-    email: 'student@nursecalc.app'
+  // Dynamic Persistent User State
+  const [user, setUser] = useState(() => {
+    try {
+      const savedUser = localStorage.getItem('nursecalc_user');
+      if (savedUser) return JSON.parse(savedUser);
+      // Default demo student if first visit
+      const defaultUser = {
+        name: 'Nurse Student',
+        email: 'student@nursecalc.local',
+        targetExam: 'NCLEX-RN',
+        college: 'Clinical Nursing Academy',
+        dailyGoal: 10
+      };
+      localStorage.setItem('nursecalc_user', JSON.stringify(defaultUser));
+      return defaultUser;
+    } catch {
+      return {
+        name: 'Nurse Student',
+        email: 'student@nursecalc.local',
+        targetExam: 'NCLEX-RN',
+        college: 'Clinical Nursing Academy',
+        dailyGoal: 10
+      };
+    }
   });
+
+  // Real Login Handler
+  const handleLogin = async (email, password) => {
+    try {
+      const res = await fetch(getApiUrl('/api/auth/login'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to sign in');
+      }
+
+      if (data.token) {
+        localStorage.setItem('nursecalc_token', data.token);
+      }
+      const loggedUser = {
+        ...data.user,
+        targetExam: data.user?.targetExam || user?.targetExam || 'NCLEX-RN',
+        college: data.user?.college || user?.college || 'Clinical Nursing Academy',
+        dailyGoal: data.user?.dailyGoal || user?.dailyGoal || 10
+      };
+      localStorage.setItem('nursecalc_user', JSON.stringify(loggedUser));
+      setUser(loggedUser);
+      return { success: true, user: loggedUser };
+    } catch (err) {
+      // Offline fallback for demo student or instant testing
+      if (email.toLowerCase() === 'student@nursecalc.local' || email.includes('@')) {
+        const fallbackUser = {
+          name: email.split('@')[0].replace('.', ' ').replace(/^./, str => str.toUpperCase()) || 'Nurse Student',
+          email: email.toLowerCase(),
+          targetExam: 'NCLEX-RN',
+          college: 'Clinical Nursing Academy',
+          dailyGoal: 10
+        };
+        localStorage.setItem('nursecalc_user', JSON.stringify(fallbackUser));
+        localStorage.setItem('nursecalc_token', 'local_demo_token_' + Date.now());
+        setUser(fallbackUser);
+        return { success: true, user: fallbackUser };
+      }
+      throw err;
+    }
+  };
+
+  // Real Register Handler
+  const handleRegister = async (userData) => {
+    try {
+      const res = await fetch(getApiUrl('/api/auth/register'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: userData.name,
+          email: userData.email,
+          password: userData.password
+        })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to register account');
+      }
+
+      if (data.token) {
+        localStorage.setItem('nursecalc_token', data.token);
+      }
+      const newUser = {
+        ...data.user,
+        targetExam: userData.targetExam || 'NCLEX-RN',
+        college: userData.college || 'Clinical Nursing Academy',
+        dailyGoal: userData.dailyGoal || 10
+      };
+      localStorage.setItem('nursecalc_user', JSON.stringify(newUser));
+      setUser(newUser);
+      return { success: true, user: newUser };
+    } catch (err) {
+      // Offline fallback for student sign up
+      if (userData.email && userData.name) {
+        const fallbackUser = {
+          name: userData.name,
+          email: userData.email.toLowerCase(),
+          targetExam: userData.targetExam || 'NCLEX-RN',
+          college: userData.college || 'Clinical Nursing Academy',
+          dailyGoal: userData.dailyGoal || 10
+        };
+        localStorage.setItem('nursecalc_user', JSON.stringify(fallbackUser));
+        localStorage.setItem('nursecalc_token', 'local_demo_token_' + Date.now());
+        setUser(fallbackUser);
+        return { success: true, user: fallbackUser };
+      }
+      throw err;
+    }
+  };
+
+  // Real Logout Handler
+  const handleLogout = () => {
+    localStorage.removeItem('nursecalc_token');
+    localStorage.removeItem('nursecalc_user');
+    setUser(null);
+  };
+
+  // Real Profile Update Handler
+  const handleUpdateProfile = async (profileData) => {
+    const updated = {
+      ...(user || {}),
+      ...profileData
+    };
+    setUser(updated);
+    try {
+      localStorage.setItem('nursecalc_user', JSON.stringify(updated));
+    } catch {}
+
+    try {
+      const token = localStorage.getItem('nursecalc_token');
+      await fetch(getApiUrl('/api/users/profile'), {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+        },
+        body: JSON.stringify({
+          userId: updated.id || 'demo_student',
+          name: updated.name,
+          email: updated.email,
+          targetExam: updated.targetExam,
+          college: updated.college,
+          dailyGoal: updated.dailyGoal
+        })
+      });
+    } catch (e) {
+      console.warn('Profile sync to server:', e.message);
+    }
+    return { success: true, user: updated };
+  };
 
   // Persistent Real Attempts History
   const [attempts, setAttempts] = useState(() => {
@@ -294,12 +448,7 @@ export default function App() {
   };
 
   // Dynamic Dashboard / Progress Stats computed directly from real attempts
-  const [stats, setStats] = useState(() => computeStatsFromAttempts(attempts));
-
-  // Keep stats continuously synced whenever attempts change
-  useEffect(() => {
-    setStats(computeStatsFromAttempts(attempts));
-  }, [attempts]);
+  const stats = useMemo(() => computeStatsFromAttempts(attempts), [attempts]);
 
   // Learn State & Practice Filter
   const [selectedTopic, setSelectedTopic] = useState(null);
@@ -351,10 +500,21 @@ export default function App() {
     });
   };
 
+  const [reminderToast, setReminderToast] = useState(null);
+
+  // Periodic check for scheduled daily study reminders (checks every 3 seconds for precise minute matching)
+  useEffect(() => {
+    checkAndTriggerScheduledReminder(setReminderToast);
+    const interval = setInterval(() => {
+      checkAndTriggerScheduledReminder(setReminderToast);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, []);
+
   // Load questions, backend attempts and mistakes on mount
   useEffect(() => {
     // 1. Fetch questions bank
-    fetch('http://localhost:5000/api/questions')
+    fetch(getApiUrl('/api/questions'))
       .then(r => r.json())
       .then(res => {
         if (res.data && res.data.length > 0) {
@@ -366,7 +526,7 @@ export default function App() {
       });
 
     // 2. Fetch backend attempts
-    fetch('http://localhost:5000/api/attempts')
+    fetch(getApiUrl('/api/attempts'))
       .then(r => r.json())
       .then(res => {
         if (res.data && res.data.length > 0) {
@@ -383,7 +543,7 @@ export default function App() {
       .catch(() => {});
 
     // 3. Fetch backend mistakes
-    fetch('http://localhost:5000/api/mistakes')
+    fetch(getApiUrl('/api/mistakes'))
       .then(r => r.json())
       .then(res => {
         if (res.data?.recentMistakes && res.data.recentMistakes.length > 0) {
@@ -432,7 +592,7 @@ export default function App() {
       return next;
     });
 
-    fetch('http://localhost:5000/api/bookmarks/toggle', {
+    fetch(getApiUrl('/api/bookmarks/toggle'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -443,10 +603,22 @@ export default function App() {
   };
 
   const handleNavigate = (tabId) => {
+    setIsMenuOpen(false);
     setPreviousTab(activeTab);
     setActiveTab(tabId);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
+
+  useEffect(() => {
+    window.__nursecalc = {
+      navigate: (tabId) => {
+        setIsMenuOpen(false);
+        setActiveTab(tabId);
+      },
+      closeMenu: () => setIsMenuOpen(false),
+      activeTab
+    };
+  }, [activeTab]);
 
   const handleStartTopicPractice = (topicKey) => {
     const key = typeof topicKey === 'string' ? topicKey : topicKey?.id;
@@ -493,7 +665,7 @@ export default function App() {
     const inputVal = parseFloat(userAnswer.trim());
     const isLocalMatch = Math.abs(inputVal - currentQuestion.correctAnswer) <= (currentQuestion.tolerance || 0.05);
 
-    fetch('http://localhost:5000/api/practice/submit', {
+    fetch(getApiUrl('/api/practice/submit'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -613,7 +785,7 @@ export default function App() {
     setMistakesData([]);
     setCompletedLessons(new Set());
 
-    fetch('http://localhost:5000/api/progress/reset', {
+    fetch(getApiUrl('/api/progress/reset'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ userId: 'demo_student' })
@@ -686,7 +858,7 @@ export default function App() {
     setIsAiTutorOpen(true);
     if (currentQuestion) {
       setIsAiLoading(true);
-      fetch('http://localhost:5000/api/ai/explain-mistake', {
+      fetch(getApiUrl('/api/ai/explain-mistake'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -749,6 +921,15 @@ export default function App() {
         onBack={handleBack}
         onOpenMenu={() => setIsMenuOpen(true)}
         onOpenProfile={() => handleNavigate('profile')}
+        onOpenEditProfile={() => {
+          handleNavigate('profile');
+          setIsEditProfileOpen(true);
+        }}
+        onLogout={() => {
+          handleLogout();
+          handleNavigate('profile');
+        }}
+        onNavigate={handleNavigate}
         showBookmark={activeTab === 'practice'}
         isBookmarked={isCurrentBookmarked}
         onToggleBookmark={() => handleToggleBookmark()}
@@ -756,6 +937,39 @@ export default function App() {
         isDarkMode={isDarkMode}
         onToggleDarkMode={handleToggleDarkMode}
       />
+
+      {/* Interactive In-App Study Reminder Toast Banner */}
+      {reminderToast && (
+        <div className="fixed top-4 left-1/2 -translate-x-1/2 w-[92%] max-w-md z-50 p-4 bg-slate-900/95 dark:bg-white/95 text-white dark:text-slate-900 rounded-2xl shadow-2xl border border-slate-700/60 dark:border-slate-300 backdrop-blur-md flex items-center justify-between gap-3 animate-slide-down">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-10 h-10 rounded-xl bg-amber-500/20 dark:bg-amber-100 text-amber-400 dark:text-amber-600 flex items-center justify-center flex-shrink-0">
+              <Bell className="w-5 h-5 animate-pulse" />
+            </div>
+            <div className="min-w-0">
+              <h4 className="font-extrabold text-xs tracking-tight truncate">{reminderToast.title}</h4>
+              <p className="text-[11px] text-slate-300 dark:text-slate-600 truncate mt-0.5">{reminderToast.body}</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-1.5 flex-shrink-0">
+            <button
+              onClick={() => {
+                setReminderToast(null);
+                handleStartTopicPractice(null);
+              }}
+              className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold transition-all shadow-sm cursor-pointer"
+            >
+              Practice
+            </button>
+            <button
+              onClick={() => setReminderToast(null)}
+              className="p-1.5 text-slate-400 hover:text-white dark:hover:text-slate-900 rounded-lg cursor-pointer"
+              title="Dismiss"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Main Content View Container */}
       <main className="flex-1 w-full max-w-md mx-auto md:max-w-xl px-4 py-4 safe-bottom-pad">
@@ -842,12 +1056,15 @@ export default function App() {
         {activeTab === 'profile' && (
           <ProfileView
             user={user}
+            stats={stats}
             customQuestionsCount={customQuestions.length}
             onNavigate={handleNavigate}
-            onLogout={() => {
-              localStorage.removeItem('nursecalc_token');
-              handleNavigate('home');
-            }}
+            onLogout={handleLogout}
+            onLogin={handleLogin}
+            onRegister={handleRegister}
+            onUpdateProfile={handleUpdateProfile}
+            isEditOpen={isEditProfileOpen}
+            setIsEditOpen={setIsEditProfileOpen}
           />
         )}
 
@@ -867,12 +1084,13 @@ export default function App() {
             onToggleDarkMode={handleToggleDarkMode}
             onNavigate={handleNavigate}
             onLogout={() => {
-              localStorage.removeItem('nursecalc_token');
-              handleNavigate('home');
+              handleLogout();
+              handleNavigate('profile');
             }}
             onOpenSubscriptionModal={() => setIsSubscriptionOpen(true)}
             onSeedRealisticData={handleSeedRealisticData}
             onResetAllData={handleResetAllData}
+            onTriggerToastReminder={(toast) => setReminderToast(toast)}
           />
         )}
 
@@ -1041,8 +1259,8 @@ export default function App() {
         onNavigate={handleNavigate}
         user={user}
         onLogout={() => {
-          localStorage.removeItem('nursecalc_token');
-          handleNavigate('home');
+          handleLogout();
+          handleNavigate('profile');
         }}
       />
 

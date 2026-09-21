@@ -39,6 +39,15 @@ export default function PracticeView({
     }
   };
 
+  const formatWithUnit = (ans) => {
+    if (ans === undefined || ans === null) return '';
+    const ansStr = String(ans).trim();
+    const effectiveUnit = (unit || currentQuestion?.unit || '').trim();
+    if (!effectiveUnit) return ansStr;
+    if (ansStr.toLowerCase().endsWith(effectiveUnit.toLowerCase())) return ansStr;
+    return `${ansStr} ${effectiveUnit}`;
+  };
+
   return (
     <div className="space-y-4 pb-12 animate-fade-in w-full max-w-full overflow-hidden">
       {/* Header Info & Quick Navigation */}
@@ -149,8 +158,8 @@ export default function PracticeView({
             >
               {isChecking ? (
                 <>
-                  <div className="w-5 h-5 border-2 border-white dark:border-slate-900 border-t-transparent rounded-full animate-spin" />
-                  <span>Verifying Calculation...</span>
+                  <RefreshCw className="w-4 h-4 animate-spin" />
+                  <span>Verifying Dose...</span>
                 </>
               ) : (
                 <>
@@ -162,41 +171,37 @@ export default function PracticeView({
           </div>
 
           {/* Previous / Next Question Buttons */}
-          <div className="flex items-center justify-between gap-3 pt-2">
+          <div className="flex items-center justify-between gap-3 pt-1">
             <button
               type="button"
               onClick={onPreviousQuestion}
               disabled={questionIndex === 0}
-              className="nc-btn-secondary flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-bold disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+              className="nc-btn-secondary text-xs font-bold flex-1 flex items-center justify-center gap-1.5 disabled:opacity-40 cursor-pointer"
             >
-              <ArrowLeft className="w-3.5 h-3.5" />
+              <ArrowLeft className="w-4 h-4" />
               <span>Previous</span>
             </button>
             <button
               type="button"
               onClick={onNextQuestion}
-              disabled={questionIndex + 1 >= totalQuestions}
-              className="nc-btn-secondary flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-bold disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+              className="nc-btn-secondary text-xs font-bold flex-1 flex items-center justify-center gap-1.5 cursor-pointer"
             >
               <span>Skip / Next</span>
-              <ArrowRight className="w-3.5 h-3.5" />
+              <ArrowRight className="w-4 h-4" />
             </button>
           </div>
         </div>
       ) : (
-        /* Result & Educational Breakdown */
-        <div className="space-y-4 animate-fade-in w-full">
-          {/* Result Card */}
-          <div className={`nc-card p-4 sm:p-5 border-2 ${
+        /* Evaluation Results Card */
+        <div className="space-y-4">
+          <div className={`nc-card p-4 sm:p-5 border shadow-sm transition-all duration-300 ${
             result?.isCorrect 
-              ? 'border-emerald-500/50 bg-emerald-50/40 dark:bg-emerald-950/20' 
-              : 'border-red-500/50 bg-red-50/40 dark:bg-red-950/20'
+              ? 'bg-emerald-50/70 dark:bg-emerald-950/20 border-emerald-300 dark:border-emerald-800' 
+              : 'bg-red-50/70 dark:bg-red-950/20 border-red-300 dark:border-red-800'
           }`}>
-            <div className="flex items-center gap-3">
-              <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
-                result?.isCorrect 
-                  ? 'bg-emerald-100 dark:bg-emerald-900/60 text-emerald-700 dark:text-emerald-300' 
-                  : 'bg-red-100 dark:bg-red-900/60 text-red-700 dark:text-red-300'
+            <div className="flex items-start gap-3">
+              <div className={`p-2 rounded-xl flex-shrink-0 ${
+                result?.isCorrect ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/60 dark:text-emerald-300' : 'bg-red-100 text-red-700 dark:bg-red-900/60 dark:text-red-300'
               }`}>
                 {result?.isCorrect ? (
                   <CheckCircle2 className="w-6 h-6" />
@@ -212,8 +217,8 @@ export default function PracticeView({
                 </h3>
                 <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5 font-medium">
                   {result?.isCorrect 
-                    ? `Exact match: ${result?.correctAnswer} ${unit || currentQuestion.unit || ''}`
-                    : `Correct target: ${result?.correctAnswer} ${unit || currentQuestion.unit || ''} (You entered: ${userAnswer} ${unit || currentQuestion.unit || ''})`}
+                    ? `Exact match: ${formatWithUnit(result?.correctAnswer)}`
+                    : `Correct target: ${formatWithUnit(result?.correctAnswer)} (You entered: ${formatWithUnit(userAnswer)})`}
                 </p>
               </div>
             </div>

@@ -264,7 +264,7 @@ export default function QuestionPortfolioView({
                     Correct Target: {q.correctAnswer} {q.unit}
                   </span>
                   <span className="text-slate-400 text-[10px]">
-                    Created {new Date(q.createdAt || Date.now()).toLocaleDateString()}
+                    {q.createdAt ? `Created ${new Date(q.createdAt).toLocaleDateString()}` : 'Custom Question'}
                   </span>
                 </div>
               </div>

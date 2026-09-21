@@ -13,6 +13,8 @@ build/
 .env.local
 .env.*.local
 *.env
+**/.env
+**/.env.*
 
 # Logs
 logs
@@ -32,3 +34,10 @@ Thumbs.db
 
 # Mobile build artifacts
 .capacitor/
+
+# Temporary / Scratch files and debug screenshots
+scratch/
+*.png
+*.jpg
+*.jpeg
+*.webp

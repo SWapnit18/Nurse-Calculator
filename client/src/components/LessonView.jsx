@@ -7,6 +7,7 @@ import {
   ArrowRight, 
   ChevronRight, 
   ChevronLeft, 
+  ChevronDown,
   Sparkles, 
   ShieldCheck,
   FileText,
@@ -71,48 +72,56 @@ export default function LessonView({
   };
 
   return (
-    <div className="space-y-5 pb-12 animate-fade-in max-w-4xl mx-auto">
-      {/* Top Breadcrumb & Quick Controls */}
-      <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
-        <button
-          onClick={onBack}
-          className="flex items-center gap-1.5 text-xs font-bold text-slate-700 dark:text-slate-300 hover:text-black dark:hover:text-white transition-colors cursor-pointer"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          <span>All Units (8 Units · 42 Lessons)</span>
-        </button>
+    <div className="space-y-4 pb-12 animate-fade-in max-w-4xl mx-auto w-full">
+      {/* Mobile-Optimized Top Breadcrumb & Quick Controls */}
+      <div className="space-y-2.5 pt-1 w-full">
+        {/* Row 1: Back Navigation + Status Badges */}
+        <div className="flex items-center justify-between gap-2">
+          <button
+            onClick={onBack}
+            className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-700 dark:text-slate-300 hover:text-black dark:hover:text-white transition-colors cursor-pointer py-1 -ml-0.5 active:opacity-70"
+            aria-label="Back to all units"
+          >
+            <ArrowLeft className="w-4 h-4 flex-shrink-0" />
+            <span className="truncate">All Units (42 Lessons)</span>
+          </button>
 
-        {/* Quick Lesson Jump Selector & Unit Badge */}
-        <div className="flex items-center gap-2">
-          {isCompleted && (
-            <span className="text-[11px] font-black px-2.5 py-0.5 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-full flex items-center gap-1">
-              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 dark:text-emerald-600" />
-              <span>Completed</span>
+          <div className="flex items-center gap-1.5 flex-shrink-0">
+            {isCompleted && (
+              <span className="text-[10px] font-black px-2 py-0.5 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-full flex items-center gap-1 shadow-2xs">
+                <CheckCircle2 className="w-3 h-3 text-emerald-400 dark:text-emerald-600 flex-shrink-0" />
+                <span>Completed</span>
+              </span>
+            )}
+
+            <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white border border-slate-200 dark:border-slate-700 rounded-lg">
+              Unit {unitNumber} · {lessonInUnit}/{unitTotalLessons}
             </span>
-          )}
+          </div>
+        </div>
 
-          <span className="text-[11px] font-black uppercase tracking-wider px-2.5 py-1 bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white border border-slate-200 dark:border-slate-700 rounded-lg">
-            Unit {unitNumber} · {lessonInUnit}/{unitTotalLessons}
-          </span>
-
-          <div className="relative">
-            <select
-              value={currentKey}
-              onChange={(e) => onSelectLesson(e.target.value)}
-              className="text-xs font-bold bg-white dark:bg-[#111827] text-slate-900 dark:text-white border border-slate-300 dark:border-slate-700 rounded-lg py-1.5 pl-2.5 pr-7 cursor-pointer focus:ring-2 focus:ring-slate-900 dark:focus:ring-white focus:outline-none shadow-2xs"
-            >
-              {ALL_LESSON_KEYS.map((k) => {
-                const lObj = LESSONS_DATABASE[k];
-                const uI = CURRICULUM_UNITS.findIndex(u => u.id === lObj.moduleId);
-                const uNum = (uI !== -1 ? CURRICULUM_UNITS[uI].unitNumber : 1) || (uI + 1);
-                const lNum = (uI !== -1 ? CURRICULUM_UNITS[uI].lessonIds.indexOf(k) + 1 : 1);
-                return (
-                  <option key={k} value={k}>
-                    Unit {uNum} · Lesson {uNum}.{lNum}: {lObj.title}
-                  </option>
-                );
-              })}
-            </select>
+        {/* Row 2: Full-Width Touch-Friendly Lesson Selector */}
+        <div className="relative w-full">
+          <select
+            value={currentKey}
+            onChange={(e) => onSelectLesson(e.target.value)}
+            className="w-full text-xs font-bold bg-white dark:bg-[#111827] text-slate-900 dark:text-white border border-slate-300 dark:border-slate-700 rounded-xl py-2.5 pl-3 pr-9 cursor-pointer focus:ring-2 focus:ring-slate-900 dark:focus:ring-white focus:outline-none shadow-xs truncate appearance-none min-h-[42px] transition-all"
+            aria-label="Jump to lesson"
+          >
+            {ALL_LESSON_KEYS.map((k) => {
+              const lObj = LESSONS_DATABASE[k];
+              const uI = CURRICULUM_UNITS.findIndex(u => u.id === lObj.moduleId);
+              const uNum = (uI !== -1 ? CURRICULUM_UNITS[uI].unitNumber : 1) || (uI + 1);
+              const lNum = (uI !== -1 ? CURRICULUM_UNITS[uI].lessonIds.indexOf(k) + 1 : 1);
+              return (
+                <option key={k} value={k}>
+                  Unit {uNum} · Lesson {uNum}.{lNum}: {lObj.title}
+                </option>
+              );
+            })}
+          </select>
+          <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 dark:text-slate-500">
+            <ChevronDown className="w-4 h-4" />
           </div>
         </div>
       </div>

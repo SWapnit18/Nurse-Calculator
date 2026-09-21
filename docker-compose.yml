@@ -1,0 +1,107 @@
+services:
+  # MongoDB Database Service
+  mongodb:
+    image: mongo:7.0
+    container_name: nursecalc-mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    healthcheck:
+      test: ["CMD-SHELL", "mongosh --eval 'db.adminCommand(\"ping\")' || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - nursecalc-net
+
+  # High-Speed Redis Caching Service (Micro-caching & Session Store for 1M Scale)
+  redis:
+    image: redis:7-alpine
+    container_name: nursecalc-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    command: ["redis-server", "--appendonly", "yes", "--maxmemory", "512mb", "--maxmemory-policy", "allkeys-lru"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - nursecalc-net
+
+  # Express Backend API Service (Clustered across all CPU cores)
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: nursecalc-server
+    restart: unless-stopped
+    command: ["npm", "run", "start:cluster"]
+    ports:
+      - "5000:5000"
+    environment:
+      - PORT=5000
+      - MONGODB_URI=mongodb://mongodb:27017/nursecalc
+      - REDIS_URL=redis://redis:6379
+      - MONGO_MAX_POOL_SIZE=100
+      - MONGO_MIN_POOL_SIZE=10
+      - JWT_SECRET=nursecalc_super_secret_jwt_key_2026
+      - NODE_ENV=production
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:5000/api/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    networks:
+      - nursecalc-net
+
+  # React Frontend (Nginx Production Server & API Reverse Proxy)
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    container_name: nursecalc-client
+    restart: unless-stopped
+    ports:
+      - "3000:80"
+    depends_on:
+      server:
+        condition: service_healthy
+    networks:
+      - nursecalc-net
+
+  # One-time Database Seeder (Run with: docker compose --profile seed run --rm seed)
+  seed:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: nursecalc-seeder
+    environment:
+      - MONGODB_URI=mongodb://mongodb:27017/nursecalc
+      - NODE_ENV=production
+    command: ["npm", "run", "seed"]
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    profiles:
+      - seed
+    networks:
+      - nursecalc-net
+
+volumes:
+  mongo_data:
+    driver: local
+
+networks:
+  nursecalc-net:
+    driver: bridge

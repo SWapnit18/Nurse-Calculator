@@ -79,13 +79,13 @@ export default function ProgressView({ stats }) {
           <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">Past 7 Days</span>
         </div>
 
-        <div className="flex items-end justify-between h-32 pt-4 px-2">
+        <div className="flex items-end justify-between h-36 pt-4 px-2">
           {weeklyActivity.map((item, idx) => (
-            <div key={idx} className="flex flex-col items-center gap-2 flex-1">
-              <div className="w-7 bg-slate-100 dark:bg-slate-800 rounded-t-lg h-full flex items-end overflow-hidden">
+            <div key={idx} className="flex flex-col items-center gap-2 flex-1 h-full">
+              <div className="w-7 bg-slate-100 dark:bg-slate-800 rounded-t-lg flex-1 w-full max-w-[28px] flex items-end overflow-hidden">
                 <div 
-                  className="w-full bg-slate-900 dark:bg-white rounded-t-lg transition-all duration-500" 
-                  style={{ height: `${item.value || 0}%` }}
+                  className={`w-full bg-slate-900 dark:bg-white rounded-t-lg transition-all duration-500 ${item.count > 0 ? 'opacity-100' : 'opacity-20'}`} 
+                  style={{ height: item.count > 0 ? `${Math.max(item.value || 0, 16)}%` : '6px' }}
                 />
               </div>
               <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400">{item.day}</span>

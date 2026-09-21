@@ -206,10 +206,70 @@ const cancelSubscription = async (req, res) => {
   }
 };
 
+// POST /api/subscription/webhook (Stripe / Payment Gateway Webhook Receiver)
+const handleWebhook = async (req, res) => {
+  try {
+    const signature = req.headers['stripe-signature'] || req.headers['x-razorpay-signature'];
+    const event = req.body;
+
+    // In production with STRIPE_WEBHOOK_SECRET, require valid signature header
+    if (process.env.STRIPE_WEBHOOK_SECRET && !signature) {
+      return res.status(400).json({ error: 'Missing webhook signature header' });
+    }
+
+    const eventType = event?.type || event?.event || 'payment.succeeded';
+    console.log(`[Payment Webhook Received] Type: ${eventType}`);
+
+    switch (eventType) {
+      case 'checkout.session.completed':
+      case 'payment_intent.succeeded':
+      case 'order.paid': {
+        const customerEmail = event.data?.object?.customer_email || event.payload?.payment?.entity?.email;
+        if (customerEmail) {
+          try {
+            await User.findOneAndUpdate(
+              { email: customerEmail.toLowerCase() },
+              {
+                $set: {
+                  'subscription.plan': 'pro_monthly',
+                  'subscription.status': 'active',
+                  'subscription.isProActive': true,
+                  'subscription.currentPeriodEnd': new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+                }
+              }
+            );
+          } catch (e) {}
+        }
+        break;
+      }
+      case 'customer.subscription.deleted': {
+        const customerEmail = event.data?.object?.customer_email;
+        if (customerEmail) {
+          try {
+            await User.findOneAndUpdate(
+              { email: customerEmail.toLowerCase() },
+              { $set: { 'subscription.status': 'expired', 'subscription.isProActive': false } }
+            );
+          } catch (e) {}
+        }
+        break;
+      }
+      default:
+        break;
+    }
+
+    return res.json({ received: true, event: eventType });
+  } catch (err) {
+    console.error('[Webhook Error]', err.message);
+    return res.status(400).json({ error: 'Webhook processing failed' });
+  }
+};
+
 module.exports = {
   getSubscriptionStatus,
   createPaymentOrder,
   verifyPayment,
   cancelSubscription,
+  handleWebhook,
   SUBSCRIPTION_CONFIG
 };

@@ -112,9 +112,16 @@ export default function SideMenuModal({
               <span>Log Out</span>
             </button>
           ) : (
-            <p className="text-xs text-center text-slate-400">
-              Small Steps. Big Progress.
-            </p>
+            <button
+              onClick={() => {
+                onNavigate('profile');
+                onClose();
+              }}
+              className="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-sm font-bold bg-slate-900 dark:bg-white text-white dark:text-slate-900 transition-colors min-h-[44px] cursor-pointer"
+            >
+              <User className="w-4 h-4" />
+              <span>Sign In / Register</span>
+            </button>
           )}
         </div>
       </div>

@@ -108,6 +108,44 @@ npm run open:ios        # Opens in Xcode (macOS only)
 
 ---
 
+## Docker Quickstart (Recommended)
+
+NurseCalc includes production-ready containerization and a Docker Compose stack that spins up MongoDB, the Express backend, and the React frontend (served via Nginx with automated API proxying).
+
+### 1. Start the Full Application Stack (Production)
+```bash
+docker compose up --build -d
+```
+- **Web App**: Accessible at [http://localhost:3000](http://localhost:3000)
+- **Backend API**: Accessible at [http://localhost:5000/api/health](http://localhost:5000/api/health)
+- **MongoDB**: Running internally on port `27017` with persistent volume `mongo_data`
+
+### 2. Seed Database in Docker
+To populate the MongoDB container with 5 accredited topics, 15 worked lessons, and 105+ reviewed NCLEX questions:
+```bash
+docker compose --profile seed run --rm seed
+```
+*(Or run `npm run docker:seed` from the root directory).*
+
+### 3. View Logs or Stop Containers
+```bash
+# View live logs across all services
+docker compose logs -f
+
+# Stop and remove containers
+docker compose down
+```
+
+### 4. Live Hot-Reloading Development in Docker
+For active code development with volume mounting and hot module reloading:
+```bash
+docker compose -f docker-compose.dev.yml up --build
+```
+- Frontend dev server (Vite with HMR): [http://localhost:5173](http://localhost:5173)
+- Backend dev server (Nodemon): [http://localhost:5000](http://localhost:5000)
+
+---
+
 ## Environment Variables
 
 Create `.env` in `server/`:
@@ -117,3 +155,5 @@ MONGODB_URI=mongodb://127.0.0.1:27017/nursecalc
 JWT_SECRET=nursecalc_super_secret_jwt_key_2026
 NODE_ENV=development
 ```
+*(When running inside Docker Compose, environment variables are automatically configured for internal container networking).*
+

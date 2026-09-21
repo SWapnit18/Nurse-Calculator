@@ -126,6 +126,14 @@ const bookmarkSchema = new mongoose.Schema({
   savedAt: { type: Date, default: Date.now }
 });
 
+// Compound Indexes for 1,000,000 User High-Concurrency Query Optimization
+lessonSchema.index({ topicId: 1, order: 1 });
+questionSchema.index({ topicId: 1, difficulty: 1 });
+attemptSchema.index({ userId: 1, timestamp: -1 });
+mistakeSchema.index({ userId: 1, timestamp: -1 });
+progressSchema.index({ userId: 1, topicId: 1 }, { unique: true });
+bookmarkSchema.index({ userId: 1, questionId: 1 }, { unique: true });
+
 module.exports = {
   User: mongoose.models.User || mongoose.model('User', userSchema),
   Topic: mongoose.models.Topic || mongoose.model('Topic', topicSchema),

@@ -1,11 +1,7 @@
 const { topicsData, lessonsData, questionsData } = require('../data/seedData');
 const { Topic, Lesson, Question, Attempt, Mistake, Progress, Bookmark } = require('../models');
 const SafeMath = require('../services/calculationService');
-
-// In-memory fallback registries
-let memAttempts = [];
-let memMistakes = [];
-let memBookmarks = [];
+const memStore = require('../config/memoryStore');
 
 // 1. Learn Topics
 const getTopics = async (req, res) => {
@@ -131,7 +127,7 @@ const submitPractice = async (req, res) => {
     try {
       await Mistake.create(mistakeRecord);
     } catch (e) {
-      memMistakes.push(mistakeRecord);
+      memStore.mistakes.push(mistakeRecord);
     }
   }
 
@@ -149,7 +145,7 @@ const submitPractice = async (req, res) => {
   try {
     await Attempt.create(attemptRecord);
   } catch (e) {
-    memAttempts.push(attemptRecord);
+    memStore.attempts.push(attemptRecord);
   }
 
   res.json({
@@ -173,7 +169,7 @@ const getProgress = async (req, res) => {
   try {
     attempts = await Attempt.find({ userId: uid }).sort({ timestamp: 1 });
   } catch (e) {
-    attempts = memAttempts.filter(a => a.userId === uid);
+    attempts = memStore.attempts.filter(a => a.userId === uid);
   }
 
   const total = attempts.length;
@@ -279,12 +275,12 @@ const toggleBookmark = async (req, res) => {
     await Bookmark.create({ userId: uid, questionId, note });
     return res.json({ success: true, bookmarked: true });
   } catch (e) {
-    const idx = memBookmarks.findIndex(b => b.questionId === questionId && b.userId === uid);
+    const idx = memStore.bookmarks.findIndex(b => b.questionId === questionId && b.userId === uid);
     if (idx !== -1) {
-      memBookmarks.splice(idx, 1);
+      memStore.bookmarks.splice(idx, 1);
       return res.json({ success: true, bookmarked: false });
     }
-    memBookmarks.push({ userId: uid, questionId, note });
+    memStore.bookmarks.push({ userId: uid, questionId, note });
     return res.json({ success: true, bookmarked: true });
   }
 };
@@ -299,9 +295,9 @@ const resetProgress = async (req, res) => {
     await Bookmark.deleteMany({ userId: uid });
   } catch (e) {}
 
-  memAttempts = memAttempts.filter(a => a.userId !== uid);
-  memMistakes = memMistakes.filter(m => m.userId !== uid);
-  memBookmarks = memBookmarks.filter(b => b.userId !== uid);
+  memStore.attempts = memStore.attempts.filter(a => a.userId !== uid);
+  memStore.mistakes = memStore.mistakes.filter(m => m.userId !== uid);
+  memStore.bookmarks = memStore.bookmarks.filter(b => b.userId !== uid);
 
   return res.json({
     success: true,

@@ -9,6 +9,11 @@
     "seed": "npm --prefix server run seed",
     "test": "npm --prefix server test",
     "build": "npm --prefix client run build",
+    "docker:up": "docker compose up --build -d",
+    "docker:down": "docker compose down",
+    "docker:seed": "docker compose --profile seed run --rm seed",
+    "docker:logs": "docker compose logs -f",
+    "docker:dev": "docker compose -f docker-compose.dev.yml up",
     "sync:mobile": "npm --prefix client run build && cd client && npx cap sync",
     "open:android": "npx --prefix client cap open android",
     "open:ios": "npx --prefix client cap open ios"
@@ -16,7 +21,8 @@
   "dependencies": {
     "@supabase/server": "^1.6.0",
     "@supabase/ssr": "^0.12.7",
-    "@supabase/supabase-js": "^2.116.0"
+    "@supabase/supabase-js": "^2.116.0",
+    "helmet": "^8.3.0"
   },
   "devDependencies": {
     "concurrently": "^10.0.5"

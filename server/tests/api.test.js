@@ -58,10 +58,12 @@ describe('NurseCalc Full-Stack MERN Roadmap Validation Tests', () => {
     expect(res.body.remediationRecommendation).toContain('Topic 1, Lesson 1');
   });
 
-  test('GET /api/progress/:userId returns accuracy and NCLEX benchmark', async () => {
+  test('GET /api/progress/:userId returns accuracy, streak, and NCLEX benchmark', async () => {
     const res = await request(app).get('/api/progress/demo_student');
     expect(res.statusCode).toBe(200);
     expect(res.body.data.overallAccuracy).toBeDefined();
+    expect(res.body.data.streak).toBeDefined();
+    expect(res.body.data.streak).toBeGreaterThanOrEqual(1);
     expect(res.body.data.masteryStatus).toBeDefined();
   });
 

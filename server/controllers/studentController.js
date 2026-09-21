@@ -1,11 +1,18 @@
 const { User, Attempt, Mistake, Progress, Bookmark, Question, Topic, Lesson } = require('../models');
 const { topicsData, questionsData } = require('../data/seedData');
+const memStore = require('../config/memoryStore');
+const { resolveSecureUserId } = require('../middleware/authMiddleware');
 
 // GET /api/users/me
 const getMe = async (req, res) => {
   try {
-    const userId = req.user?.id;
+    const session = resolveSecureUserId(req);
+    if (!session.isAuthorized) {
+      return res.status(403).json({ success: false, message: session.error });
+    }
+    const userId = session.userId;
     let user = null;
+
     try {
       user = await User.findById(userId).select('-password');
     } catch (e) {}
@@ -33,7 +40,11 @@ const getMe = async (req, res) => {
 // PUT /api/users/onboarding
 const updateOnboarding = async (req, res) => {
   try {
-    const userId = req.user?.id || req.body.userId || 'demo_student';
+    const session = resolveSecureUserId(req);
+    if (!session.isAuthorized) {
+      return res.status(403).json({ success: false, message: session.error });
+    }
+    const userId = session.userId;
     const { preparingFor, confidence, goal } = req.body;
 
     const preferences = { preparingFor, confidence, goal };
@@ -44,8 +55,8 @@ const updateOnboarding = async (req, res) => {
 
     return res.json({
       success: true,
-      message: 'Onboarding preferences saved successfully.',
-      data: { userId, preferences }
+      message: 'Onboarding preferences updated successfully.',
+      data: preferences
     });
   } catch (err) {
     return res.status(500).json({ success: false, message: err.message });
@@ -55,11 +66,19 @@ const updateOnboarding = async (req, res) => {
 // GET /api/mistakes
 const getMistakes = async (req, res) => {
   try {
-    const userId = req.user?.id || req.query.userId || 'demo_student';
+    const session = resolveSecureUserId(req);
+    if (!session.isAuthorized) {
+      return res.status(403).json({ success: false, message: session.error });
+    }
+    const userId = session.userId;
     let mistakes = [];
     try {
       mistakes = await Mistake.find({ userId }).sort({ timestamp: -1 });
     } catch (e) {}
+
+    if (!mistakes || mistakes.length === 0) {
+      mistakes = memStore.mistakes.filter(m => m.userId === userId);
+    }
 
     // Aggregate by category
     const categoryCounts = {
@@ -91,11 +110,19 @@ const getMistakes = async (req, res) => {
 // GET /api/bookmarks
 const getBookmarks = async (req, res) => {
   try {
-    const userId = req.user?.id || req.query.userId || 'demo_student';
+    const session = resolveSecureUserId(req);
+    if (!session.isAuthorized) {
+      return res.status(403).json({ success: false, message: session.error });
+    }
+    const userId = session.userId;
     let bookmarks = [];
     try {
       bookmarks = await Bookmark.find({ userId }).sort({ savedAt: -1 });
     } catch (e) {}
+
+    if (!bookmarks || bookmarks.length === 0) {
+      bookmarks = memStore.bookmarks.filter(b => b.userId === userId);
+    }
 
     const detailed = bookmarks.map(b => {
       const q = questionsData.find(item => item.questionId === b.questionId);
@@ -114,11 +141,19 @@ const getBookmarks = async (req, res) => {
 // GET /api/attempts
 const getAttempts = async (req, res) => {
   try {
-    const userId = req.user?.id || req.query.userId || 'demo_student';
+    const session = resolveSecureUserId(req);
+    if (!session.isAuthorized) {
+      return res.status(403).json({ success: false, message: session.error });
+    }
+    const userId = session.userId;
     let attempts = [];
     try {
       attempts = await Attempt.find({ userId }).sort({ timestamp: -1 }).limit(50);
     } catch (e) {}
+
+    if (!attempts || attempts.length === 0) {
+      attempts = memStore.attempts.filter(a => a.userId === userId);
+    }
 
     return res.json({ success: true, count: attempts.length, data: attempts });
   } catch (err) {
@@ -162,18 +197,41 @@ const explainMistake = async (req, res) => {
         remediationGuidance = '1 g = 1,000 mg | 1 mg = 1,000 mcg | 1 kg = 1,000 g | 1 L = 1,000 mL. Keep dimensional units aligned.';
         break;
 
-      case 'CONCEPT_INQUIRY':
-        if (prompt && (prompt.toLowerCase().includes('drip') || prompt.toLowerCase().includes('gravity') || prompt.toLowerCase().includes('gtt'))) {
-          pedagogicalExplanation = `Gravity Drip Rate Calculation:\nFormula: (Total Volume in mL × Tubing Drop Factor in gtt/mL) ÷ Total Minutes.\n\nAlways convert hours to minutes (hours × 60), and round your final answer to the nearest whole integer drop.`;
-          remediationGuidance = 'Macro-tubing drop factors: 10, 15, or 20 gtt/mL. Micro-drip tubing: 60 gtt/mL.';
-        } else if (prompt && (prompt.toLowerCase().includes('pump') || prompt.toLowerCase().includes('ml/hr'))) {
-          pedagogicalExplanation = `Electronic Infusion Pump Flow Rate:\nFormula: Total Volume (mL) ÷ Total Infusion Time (hr).\n\nSmart volumetric electronic infusion pumps support decimal precision (e.g., 62.5 mL/hr). Do not round to integer unless specifically ordered.`;
-          remediationGuidance = 'Always convert partial hours into decimal format before calculating (e.g., 30 min = 0.5 hr, 45 min = 0.75 hr).';
+      case 'CONCEPT_INQUIRY': {
+        const p = (prompt || '').toLowerCase();
+        if (p.includes('drip') || p.includes('gravity') || p.includes('gtt')) {
+          pedagogicalExplanation = `Gravity Drip Rate Calculation:\n\n• Formula: (Total Volume in mL × Tubing Drop Factor in gtt/mL) ÷ Total Infusion Minutes\n• Step 1: Convert infusion hours into minutes (Hours × 60).\n• Step 2: Multiply total volume by tubing drop factor (10, 15, 20 for macrodrip; 60 for microdrip).\n• Step 3: Divide by total minutes and round to the nearest whole drop (e.g. 31.25 -> 31 gtt/min), as gravity tubing cannot deliver fractional drops.`;
+          remediationGuidance = 'Macrodrip tubing: 10, 15, or 20 gtt/mL. Microdrip tubing: 60 gtt/mL (where mL/hr = gtt/min).';
+        } else if (p.includes('pump') || p.includes('ml/hr') || p.includes('flow rate') || p.includes('infusion')) {
+          pedagogicalExplanation = `Electronic Volumetric Infusion Pump Rate:\n\n• Formula: Rate (mL/hr) = Total Volume to Infuse (mL) ÷ Total Infusion Time (Hours)\n• Step 1: Convert partial hours or minutes into decimal hours (e.g. 30 min = 0.5 hr, 45 min = 0.75 hr, 90 min = 1.5 hr).\n• Step 2: Divide total volume in mL by decimal hours.\n• Precision: Smart infusion pumps support decimal precision (e.g. 62.5 mL/hr). Do not round to whole numbers unless ordered.`;
+          remediationGuidance = 'Volumetric smart pumps support tenths (0.1 mL/hr). Ensure dose error reduction systems (DERS) are active.';
+        } else if (p.includes('weight') || p.includes('pediatric') || p.includes('mg/kg') || p.includes('child')) {
+          pedagogicalExplanation = `Pediatric & Weight-Based Dosage Calculation:\n\n• Step 1: Ensure patient weight is strictly in kilograms (if given in pounds, divide lbs by 2.2).\n• Step 2: Calculate daily or single dose requirement = Prescribed Rate (mg/kg or mcg/kg) × Patient Weight in kg.\n• Step 3: If the prescription is divided (e.g. daily dose in 3 divided doses q8h), divide total daily dose by frequency.\n• Safety Check: Always compare total calculated dose against standard pediatric maximum reference range limits.`;
+          remediationGuidance = 'Formula: Dose (mg) = Weight (kg) × Dose Rate (mg/kg). 1 kg = 2.20462 lbs.';
+        } else if (p.includes('titrat') || p.includes('mcg/kg/min') || p.includes('vaso') || p.includes('icu') || p.includes('dopamine') || p.includes('norepinephrine')) {
+          pedagogicalExplanation = `ICU Vasoactive Titration (mcg/kg/min to mL/hr):\n\n• Step 1: Calculate drug bag concentration in mcg/mL = (Bag mg × 1,000) ÷ Bag Volume (mL).\n• Step 2: Calculate patient's hourly microgram requirement = Desired Rate (mcg/kg/min) × Patient Weight (kg) × 60 min/hr.\n• Step 3: Compute pump flow rate (mL/hr) = Hourly mcg Requirement ÷ Bag Concentration (mcg/mL).`;
+          remediationGuidance = 'Double check continuous titration calculations with an independent secondary registered nurse.';
+        } else if (p.includes('convert') || p.includes('metric') || p.includes('mcg') || p.includes('gram') || p.includes('lb') || p.includes('lbs') || p.includes('kg')) {
+          pedagogicalExplanation = `Metric & Clinical Unit Conversions:\n\n• Mass Hierarchy: 1 kilogram (kg) = 1,000 grams (g) = 1,000,000 milligrams (mg) = 1,000,000,000 micrograms (mcg).\n• Volume Hierarchy: 1 Liter (L) = 1,000 milliliters (mL).\n• Weight Conversion: Pounds to kg = Weight in lbs ÷ 2.2.\n• Golden Rule: Convert units BEFORE placing numbers into any dosing formula.`;
+          remediationGuidance = '1 g = 1,000 mg | 1 mg = 1,000 mcg | 1 kg = 2.2 lbs | 1 L = 1,000 mL.';
+        } else if (p.includes('tablet') || p.includes('pill') || p.includes('oral') || p.includes('scored')) {
+          pedagogicalExplanation = `Oral Solid Tablet Dosing (D/H × V):\n\n• Formula: Number of Tablets = (Desired Dose Ordered ÷ Stock on Hand) × 1 Tablet.\n• Scored Tablets: Only split tablets that have a manufacturer score line. Unscored tablets or extended-release (ER/XR/CR) capsules must NEVER be cut or crushed.\n• 4-Tablet Rule: If your math results in >3–4 tablets for a single dose, STOP and verify immediately with pharmacy.`;
+          remediationGuidance = 'Formula: (D ÷ H) × V. Never crush enteric-coated or sustained-release formulations.';
+        } else if (p.includes('inject') || p.includes('syringe') || p.includes('parenteral') || p.includes('vial') || p.includes('im') || p.includes('sc')) {
+          pedagogicalExplanation = `Liquid & Syringe Dosage Calculation:\n\n• Formula: Volume (mL) = (Desired Dose ÷ Stock Concentration) × Vehicle Volume.\n• Syringe Selection: For volumes <1.0 mL, use a 1.0 mL tuberculin syringe with 0.01 mL calibrations. For volumes 1.0–3.0 mL, use a 3.0 mL syringe with 0.1 mL calibrations.\n• Injection Limits: Maximum IM volume in adult deltoid = 1.0 mL; adult ventrogluteal = 3.0 mL.`;
+          remediationGuidance = 'Dose (mL) = (D ÷ H) × V. Apply ISMP leading zero rules (e.g. 0.4 mL, never .4 mL).';
+        } else if (p.includes('zero') || p.includes('ismp') || p.includes('decimal')) {
+          pedagogicalExplanation = `ISMP Leading & Trailing Zero Rules:\n\n• Leading Zero REQUIRED: Always place a zero before a decimal point for values under 1 (e.g. write 0.5 mg, NEVER .5 mg) to prevent catastrophic 10-fold overdose.\n• Trailing Zero FORBIDDEN: Never place a zero after a decimal point for whole numbers (e.g. write 5 mg, NEVER 5.0 mg) because an obscured decimal point causes a 50 mg administration.`;
+          remediationGuidance = 'Remember: Leading zeros ALWAYS, trailing zeros NEVER.';
+        } else if (p.includes('gcs') || p.includes('glasgow') || p.includes('coma')) {
+          pedagogicalExplanation = `Glasgow Coma Scale (GCS) Assessment:\n\n• Eye Opening (E): 1 to 4 points\n• Verbal Response (V): 1 to 5 points\n• Motor Response (M): 1 to 6 points\n• Total Score: Range is 3 (deep coma/death) to 15 (fully alert).\n• Critical Airway Safety: GCS score ≤ 8 indicates severe brain injury; prepare for endotracheal intubation ("GCS of 8, intubate").`;
+          remediationGuidance = 'GCS = Eye (4) + Verbal (5) + Motor (6). Score ≤ 8 = Immediate Airway Alert.';
         } else {
-          pedagogicalExplanation = `Clinical Calculation Strategy:\n1. Identify the desired dose and available stock concentration.\n2. Convert metric units so numerator and denominator match.\n3. Apply formula: (Desired ÷ Have) × Vehicle.\n4. Apply ISMP leading zero rules (e.g. 0.5 mL, never .5 mL).`;
+          pedagogicalExplanation = `Clinical Medication Mathematics Strategy:\n\n1. Identify Prescribed Order (Desired Dose) & Available Stock (Have Concentration).\n2. Convert metric units so numerator and denominator match (e.g. mg to mg).\n3. Apply Universal Formula: Dose = (Desired ÷ Have) × Vehicle.\n4. Enforce ISMP Safety: Always verify leading zeros (0.5 mL, not .5 mL) and remove trailing zeros (5 mg, not 5.0 mg).\n5. Clinical Sanity Check: Confirm volume is within physiological capacity (max 3 mL IM) and oral dose is ≤4 tablets.`;
           remediationGuidance = 'Always perform independent math verification before clinical medication administration.';
         }
         break;
+      }
 
       default:
         pedagogicalExplanation = targetQuestion?.explanation || 
@@ -198,10 +256,51 @@ const explainMistake = async (req, res) => {
   }
 };
 
+// PUT /api/users/profile
+const updateProfile = async (req, res) => {
+  try {
+    const session = resolveSecureUserId(req);
+    if (!session.isAuthorized) {
+      return res.status(403).json({ success: false, message: session.error });
+    }
+    const userId = session.userId;
+    const { name, email, targetExam, college, dailyGoal } = req.body;
+
+    let updatedUser = null;
+    try {
+      updatedUser = await User.findByIdAndUpdate(
+        userId,
+        { name, targetExam, college, dailyGoal },
+        { new: true }
+      ).select('-password');
+    } catch (e) {}
+
+    if (!updatedUser) {
+      updatedUser = {
+        id: userId,
+        name: name || 'Nurse Student',
+        email: email || 'student@nursecalc.local',
+        targetExam: targetExam || 'NCLEX-RN',
+        college: college || 'Nursing College',
+        dailyGoal: dailyGoal || 10,
+        role: 'student'
+      };
+    }
+
+    return res.json({
+      success: true,
+      message: 'Student profile updated successfully.',
+      data: updatedUser
+    });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: err.message });
+  }
+};
 
 module.exports = {
   getMe,
   updateOnboarding,
+  updateProfile,
   getMistakes,
   getBookmarks,
   getAttempts,
