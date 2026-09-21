@@ -150,17 +150,18 @@ export default function ProfileView({
     }
   };
 
-  // Navigation Rows for Logged-in profile
+  // Navigation Rows for Logged-in profile (Minimal & Clean)
   const profileRows = [
-    { id: 'portfolio', label: 'My Question Portfolio', icon: FolderHeart, badge: `${customQuestionsCount} custom` },
-    { id: 'learning-goals', label: 'Learning Goals & NCLEX Milestones', icon: Target },
+    { id: 'learning-goals', label: 'Learning Goals', icon: Target },
+    { id: 'mistakes', label: 'Mistakes Log', icon: AlertCircle },
+    { id: 'progress', label: 'Progress & Analytics', icon: TrendingUp },
     { id: 'bookmarks', label: 'Saved Bookmarks', icon: Bookmark },
-    { id: 'mistakes', label: 'Mistakes Review & 10x Slip Log', icon: AlertCircle },
-    { id: 'progress', label: 'Progress & Mastery Analytics', icon: TrendingUp },
-    { id: 'settings', label: 'Preferences & Study Reminders', icon: Settings },
-    { id: 'safety', label: 'Safety & Clinical Standards (ISMP)', icon: Shield },
-    { id: 'help', label: 'Help & Clinical Formula Cheatsheet', icon: HelpCircle },
+    { id: 'portfolio', label: 'Question Portfolio', icon: FolderHeart, badge: customQuestionsCount > 0 ? `${customQuestionsCount}` : null },
+    { id: 'settings', label: 'Settings & Preferences', icon: Settings },
+    { id: 'safety', label: 'Clinical Safety (ISMP)', icon: Shield },
+    { id: 'help', label: 'Formula Cheatsheet', icon: HelpCircle },
   ];
+
 
   // -----------------------------------------------------------
   // 1. LOGGED-OUT STATE: AUTHENTICATION INTERFACE (SIGN IN / SIGN UP)
@@ -441,117 +442,87 @@ export default function ProfileView({
   const goalPercent = Math.min(Math.round((solvedToday / dailyGoal) * 100), 100);
 
   return (
-    <div className="space-y-4 pb-12 animate-fade-in w-full max-w-full">
-      {/* Header Title */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white">
-            Student Profile
-          </h1>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-            Active clinical candidate credential & mastery record
-          </p>
-        </div>
-
-        <button
-          onClick={() => {
-            setEditName(user?.name || '');
-            setEditExam(user?.targetExam || 'NCLEX-RN');
-            setEditCollege(user?.college || 'Clinical Nursing Academy');
-            setEditGoal(user?.dailyGoal || 10);
-            setIsEditOpen(true);
-          }}
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors cursor-pointer"
-        >
-          <Edit3 className="w-3.5 h-3.5" />
-          <span>Edit Profile</span>
-        </button>
-      </div>
-
-      {/* Hero User Identity Card */}
-      <div className="nc-card p-4 sm:p-5 bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-800 shadow-xs space-y-3.5">
-        <div className="flex items-center gap-3.5">
-          <div className="w-14 h-14 rounded-2xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 flex items-center justify-center font-black text-2xl shadow-sm flex-shrink-0">
-            {userInitial}
-          </div>
-
-          <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-2">
-              <h2 className="font-black text-base text-slate-900 dark:text-white truncate">
-                {user.name}
-              </h2>
-              <span className="text-[10px] font-extrabold px-2 py-0.5 bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 rounded-md flex items-center gap-1">
-                <CheckCircle2 className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
-                <span>Active</span>
-              </span>
+    <div className="space-y-3 pb-12 animate-fade-in w-full max-w-lg mx-auto">
+      {/* Minimal User Identity Card */}
+      <div className="nc-card p-4 bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xs space-y-3">
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-11 h-11 rounded-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 flex items-center justify-center font-black text-lg flex-shrink-0 shadow-xs">
+              {userInitial}
             </div>
-            <p className="text-xs text-slate-500 dark:text-slate-400 truncate mt-0.5">
-              {user.email}
-            </p>
 
-            <div className="flex flex-wrap items-center gap-1.5 mt-2">
-              <span className="text-[10px] font-bold px-2 py-0.5 bg-blue-50 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 rounded border border-blue-200/50 dark:border-blue-900">
-                {targetExam}
-              </span>
-              <span className="text-[10px] font-medium px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded">
-                {college}
-              </span>
+            <div className="min-w-0">
+              <div className="flex items-center gap-1.5">
+                <h2 className="font-bold text-sm text-slate-900 dark:text-white truncate">
+                  {user.name}
+                </h2>
+                <span className="w-2 h-2 rounded-full bg-emerald-500 flex-shrink-0" title="Active"></span>
+              </div>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
+                {user.email} · <span className="font-medium text-slate-700 dark:text-slate-300">{targetExam}</span>
+              </p>
             </div>
           </div>
+
+          <button
+            onClick={() => {
+              setEditName(user?.name || '');
+              setEditExam(user?.targetExam || 'NCLEX-RN');
+              setEditCollege(user?.college || 'Clinical Nursing Academy');
+              setEditGoal(user?.dailyGoal || 10);
+              setIsEditOpen(true);
+            }}
+            className="px-2.5 py-1 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white bg-slate-100 dark:bg-slate-800 rounded-lg transition-colors cursor-pointer flex items-center gap-1 flex-shrink-0"
+          >
+            <Edit3 className="w-3.5 h-3.5" />
+            <span>Edit</span>
+          </button>
         </div>
 
         {/* Daily Study Goal Tracker Bar */}
-        <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/70 dark:border-slate-700/60 space-y-1.5">
+        <div className="pt-2 border-t border-slate-100 dark:border-slate-800/80 space-y-1">
           <div className="flex items-center justify-between text-xs">
-            <span className="font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1">
-              <Target className="w-3.5 h-3.5 text-blue-500" />
-              <span>Daily Practice Goal: {solvedToday}/{dailyGoal} questions</span>
+            <span className="text-slate-500 dark:text-slate-400 font-medium">
+              Daily Goal: <b className="text-slate-800 dark:text-slate-200">{solvedToday}/{dailyGoal} questions</b>
             </span>
-            <span className="font-extrabold text-slate-900 dark:text-white">{goalPercent}%</span>
+            <span className="font-bold text-slate-900 dark:text-white">{goalPercent}%</span>
           </div>
-          <div className="w-full h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+          <div className="w-full h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
             <div 
-              className="h-full bg-slate-900 dark:bg-white rounded-full transition-all duration-500"
+              className="h-full bg-slate-900 dark:bg-emerald-500 rounded-full transition-all duration-500"
               style={{ width: `${goalPercent}%` }}
             />
           </div>
         </div>
       </div>
 
-      {/* Real-Time Clinical Stats Grid */}
-      <div className="grid grid-cols-4 gap-2">
-        <div className="nc-card p-3 text-center bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-800">
-          <span className="text-base font-black text-slate-900 dark:text-white block">
+      {/* Clean 3-Metric Summary Bar (No box clutter) */}
+      <div className="grid grid-cols-3 gap-2">
+        <div className="nc-card p-3 text-center bg-white dark:bg-[#111827] border border-slate-200/90 dark:border-slate-800 rounded-2xl shadow-2xs">
+          <span className="text-base font-extrabold text-slate-900 dark:text-white block">
             {stats?.accuracy !== undefined ? `${stats.accuracy}%` : '0%'}
           </span>
-          <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 block mt-0.5">Accuracy</span>
+          <span className="text-[11px] text-slate-500 dark:text-slate-400 block mt-0.5">Accuracy</span>
         </div>
 
-        <div className="nc-card p-3 text-center bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-800">
-          <span className="text-base font-black text-slate-900 dark:text-white block">
+        <div className="nc-card p-3 text-center bg-white dark:bg-[#111827] border border-slate-200/90 dark:border-slate-800 rounded-2xl shadow-2xs">
+          <span className="text-base font-extrabold text-slate-900 dark:text-white block">
             {stats?.totalQuestions ?? 0}
           </span>
-          <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 block mt-0.5">Solved</span>
+          <span className="text-[11px] text-slate-500 dark:text-slate-400 block mt-0.5">Questions</span>
         </div>
 
-        <div className="nc-card p-3 text-center bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-800">
-          <span className="text-base font-black text-amber-500 dark:text-amber-400 flex items-center justify-center gap-0.5">
-            <span>{stats?.streakDays || 1}</span>
+        <div className="nc-card p-3 text-center bg-white dark:bg-[#111827] border border-slate-200/90 dark:border-slate-800 rounded-2xl shadow-2xs">
+          <span className="text-base font-extrabold text-amber-500 flex items-center justify-center gap-1">
+            <span>{stats?.streakDays || 1}d</span>
             <Flame className="w-3.5 h-3.5 fill-current" />
           </span>
-          <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 block mt-0.5">Streak</span>
-        </div>
-
-        <div className="nc-card p-3 text-center bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-800">
-          <span className="text-base font-black text-blue-600 dark:text-blue-400 block">
-            {customQuestionsCount}
-          </span>
-          <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 block mt-0.5">Custom</span>
+          <span className="text-[11px] text-slate-500 dark:text-slate-400 block mt-0.5">Streak</span>
         </div>
       </div>
 
       {/* Profile Clinical Navigation Links */}
-      <div className="nc-card divide-y divide-slate-100 dark:divide-slate-800 overflow-hidden bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-800">
+      <div className="nc-card divide-y divide-slate-100 dark:divide-slate-800 overflow-hidden bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xs">
         {profileRows.map((row) => {
           const Icon = row.icon;
           return (
