@@ -9,7 +9,7 @@
     "start:cluster": "node cluster.js",
     "dev": "nodemon server.js",
     "seed": "node data/seedDatabase.js",
-    "test": "jest --verbose"
+    "test": "jest --verbose --forceExit"
   },
   "keywords": [
     "nursing",
