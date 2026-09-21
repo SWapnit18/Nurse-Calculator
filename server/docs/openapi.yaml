@@ -1,0 +1,75 @@
+openapi: 3.0.3
+info:
+  title: NurseCalc Pro Clinical API
+  description: High-concurrency educational medication calculation and NCLEX preparation API.
+  version: 1.0.0
+  contact:
+    name: NurseCalc Team
+    email: support@nursecalc.local
+servers:
+  - url: http://localhost:5000/api
+    description: Local Development Server
+  - url: https://api.nursecalc.pro/api
+    description: Production Edge Cluster
+
+paths:
+  /health:
+    get:
+      summary: Health check and roadmap modules
+      responses:
+        '200':
+          description: System healthy and ISMP compliant
+
+  /calculate:
+    post:
+      summary: Deterministic calculation engine
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mode:
+                  type: string
+                  enum: [injection, oral, weight, gravity, pump, gcs, titration]
+                params:
+                  type: object
+      responses:
+        '200':
+          description: Calculation evaluated with dual verification
+
+  /topics:
+    get:
+      summary: Fetch accredited nursing curriculum topics
+      responses:
+        '200':
+          description: List of curriculum topics
+
+  /questions:
+    get:
+      summary: Fetch reviewed NCLEX calculation questions
+      responses:
+        '200':
+          description: List of clinical math questions
+
+  /practice/submit:
+    post:
+      summary: Submit practice question attempt and evaluate mistakes
+      responses:
+        '200':
+          description: Evaluation result and mistake classification
+
+  /mistakes:
+    get:
+      summary: Fetch mistake archive categorized by cognitive error type
+      responses:
+        '200':
+          description: Student mistake archive
+
+  /users/profile:
+    put:
+      summary: Update student profile and learning targets
+      responses:
+        '200':
+          description: Student profile updated
